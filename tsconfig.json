@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "removeComments": true,
+    "moduleResolution": "node",
+    "noLib": false,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "typings/main",
+    "typings/main.d.ts",
+    "coverage"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "web-app",
+  "version": "1.0.0",
+  "description": "AKASHA for web 2.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server ./build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AkashaProject/web-app.git"
+  },
+  "keywords": [
+    "akasha",
+    "ethereum"
+  ],
+  "author": "",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/AkashaProject/web-app/issues"
+  },
+  "homepage": "https://github.com/AkashaProject/web-app#readme",
+  "dependencies": {
+    "@akashaproject/contracts.js": "^1.2.12",
+    "@akashaproject/ipfs-js-connector": "^1.0.1",
+    "bluebird": "^3.5.0",
+    "rxjs": "^5.4.0",
+    "web3": "^0.19.0"
+  },
+  "devDependencies": {
+    "babelify": "^7.3.0",
+    "browserify": "^14.3.0",
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.6.0",
+    "http-server": "^0.10.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
