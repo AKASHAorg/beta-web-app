@@ -40,7 +40,7 @@ export class ApiListener extends GenericApi {
     }
 
     public removeAllListeners() {
-        for(let listener of this.subscribers){
+        for(let [listener] of this.subscribers){
             this.removeListener(listener);
         }
         this.pipe.unsubscribe();
@@ -52,17 +52,29 @@ export class ApiListener extends GenericApi {
 }
 
 export class ApiRequest extends ApiListener {
-    public manager: Subject<any>;
-    constructor(channel: string, manager: Subject<any>, channelName?: string) {
+    private listener: (data) => {};
+    constructor(channel: string, channelName?: string) {
         super(channel, channelName);
-        this.manager = manager;
     }
 
     public enable() {
-        this.manager.next({ channel: this.channel, listen: true });
+        if(!this.listener){
+            throw new Error(`Must register a listener for ${this.channelName} first`);
+        }
+        if(this.listenerCount == 0){
+            this.on(this.listener);
+        }
+        return { listening: true };
     }
 
     public disable() {
-        this.manager.next({ channel: this.channel, listen: false });
+        if(this.listenerCount !== 0) {
+            this.removeListener(this.listener);
+        }
+        return { listening: false };
+    }
+
+    public registerListener(listener: (data) =>{}) {
+        this.listener = listener;
     }
 }

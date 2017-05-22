@@ -7,7 +7,8 @@ const babel = require('babelify');
 const path = require('path');
 
 gulp.task('build', function(){
-  const bundler = browserify('./main/index.js', { debug: true }).transform(babel);
+  const bundler = browserify('./main/index.js', { debug: true })
+    .transform(babel, {presets:["es2015", "stage-0"]});
 
   bundler.bundle()
     .on('error', function(err) { console.error(err); this.emit('end'); })
@@ -19,7 +20,7 @@ gulp.task('build', function(){
 });
 
 gulp.task('watch', function () {
-  gulp.watch('./src/**/*.js', ['build']);
+  gulp.watch('./main/**', ['build']);
 });
 
 gulp.task('default', ['watch']);

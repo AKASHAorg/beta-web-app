@@ -44,13 +44,13 @@ const processes = ['server', 'client'];
 const EVENTS: any = { client: {}, server: {} };
 
 export function initChannels() {
-    if(!EVENTS.client){}
     Object.keys(channels).forEach((attr) => {
         channels[attr].forEach((endpoint: string) => {
             processes.forEach((proc) => {
                 if (!EVENTS[proc].hasOwnProperty(attr)) {
-                    EVENTS[proc][attr] = { manager: hashPath(proc, attr, 'manager') };
+                    EVENTS[proc][attr] = {};
                 }
+
                 EVENTS[proc][attr][endpoint] = hashPath(proc, attr, endpoint);
             });
         });
