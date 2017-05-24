@@ -39,7 +39,7 @@ bin
 docs
 *.js
 *.d.ts
-!typings/*.d.ts
+*.map
+!main/typings/*.d.ts
 test-repo
-!build/require.js
 !gulpfile.js

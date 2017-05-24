@@ -25,8 +25,9 @@
     "@akashaproject/contracts.js": "1.2.12",
     "@akashaproject/ipfs-js-connector": "1.0.1",
     "bluebird": "3.5.0",
+    "ethereumjs-util": "5.1.1",
     "rxjs": "5.4.0",
-    "web3": "0.19.0"
+    "web3": "^0.19.0"
   },
   "devDependencies": {
     "babel-polyfill": "6.23.0",
