@@ -24,18 +24,21 @@
   "dependencies": {
     "@akashaproject/contracts.js": "1.2.12",
     "@akashaproject/ipfs-js-connector": "1.0.1",
+    "@types/loglevel": "^1.4.29",
     "bluebird": "3.5.0",
     "ethereumjs-util": "5.1.1",
+    "loglevel": "^1.4.1",
     "rxjs": "5.4.0",
-    "web3": "^0.19.0"
+    "web3": "0.19.0"
   },
   "devDependencies": {
     "babel-polyfill": "6.23.0",
     "babelify": "7.3.0",
-    "browserify": "14.3.0",
+    "browserify": "14.4.0",
     "gulp": "3.9.1",
     "gulp-sourcemaps": "2.6.0",
     "http-server": "0.10.0",
+    "tslint": "^5.3.2",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }
