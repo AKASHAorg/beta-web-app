@@ -1,6 +1,7 @@
 const hashPath = (...path: string[]) => {
     return path.join('/');
 };
+
 const channels = {
 
     auth: ['login', 'logout', 'requestEther', 'generateEthKey', 'getLocalIdentities'],
@@ -41,7 +42,7 @@ const channels = {
 };
 
 const processes = ['server', 'client'];
-const EVENTS: any = { client: {}, server: {} };
+const EVENTS: any = {client: {}, server: {}};
 
 export function initChannels() {
     Object.keys(channels).forEach((attr) => {
@@ -55,11 +56,11 @@ export function initChannels() {
             });
         });
     });
-    return  { client: EVENTS.client, server: EVENTS.server };
+    return {client: EVENTS.client, server: EVENTS.server};
 }
 
-export default function getChannels(){
-    return { client: EVENTS.client, server: EVENTS.server }
-};
+export default function getChannels() {
+    return {client: EVENTS.client, server: EVENTS.server};
+}
 
 

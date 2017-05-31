@@ -1,10 +1,10 @@
 /// <reference path="../typings/main.d.ts" />
 import ModuleEmitter from '../event/ModuleEmitter';
-import { IpfsConnector, ipfsEvents } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import * as logger from 'loglevel';
 import { IPFS_LOGGER, IPFS_PEER_ID } from '../config/settings';
 import ipfsModule from './ipfs';
-import channels from '../channels';
+import getChannels from '../channels';
 import { mainResponse } from '../event/responses';
 
 class IpfsIPC extends ModuleEmitter {
@@ -38,7 +38,7 @@ class IpfsIPC extends ModuleEmitter {
         IpfsConnector.getInstance().on(
             ipfsEvents.DOWNLOAD_STARTED,
             () => {
-                this.fireEvent(channels.client.ipfs.startService, mainResponse({ downloading: true }, {}));
+                this.fireEvent(getChannels().client.ipfs.startService, mainResponse({ downloading: true }, {}));
             }
         );
         return this;
@@ -48,7 +48,7 @@ class IpfsIPC extends ModuleEmitter {
         IpfsConnector.getInstance().on(
             ipfsEvents.SERVICE_STARTING,
             () => {
-                this.fireEvent(channels.client.ipfs.startService, mainResponse({ starting: true }, {}));
+                this.fireEvent(getChannels().client.ipfs.startService, mainResponse({ starting: true }, {}));
             }
         );
         return this;
@@ -58,7 +58,7 @@ class IpfsIPC extends ModuleEmitter {
         IpfsConnector.getInstance().on(
             ipfsEvents.SERVICE_STARTED,
             () => {
-                this.fireEvent(channels.client.ipfs.startService, mainResponse({ started: true }, {}));
+                this.fireEvent(getChannels().client.ipfs.startService, mainResponse({ started: true }, {}));
                 IpfsConnector.getInstance()
                     .api
                     .apiClient
@@ -77,7 +77,7 @@ class IpfsIPC extends ModuleEmitter {
         IpfsConnector.getInstance().on(
             ipfsEvents.SERVICE_STOPPED,
             () => {
-                this.fireEvent(channels.client.ipfs.stopService, mainResponse({ stopped: true }, {}));
+                this.fireEvent(getChannels().client.ipfs.stopService, mainResponse({ stopped: true }, {}));
             }
         );
         return this;
@@ -86,7 +86,7 @@ class IpfsIPC extends ModuleEmitter {
     private _catchCorrupted() {
         IpfsConnector.getInstance().once(
             ipfsEvents.UPGRADING_BINARY, (message: string) => {
-                this.fireEvent(channels.client.ipfs.startService,
+                this.fireEvent(getChannels().client.ipfs.startService,
                     mainResponse({ upgrading: true, message }, {})
                 );
             });
@@ -94,7 +94,7 @@ class IpfsIPC extends ModuleEmitter {
             ipfsEvents.BINARY_CORRUPTED,
             (err: Error) => {
                 this.fireEvent(
-                    channels.client.ipfs.startService,
+                    getChannels().client.ipfs.startService,
                     mainResponse({ error: err }, {})
                 );
             }
@@ -107,7 +107,7 @@ class IpfsIPC extends ModuleEmitter {
             ipfsEvents.SERVICE_FAILED,
             (err: Error) => {
                 this.fireEvent(
-                    channels.client.ipfs.startService,
+                    getChannels().client.ipfs.startService,
                     mainResponse({ error: err }, {})
                 );
             }
@@ -120,7 +120,7 @@ class IpfsIPC extends ModuleEmitter {
             ipfsEvents.ERROR,
             (message: string) => {
                 this.fireEvent(
-                    channels.client.ipfs.startService,
+                    getChannels().client.ipfs.startService,
                     mainResponse({ error: message }, {})
                 );
             });
