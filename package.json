@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "http-server ./build"
+    "start": "http-server ./build --ssl"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   "homepage": "https://github.com/AkashaProject/web-app#readme",
   "dependencies": {
     "@akashaproject/contracts.js": "1.2.12",
-    "@akashaproject/ipfs-js-connector": "1.0.2",
+    "@akashaproject/ipfs-js-connector": "1.0.4",
     "@types/loglevel": "1.4.29",
     "bluebird": "3.5.0",
     "ethereumjs-util": "5.1.2",
@@ -38,7 +38,7 @@
     "gulp": "3.9.1",
     "gulp-sourcemaps": "2.6.0",
     "http-server": "0.10.0",
-    "tslint": "5.4.0",
+    "tslint": "5.4.2",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }

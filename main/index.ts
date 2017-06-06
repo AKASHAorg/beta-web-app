@@ -15,10 +15,12 @@ window.addEventListener('load', function () {
     startApp(web3Regen);
 });
 
+
 const startApp = (web3) => {
     console.log('web3', web3);
     console.time('bootstrap');
     IpfsConnector.getInstance().setOption('SignalServer', 'akasha.cloud');
+    IpfsConnector.getInstance().setOption('config', { Addresses : { Swarm: ['/libp2p-webrtc-star/dns4/akasha.cloud/wss'] } });
     initChannels();
     Object.defineProperty(window, 'Contracts', { value: contracts.init(web3) });
     Object.defineProperty(window, 'Channel', { value: injectApi() });
