@@ -3,8 +3,8 @@ import { post as POST } from 'request';
 import { FAUCET_TOKEN, FAUCET_URL } from '../../config/settings';
 
 const execute = Promise.coroutine(function*(data: RequestEtherRequest) {
-    return new Promise((resolve, reject) => {
-        POST({
+    const x = yield new Promise((resolve, reject) => {
+        return POST({
                 url: FAUCET_URL,
                 json: { address: data.address, token: FAUCET_TOKEN },
                 agentOptions: { rejectUnauthorized: false }
@@ -17,6 +17,7 @@ const execute = Promise.coroutine(function*(data: RequestEtherRequest) {
             }
         );
     });
+    return x;
 });
 
 export default { execute, name: 'requestEther' };

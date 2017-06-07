@@ -28,10 +28,13 @@
     "bluebird": "3.5.0",
     "ethereumjs-util": "5.1.2",
     "loglevel": "1.4.1",
+    "lru-cache": "^4.1.0",
+    "ramda": "^0.24.1",
     "rxjs": "5.4.0",
     "web3": "0.19.0"
   },
   "devDependencies": {
+    "@types/lru-cache": "^4.0.0",
     "babel-polyfill": "6.23.0",
     "babelify": "7.3.0",
     "browserify": "14.4.0",

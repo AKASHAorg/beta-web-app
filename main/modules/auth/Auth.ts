@@ -1,84 +1,14 @@
-import { Cipher, createCipher, createDecipher, Decipher, randomBytes } from 'crypto';
-import { GethConnector, gethHelper } from '@akashaproject/geth-connector';
+import { randomBytes } from 'crypto';
 import { addHexPrefix, bufferToHex, ecrecover, fromRpcSig, hashPersonalMessage, pubToAddress, toBuffer, unpad } from 'ethereumjs-util';
-import { constructed as contracts } from '../../contracts/index';
+import contracts from '../../contracts/index';
 import * as Promise from 'bluebird';
+import { web3Api } from '../../services';
 
 export const randomBytesAsync = Promise.promisify(randomBytes);
 
 export class Auth {
-    private _encrypted: Buffer;
-    private _decipher: Decipher;
-    private _cipher: Cipher;
     private _session: { address: string, expiration: Date, vrs: { v: string, r: string, s: string } };
     private _task;
-
-    /**
-     *
-     * @param pass
-     * @returns {Bluebird<string>|PromiseLike<string>|Thenable<string>|Promise<string>}
-     */
-    public generateKey(pass: any) {
-        try {
-            if (!Buffer.isBuffer(pass)) {
-                return Promise.reject(new Error('Incorrect password format'));
-            }
-            const transformed = Buffer.from(pass).toString('utf8');
-            return GethConnector.getInstance()
-                .web3
-                .personal
-                .newAccountAsync(transformed)
-                .then((address: string) => {
-                    return address;
-                });
-        } catch (err) {
-            return Promise.reject(err);
-        }
-
-    }
-
-    /**
-     *
-     * @returns {PromiseLike<boolean>|Promise<boolean>|Thenable<boolean>|Bluebird<boolean>}
-     * @private
-     */
-    private _generateRandom() {
-        return randomBytesAsync(64).then((buff: Buffer) => {
-            this._cipher = createCipher('aes-256-ctr', buff.toString('hex'));
-            this._decipher = createDecipher('aes-256-ctr', buff.toString('hex'));
-            return true;
-        });
-    }
-
-    /**
-     *
-     * @param key
-     * @returns {Auth}
-     * @private
-     */
-    private _encrypt(key: any) {
-        const keyTr = Buffer.from(key);
-        return this._generateRandom().then(() => {
-            this._encrypted = Buffer.concat([this._cipher.update(keyTr), this._cipher.final()]);
-            return true;
-        });
-    }
-
-    /**
-     *
-     * @returns {Buffer}
-     * @private
-     */
-    private _read(token: any) {
-
-        if (!this.isLogged(token)) {
-            throw new Error('Token is not valid');
-        }
-        const result = Buffer.concat([this._decipher.update(this._encrypted), this._decipher.final()]);
-        this._encrypt(result);
-        return result;
-    }
-
 
     /**
      *
@@ -88,7 +18,7 @@ export class Auth {
      * @param registering
      * @returns {any}
      */
-    public login(acc: string, pass: any | Uint8Array, timer: number = 1, registering = false) {
+    public login(acc: string, timer: number = 1, registering = false) {
 
         return contracts.instance
             .registry
@@ -97,29 +27,20 @@ export class Auth {
                 if (!unpad(address) && !registering) {
                     throw new Error(`eth key: ${acc} has no profile attached`);
                 }
-                return gethHelper.hasKey(acc);
-            })
-            .then((found) => {
-                if (!found) {
-                    throw new Error(`local key for ${acc} not found`);
-                }
-                // temporary until personal_sign is shipped
-                // follow here https://github.com/ethereum/go-ethereum/pull/2940
-                // @TODO: migrate to personal_sign when available
-                return this._encrypt(pass);
+                // return gethHelper.hasKey(acc);
+                return true;
             })
             .then(() => {
-                return randomBytesAsync(64);
+                return randomBytesAsync(40);
             })
             .then((buff: Buffer) => {
                 const token = addHexPrefix(buff.toString('hex'));
-                return this._signSession(token, acc, Buffer.from(pass).toString('utf8'))
+                return this._signSession(token, acc)
                     .then((signedString: string) => {
                         const expiration = new Date();
                         const clientToken = hashPersonalMessage(buff);
                         expiration.setMinutes(expiration.getMinutes() + timer);
-                        GethConnector.getInstance().web3.personal.lockAccountAsync(acc).then(() => null);
-                        GethConnector.getInstance().web3.eth.defaultAccount = acc;
+                        web3Api.instance.eth.defaultAccount = acc;
                         this._session = {
                             expiration,
                             address: acc,
@@ -132,9 +53,6 @@ export class Auth {
     }
 
     public logout() {
-        if (this._session) {
-            GethConnector.getInstance().web3.personal.lockAccountAsync(this._session.address);
-        }
         this._flushSession();
 
     }
@@ -174,9 +92,6 @@ export class Auth {
      */
     private _flushSession() {
         this._session = null;
-        this._encrypted = null;
-        this._cipher = null;
-        this._decipher = null;
         clearTimeout(this._task);
         console.log('flushed session');
     }
@@ -189,11 +104,10 @@ export class Auth {
      * @returns {any}
      * @private
      */
-    private _signSession(hash: string, account: string, password: string) {
-        return GethConnector.getInstance()
-            .web3
-            .personal
-            .signAsync(hash, account, password);
+    private _signSession(hash: string, account: string) {
+        // metamask bug
+        // @todo: first param should be hash when solved
+        return web3Api.instance.personal.signAsync(account, account);
     }
 
     /**
@@ -203,10 +117,7 @@ export class Auth {
      * @returns {any}
      */
     public signData(data: {}, token: string) {
-        return GethConnector.getInstance()
-            .web3
-            .personal
-            .sendTransactionAsync(data, this._read(token).toString('utf8'));
+        return web3Api.instance.personal.sendTransactionAsync(data);
     }
 }
 
