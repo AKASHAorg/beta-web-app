@@ -3,7 +3,7 @@ import contracts from '../../contracts/index';
 import { mixed } from '../models/records';
 import { A_STREAM_I, BLOCK_INTERVAL } from '../../config/settings';
 import getEntry from './get-entry';
-
+import { web3Api } from '../../services';
 
 const fetch = Promise.coroutine(function*(entries, toBlock, limit) {
     const fromBlock = toBlock - BLOCK_INTERVAL;
@@ -31,8 +31,8 @@ const fetch = Promise.coroutine(function*(entries, toBlock, limit) {
 
 const execute = Promise.coroutine(function*(data: { limit?: number, toBlock?: number }) {
     let toBlock = (data.toBlock) ? data.toBlock :
-        yield GethConnector.getInstance()
-            .web3
+        yield web3Api
+            .instance
             .eth
             .getBlockNumberAsync();
     const indexBlock = toBlock;

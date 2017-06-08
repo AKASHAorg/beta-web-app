@@ -34,7 +34,8 @@
     "web3": "0.19.0"
   },
   "devDependencies": {
-    "@types/lru-cache": "^4.0.0",
+    "babel-plugin-transform-regenerator": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "6.23.0",
     "babelify": "7.3.0",
     "browserify": "14.4.0",

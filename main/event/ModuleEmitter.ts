@@ -56,6 +56,7 @@ export default class ModuleEmitter {
                     response = mainResponse(result, data);
                 })
                 .catch((err: Error) => {
+                console.log(err);
                     response = mainResponse({ error: { message: err.message } }, data);
                 })
                 .finally(() => {

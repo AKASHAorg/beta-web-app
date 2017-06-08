@@ -48,14 +48,8 @@ export default class BaseContract {
      * @returns {"~bluebird/bluebird".Bluebird}
      */
     public estimateGas(method: string, ...params: any[]) {
-        return new Promise((resolve, reject) => {
-            this.contract[method]
-                .estimateGas(...params, (err: any, gas: number) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(gas);
-                });
+        return Promise.fromCallback((cb) => {
+            return this.contract[method].estimateGas(...params, cb);
         });
     }
 

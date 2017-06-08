@@ -117,7 +117,7 @@ export class Auth {
      * @returns {any}
      */
     public signData(data: {}, token: string) {
-        return web3Api.instance.personal.sendTransactionAsync(data);
+        return web3Api.instance.eth.sendTransactionAsync(data);
     }
 }
 

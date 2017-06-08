@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import * as Promise from 'bluebird';
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import Web3 from 'web3';
@@ -6,7 +5,6 @@ import { initChannels } from './channels';
 import injectApi from './preloader';
 import initModules from './init-modules';
 import contracts from './contracts';
-import Auth from './modules/auth/Auth';
 import {web3Api, ipfsApi} from './services';
 declare const web3;
 
