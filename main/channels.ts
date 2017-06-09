@@ -4,7 +4,7 @@ const hashPath = (...path: string[]) => {
 
 const channels = {
 
-    auth: ['login', 'logout', 'requestEther', 'generateEthKey', 'getLocalIdentities'],
+    auth: ['login', 'logout', 'requestEther', 'generateEthKey', 'getLocalIdentities', 'regenSession'],
 
     tags: ['checkFormat', 'create', 'tagIterator', 'tagSubIterator', 'exists', 'getTagsCreated', 'subsCount',
         'subscribe', 'getTagId', 'getTagName', 'unSubscribe', 'isSubscribed', 'searchTag'],

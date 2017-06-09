@@ -1,5 +1,5 @@
-import { randomBytes } from 'crypto';
-import { addHexPrefix, bufferToHex, ecrecover, fromRpcSig, hashPersonalMessage, pubToAddress, toBuffer, unpad } from 'ethereumjs-util';
+import { Cipher, createCipher, createDecipher, Decipher, randomBytes } from 'crypto';
+import { addHexPrefix, hashPersonalMessage, stripHexPrefix, unpad } from 'ethereumjs-util';
 import contracts from '../../contracts/index';
 import * as Promise from 'bluebird';
 import { web3Api } from '../../services';
@@ -7,8 +7,61 @@ import { web3Api } from '../../services';
 export const randomBytesAsync = Promise.promisify(randomBytes);
 
 export class Auth {
-    private _session: { address: string, expiration: Date, vrs: { v: string, r: string, s: string } };
+    private _decipher: Decipher;
+    private _cipher: Cipher;
+    private _session: { address: string, expiration: Date, sig: string };
     private _task;
+    private _key;
+
+    public constructor(key = 'session-key') {
+        this._key = key;
+    }
+
+    /**
+     *
+     * @param token
+     * @returns {boolean}
+     */
+    public regenSession(token: string) {
+        let session;
+        const data = localStorage.getItem(this._key);
+        if (!data) {
+            return false;
+        }
+
+        this._generateDecipher(stripHexPrefix(token));
+        try {
+            const sessionData = JSON.parse(data);
+            if (!sessionData.hasOwnProperty('data')) {
+                return false;
+            }
+            const sessionBuffer = Buffer.from(sessionData.data);
+            const sessionDecrypted = Buffer.concat([this._decipher.update(sessionBuffer), this._decipher.final()]);
+            session = JSON.parse(sessionDecrypted.toString());
+            if (
+                !session.hasOwnProperty('address') ||
+                !session.hasOwnProperty('expiration') ||
+                !session.hasOwnProperty('sig')
+            ) {
+                return false;
+            }
+            session.expiration = new Date(session.expiration);
+
+        } catch (err) {
+            session = null;
+            console.error(err);
+        }
+        this._session = session;
+        return !!this._session;
+    }
+
+    private _generateCipher(token: string) {
+        this._cipher = createCipher('aes-256-ctr', token);
+    }
+
+    private _generateDecipher(token: string) {
+        this._decipher = createDecipher('aes-256-ctr', token);
+    }
 
     /**
      *
@@ -18,7 +71,7 @@ export class Auth {
      * @param registering
      * @returns {any}
      */
-    public login(acc: string, timer: number = 1, registering = false) {
+    public login(acc: string, timer: number = 30, registering = false) {
 
         return contracts.instance
             .registry
@@ -44,8 +97,16 @@ export class Auth {
                         this._session = {
                             expiration,
                             address: acc,
-                            vrs: fromRpcSig(signedString)
+                            sig: signedString
                         };
+                        this._generateCipher(clientToken.toString('hex'));
+                        localStorage.setItem(this._key,
+                            JSON.stringify(
+                                Buffer.concat([this._cipher.update(Buffer.from(JSON.stringify(this._session))),
+                                    this._cipher.final()]
+                                )
+                            )
+                        );
                         this._task = setTimeout(() => this._flushSession(), 1000 * 60 * timer);
                         return { token: addHexPrefix(clientToken.toString('hex')), expiration, account: acc };
                     });
@@ -63,8 +124,6 @@ export class Auth {
      * @returns {boolean}
      */
     public isLogged(token: any) {
-        let pubKey: string;
-        let ethAddr: Buffer;
         const now = new Date();
         // console.log(token);
         if (!this._session || !token) {
@@ -74,16 +133,12 @@ export class Auth {
         if (now > this._session.expiration) {
             return false;
         }
-        const { v, r, s } = this._session.vrs;
-        try {
-            pubKey = bufferToHex(ecrecover(toBuffer(token), v, r, s));
-            ethAddr = pubToAddress(pubKey);
-            // console.log(bufferToHex(ethAddr), this._session.address);
-            return bufferToHex(ethAddr) === this._session.address;
-        } catch (err) {
-            return false;
-        }
-
+        return web3Api.instance
+            .personal
+            .ecRecoverAsync(token, this._session.sig)
+            .then((address) => {
+                return address === this._session.address;
+            });
     }
 
     /**
@@ -117,6 +172,9 @@ export class Auth {
      * @returns {any}
      */
     public signData(data: {}, token: string) {
+        // if (!this.isLogged(token)) {
+        //     throw new Error('Token is not valid');
+        // }
         return web3Api.instance.eth.sendTransactionAsync(data);
     }
 }

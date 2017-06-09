@@ -1,5 +1,6 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { profiles } from '../models/records';
+import createImage from '../helpers/create-image';
 import { isEmpty } from 'ramda';
 import * as Promise from 'bluebird';
 
@@ -76,16 +77,15 @@ export const getShortProfile = Promise.coroutine(function*(hash: string, resolve
     if (profiles.getShort(hash)) {
         return Promise.resolve(profiles.getShort(hash));
     }
+    let avatarData;
     const avatarPath = { [ProfileSchema.AVATAR]: '' };
     const profileBase = yield IpfsConnector.getInstance().api.get(hash);
     const avatar = yield IpfsConnector.getInstance().api.findLinks(hash, [ProfileSchema.AVATAR]);
     if (avatar.length) {
-        if (!resolveAvatar) {
-            avatarPath[ProfileSchema.AVATAR] = avatar[0].multihash;
-        } else {
-            avatarPath[ProfileSchema.AVATAR] = yield IpfsConnector.getInstance().api.getFile(avatar[0].multihash);
-        }
+        avatarData = yield IpfsConnector.getInstance().api.getFile(avatar[0].multihash);
+        avatarPath[ProfileSchema.AVATAR] = createImage(avatarData);
     }
+    avatarData = null;
     const fetched = Object.assign({}, profileBase, avatarPath);
     profiles.setShort(hash, fetched);
     return fetched;
@@ -109,6 +109,9 @@ export const resolveProfile = Promise.coroutine(function*(hash: string, resolveI
         .api.findLinks(hash, [ProfileSchema.LINKS, ProfileSchema.ABOUT, ProfileSchema.BACKGROUND_IMAGE]);
     for (let i = 0; i < pool.length; i++) {
         constructed[pool[i].name] = yield IpfsConnector.getInstance().api.get(pool[i].multihash);
+    }
+    if (constructed[ProfileSchema.BACKGROUND_IMAGE]) {
+       //@TODO: generate an objectUrl foreach dimension
     }
     const returned = Object.assign({}, shortProfile, constructed);
     profiles.setFull(hash, returned);
