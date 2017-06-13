@@ -1,8 +1,8 @@
 import * as Promise from 'bluebird';
-
+import { web3Api } from '../../services';
 const execute = Promise.coroutine(function*(data: TxRequestData) {
     const requests = data.transactionHash.map((txHash) => {
-        return GethConnector.getInstance().web3.eth.getTransactionReceiptAsync(txHash);
+        return web3Api.instance.eth.getTransactionReceiptAsync(txHash);
     });
     return Promise.all(requests);
 });

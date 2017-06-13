@@ -5,6 +5,7 @@ import currentProfile from '../registry/current-profile';
 import { mixed } from '../models/records';
 import { BLOCK_INTERVAL, F_STREAM_I, FOLLOWING_LIST } from '../../config/settings';
 import getEntry from './get-entry';
+import { web3Api } from '../../services';
 
 
 const fetch = Promise.coroutine(function*(entries, following, toBlock, limit) {
@@ -42,8 +43,7 @@ const execute = Promise.coroutine(function*(data: { limit?: number, toBlock?: nu
         mixed.setFull(FOLLOWING_LIST, following.collection);
     }
     let toBlock = (data.toBlock) ? data.toBlock :
-        yield GethConnector.getInstance()
-            .web3
+        yield web3Api.instance
             .eth
             .getBlockNumberAsync();
     const indexBlock = toBlock;

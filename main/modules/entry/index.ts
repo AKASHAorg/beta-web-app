@@ -19,7 +19,6 @@ import votesIterator from './votes-iterator';
 import getEntriesStream from './entry-stream';
 import getEntryBalance from './get-entry-balance';
 import getEntryList from './get-entry-list';
-import runner from '../pinner/index';
 import editEntry from './edit-entry';
 import followingStreamIterator from './following-stream-iterator';
 import allStreamIterator from './all-stream-iterator';
@@ -52,7 +51,6 @@ export default [
     editEntry,
     followingStreamIterator,
     allStreamIterator,
-    runner[0],
     getLatestEntryVersion,
     getEntryIpfsHash,
     resolveEntriesIpfsHash

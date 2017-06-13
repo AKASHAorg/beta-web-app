@@ -91,7 +91,6 @@ export class Auth {
                 return this._signSession(token, acc)
                     .then((signedString: string) => {
                         const expiration = new Date();
-                        const clientToken = hashPersonalMessage(buff);
                         expiration.setMinutes(expiration.getMinutes() + timer);
                         web3Api.instance.eth.defaultAccount = acc;
                         this._session = {
@@ -99,7 +98,7 @@ export class Auth {
                             address: acc,
                             sig: signedString
                         };
-                        this._generateCipher(clientToken.toString('hex'));
+                        this._generateCipher(stripHexPrefix(token));
                         localStorage.setItem(this._key,
                             JSON.stringify(
                                 Buffer.concat([this._cipher.update(Buffer.from(JSON.stringify(this._session))),
@@ -108,7 +107,7 @@ export class Auth {
                             )
                         );
                         this._task = setTimeout(() => this._flushSession(), 1000 * 60 * timer);
-                        return { token: addHexPrefix(clientToken.toString('hex')), expiration, account: acc };
+                        return { token: token, expiration, account: acc };
                     });
             });
     }
@@ -125,13 +124,12 @@ export class Auth {
      */
     public isLogged(token: any) {
         const now = new Date();
-        // console.log(token);
         if (!this._session || !token) {
-            return false;
+            return Promise.resolve(false);
         }
 
         if (now > this._session.expiration) {
-            return false;
+            return Promise.resolve(false);
         }
         return web3Api.instance
             .personal
@@ -160,9 +158,7 @@ export class Auth {
      * @private
      */
     private _signSession(hash: string, account: string) {
-        // metamask bug
-        // @todo: first param should be hash when solved
-        return web3Api.instance.personal.signAsync(account, account);
+        return web3Api.instance.personal.signAsync(hash, account);
     }
 
     /**
@@ -172,10 +168,13 @@ export class Auth {
      * @returns {any}
      */
     public signData(data: {}, token: string) {
-        // if (!this.isLogged(token)) {
-        //     throw new Error('Token is not valid');
-        // }
-        return web3Api.instance.eth.sendTransactionAsync(data);
+        return this.isLogged(token)
+            .then(function (logged) {
+                if (!logged) {
+                    throw new Error('Token is not valid!');
+                }
+                return web3Api.instance.eth.sendTransactionAsync(data);
+            });
     }
 }
 

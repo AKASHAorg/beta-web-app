@@ -42,7 +42,7 @@
     "gulp": "3.9.1",
     "gulp-sourcemaps": "2.6.0",
     "http-server": "0.10.0",
-    "tslint": "5.4.2",
+    "tslint": "5.4.3",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0"
   }

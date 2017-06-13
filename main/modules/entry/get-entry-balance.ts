@@ -1,5 +1,6 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
+import { web3Api } from '../../services';
 
 /**
  * Get current balance of an entry
@@ -23,9 +24,9 @@ const execute = Promise.coroutine(
                     if (!balanceAddress) {
                         return { balance: 'claimed', unit: data.unit, entryId: id };
                     }
-                    return GethConnector.getInstance().web3.eth.getBalanceAsync(balanceAddress)
+                    return web3Api.instance.eth.getBalanceAsync(balanceAddress)
                         .then((weiAmount) => {
-                            const balance = GethConnector.getInstance().web3.fromWei(weiAmount, data.unit);
+                            const balance = web3Api.instance.fromWei(weiAmount, data.unit);
                             return { balance: balance.toString(10), unit: data.unit, entryId: id };
                         });
                 });

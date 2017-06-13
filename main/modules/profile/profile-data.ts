@@ -15,11 +15,11 @@ import subsCount from '../tags/subs-count';
 const execute = Promise.coroutine(function*(data: ProfileDataRequest) {
     const ipfsHash = yield contracts.instance.profile.getIpfs(data.profile);
     const profile = (data.full) ?
-        yield resolveProfile(ipfsHash, data.resolveImages)
+        yield resolveProfile(ipfsHash)
             .timeout(FULL_WAIT_TIME)
             .then((d) => d).catch((e) => null)
         :
-        yield getShortProfile(ipfsHash, data.resolveImages)
+        yield getShortProfile(ipfsHash)
             .timeout(SHORT_WAIT_TIME)
             .then((d) => d).catch((e) => null);
 

@@ -1,3 +1,4 @@
+import createImage from './create-image';
 import getConfig from './get-config';
 import getPorts from './get-ports';
 import logs from './logs';
@@ -7,4 +8,4 @@ import start from './start';
 import status from './status';
 import stop from './stop';
 
-export default [getConfig, getPorts, logs, resolve, setPorts, start, status, stop];
+export default [createImage, getConfig, getPorts, logs, resolve, setPorts, start, status, stop];
