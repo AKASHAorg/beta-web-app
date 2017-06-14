@@ -7,7 +7,7 @@ const channels = {
     auth: ['login', 'logout', 'requestEther', 'generateEthKey', 'getLocalIdentities', 'regenSession'],
 
     tags: ['checkFormat', 'create', 'tagIterator', 'tagSubIterator', 'exists', 'getTagsCreated', 'subsCount',
-        'subscribe', 'getTagId', 'getTagName', 'unSubscribe', 'isSubscribed', 'searchTag'],
+        'subscribe', 'getTagId', 'getTagName', 'unSubscribe', 'isSubscribed', 'searchTag', 'getTagCount'],
 
     entry: ['getProfileEntriesCount', 'getTagEntriesCount', 'isActive', 'getEntry', 'publish', 'update', 'canClaim', 'claim',
         'downvote', 'getScore', 'getDepositBalance', 'upvote', 'voteCost', 'voteCount', 'entryTagIterator',
@@ -15,7 +15,8 @@ const channels = {
         'editEntry', 'pin', 'followingStreamIterator', 'allStreamIterator', 'getLatestEntryVersion', 'getEntryIpfsHash',
         'resolveEntriesIpfsHash'],
 
-    comments: ['getComment', 'comment', 'commentsCount', 'removeComment', 'commentsIterator'],
+    comments: ['getComment', 'comment', 'commentsCount', 'removeComment', 'commentsIterator', 'commentsParentIterator',
+    'getProfileComments', 'resolveCommentsIpfsHash'],
 
     geth: ['options', 'startService', 'stopService', 'restartService', 'syncStatus', 'logs', 'status'],
 
@@ -28,17 +29,11 @@ const channels = {
     registry: ['fetchRegistered', 'addressOf', 'checkIdFormat', 'getCurrentProfile', 'profileExists', 'registerProfile',
         'getByAddress', 'unregister'],
 
-    notifications: ['me', 'feed', 'setFilter', 'excludeFilter', 'includeFilter', 'mention'],
-
     tx: ['addToQueue', 'emitMined', 'getTransaction'],
 
     licenses: ['getLicenceById', 'getLicenses'],
 
-    chat: ['fetch', 'post', 'join', 'leave', 'getCurrentChannels'],
-
-    search: ['handshake', 'query'],
-
-    utils: ['backupKeys', 'osInfo', 'checkUpdate']
+    utils: ['osInfo']
 };
 
 const processes = ['server', 'client'];

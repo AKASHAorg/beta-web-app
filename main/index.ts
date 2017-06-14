@@ -6,6 +6,7 @@ import injectApi from './preloader';
 import initModules from './init-modules';
 import contracts from './contracts';
 import {web3Api, ipfsApi} from './services';
+import web3Helper from './modules/helpers/web3-helper';
 declare const web3;
 
 window.addEventListener('load', function () {
@@ -32,10 +33,11 @@ const startApp = (web3) => {
     initChannels();
     // for debug
     Object.defineProperty(window, 'Contracts', { value: contracts.init(web3) });
-    Object.defineProperty(window, 'Channel', { value: injectApi() });
+    const channels = injectApi();
+    Object.defineProperty(window, 'Channel', { value:  channels});
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
     Object.defineProperty(window, 'web3', { value: web3 });
-     //
     initModules();
+    web3Helper.setChannel(channels.client.tx.emitMined);
     console.timeEnd('bootstrap');
 };

@@ -11,8 +11,6 @@ class UtilsIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = [];
     }
 
-    /**
-     */
     public initListeners() {
         this._initMethods(utils);
         this._manager();

@@ -13,7 +13,6 @@ export default class ModuleEmitter {
         this.DEFAULT_MANAGED.forEach(
             (action: string) => {
                 getChannels().server[this.MODULE_NAME][action].enable();
-                console.info('Listening on', this.MODULE_NAME, action);
             }
         );
     }

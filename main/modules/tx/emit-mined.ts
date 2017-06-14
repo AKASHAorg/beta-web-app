@@ -1,8 +1,9 @@
 import * as Promise from 'bluebird';
+import web3Helper from '../helpers/web3-helper';
 
 const execute = Promise.coroutine(function*(data: EmitMinedRequest) {
-    (data.watch) ? gethHelper.startTxWatch() : gethHelper.stopTxWatch();
-    return { watching: gethHelper.watching };
+    (data.watch) ? web3Helper.startTxWatch() : web3Helper.stopTxWatch();
+    return { watching: web3Helper.watching };
 });
 
 export default { execute, name: 'emitMined' };
