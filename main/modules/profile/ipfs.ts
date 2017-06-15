@@ -2,6 +2,7 @@ import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { profiles } from '../models/records';
 import { isEmpty } from 'ramda';
 import * as Promise from 'bluebird';
+import createImage from '../helpers/create-image';
 
 export const ProfileSchema = {
     AVATAR: 'avatar',

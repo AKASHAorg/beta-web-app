@@ -1,11 +1,12 @@
 import * as Promise from 'bluebird';
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import Web3 from 'web3';
+import { bootstrap } from '../app';
 import { initChannels } from './channels';
 import injectApi from './preloader';
 import initModules from './init-modules';
 import contracts from './contracts';
-import {web3Api, ipfsApi} from './services';
+import { channel, ipfsApi, web3Api } from './services';
 import web3Helper from './modules/helpers/web3-helper';
 declare const web3;
 
@@ -29,15 +30,19 @@ const startApp = (web3) => {
     ipfsApi.instance = IpfsConnector.getInstance();
     console.time('bootstrap');
     IpfsConnector.getInstance().setOption('SignalServer', 'akasha.cloud');
-    IpfsConnector.getInstance().setOption('config', { Addresses : { Swarm: ['/libp2p-webrtc-star/dns4/akasha.cloud/wss'] } });
+    IpfsConnector.getInstance().setOption('config', { Addresses: { Swarm: ['/libp2p-webrtc-star/dns4/akasha.cloud/wss'] } });
     initChannels();
     // for debug
     Object.defineProperty(window, 'Contracts', { value: contracts.init(web3) });
     const channels = injectApi();
-    Object.defineProperty(window, 'Channel', { value:  channels});
+    channel.instance = channels;
+    // for dev only
+    Object.defineProperty(window, 'Channel', { value: channels });
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
     Object.defineProperty(window, 'web3', { value: web3 });
+    // end
     initModules();
     web3Helper.setChannel(channels.client.tx.emitMined);
     console.timeEnd('bootstrap');
+    bootstrap();
 };

@@ -12,3 +12,4 @@ class Service {
 
 export const web3Api = new Service();
 export const ipfsApi = new Service();
+export const channel = new Service();

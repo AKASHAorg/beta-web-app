@@ -1,0 +1,21 @@
+.root {
+    padding: 12px 24px;
+    position: absolute;
+    left: 8px;
+    right: 0;
+    bottom: 0;
+    margin-right: 0 !important;
+    z-index: 10;
+}
+.leftActions,
+.rightActions {
+     flex: 1 1 auto;
+     display: flex;
+}
+
+.leftActions {
+     justify-content: flex-start;
+}
+.rightActions {
+     justify-content: flex-end;
+}
