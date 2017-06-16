@@ -42,4 +42,4 @@ docs
 *.map
 !main/typings/*.d.ts
 test-repo
-!gulpfile.js
+!gulpfile.old.js
