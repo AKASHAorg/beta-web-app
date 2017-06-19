@@ -24,5 +24,6 @@ export const GETH_LOGGER = 'geth';
 export const IPFS_LOGGER = 'ipfs';
 
 export const IPFS_PEER_ID = '/ip4/46.101.103.114/tcp/4001/ipfs/QmYfXRuVWMWFRJxUSFPHtScTNR9CU2samRsTK15VFJPpvh';
+export const defaultPath = 'ipfs/akasha-alpha';
 // default settings
 generalSettings.set(BASE_URL, '');

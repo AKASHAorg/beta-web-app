@@ -91,11 +91,13 @@ export class GethHelper {
                         }
 
                         this.channel.send({
-                            mined: tx.transactionHash,
-                            blockNumber: tx.blockNumber,
-                            cumulativeGasUsed: tx.cumulativeGasUsed,
-                            hasEvents: !!(tx.logs.length),
-                            watching: this.watching
+                            data: {
+                                mined: tx.transactionHash,
+                                blockNumber: tx.blockNumber,
+                                cumulativeGasUsed: tx.cumulativeGasUsed,
+                                hasEvents: !!(tx.logs.length),
+                                watching: this.watching
+                            }
                         });
                     }
                 });
@@ -124,8 +126,8 @@ export class GethHelper {
     public stopTxWatch() {
         this.watching = false;
         return (this.watcher) ? this.watcher.stopWatching(() => {
-                this.watcher = null;
-            }) : '';
+            this.watcher = null;
+        }) : '';
     }
 
     /**

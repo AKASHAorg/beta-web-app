@@ -18,12 +18,16 @@ export const ProfileSchema = {
 export const create = Promise.coroutine(function*(data: IpfsProfileCreateRequest) {
     let saved, tmp, targetHash, keys, pool;
     let i = 0;
+    console.log('IpfsProfileCreateRequest', data);
     const simpleLinks = [ProfileSchema.AVATAR, ProfileSchema.ABOUT, ProfileSchema.LINKS];
     const root = yield IpfsConnector.getInstance().api.add({ firstName: data.firstName, lastName: data.lastName });
+    console.log('root', root);
     targetHash = root.hash;
     while (i < simpleLinks.length) {
         if (!isEmpty(data[simpleLinks[i]]) && data[simpleLinks[i]]) {
-            tmp = yield IpfsConnector.getInstance().api.add(data[simpleLinks[i]], simpleLinks[i] === ProfileSchema.AVATAR);
+            console.log('adding avatar');
+            tmp = yield IpfsConnector.getInstance().api.add(Buffer.from(data[simpleLinks[i]]), simpleLinks[i] === ProfileSchema.AVATAR);
+            console.log('tmp', tmp);
             saved = yield IpfsConnector.getInstance()
                 .api
                 .addLink({ name: simpleLinks[i], size: tmp.size, hash: tmp.hash }, targetHash);
