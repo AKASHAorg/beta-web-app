@@ -1,3 +1,11 @@
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
+
+export const gethStatus = {
+    process: false,
+    api: false,
+    version: ''
+};
+
 /**
  *
  * @param rawData
@@ -9,8 +17,8 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
         return {
             data: {},
             services: {
-                ipfs: {},
-                geth: {}
+                ipfs: IpfsConnector.getInstance().serviceStatus,
+                geth: gethStatus
             },
             error: { message: rawData.error.message }, request
         };
@@ -18,8 +26,8 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
     return {
         data: rawData,
         services: {
-            ipfs: {},
-            geth: {}
+            ipfs: IpfsConnector.getInstance().serviceStatus,
+            geth: gethStatus
         }, request
     };
 };

@@ -2,6 +2,7 @@ import AuthIPC from './AuthIPC';
 import CommentsIPC from './CommentsIPC';
 import EntryIPC from './EntryIPC';
 import IpfsIPC from './IpfsIPC';
+import GethIPC from './GethIPC';
 import LicencesIPC from './LicensesIPC';
 import ProfileIPC from './ProfileIPC';
 import RegistryIPC from './RegistryIPC';
@@ -14,6 +15,7 @@ export default [
     new CommentsIPC(),
     new EntryIPC(),
     new IpfsIPC(),
+    new GethIPC(),
     new LicencesIPC(),
     new ProfileIPC(),
     new RegistryIPC(),

@@ -18,7 +18,7 @@ const channels = {
     comments: ['getComment', 'comment', 'commentsCount', 'removeComment', 'commentsIterator', 'commentsParentIterator',
     'getProfileComments', 'resolveCommentsIpfsHash'],
 
-    geth: ['options', 'startService', 'stopService', 'restartService', 'syncStatus', 'logs', 'status'],
+    geth: ['options', 'startService', 'stopService', 'restartService', 'syncStatus', 'status'],
 
     ipfs: ['startService', 'stopService', 'status', 'resolve', 'getConfig', 'setPorts', 'getPorts', 'logs', 'createImage'],
 

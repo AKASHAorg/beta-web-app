@@ -23,6 +23,8 @@ const execute = Promise.coroutine(function*(data: ProfileDataRequest) {
             .timeout(SHORT_WAIT_TIME)
             .then((d) => d).catch((e) => null);
 
+    console.log('profile', profile);
+
     const akashaId = yield contracts.instance.profile.getId(data.profile);
     const foCount = yield followingCount.execute({ akashaId });
     const fwCount = yield followersCount.execute({ akashaId });

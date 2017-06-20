@@ -2,6 +2,7 @@ import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { profiles } from '../models/records';
 import { isEmpty } from 'ramda';
 import * as Promise from 'bluebird';
+import { Buffer } from 'safe-buffer';
 import createImage from '../helpers/create-image';
 
 export const ProfileSchema = {
@@ -18,7 +19,6 @@ export const ProfileSchema = {
 export const create = Promise.coroutine(function*(data: IpfsProfileCreateRequest) {
     let saved, tmp, targetHash, keys, pool;
     let i = 0;
-    console.log('IpfsProfileCreateRequest', data);
     const simpleLinks = [ProfileSchema.AVATAR, ProfileSchema.ABOUT, ProfileSchema.LINKS];
     const root = yield IpfsConnector.getInstance().api.add({ firstName: data.firstName, lastName: data.lastName });
     console.log('root', root);
@@ -83,13 +83,17 @@ export const getShortProfile = Promise.coroutine(function*(hash: string) {
     }
     let avatarData;
     const avatarPath = { [ProfileSchema.AVATAR]: '' };
+    console.log(hash, 'hash');
     const profileBase = yield IpfsConnector.getInstance().api.get(hash);
+    console.log(profileBase, 'profileBase');
     const avatar = yield IpfsConnector.getInstance().api.findLinks(hash, [ProfileSchema.AVATAR]);
+    console.log(avatar, 'avatar');
     if (avatar.length) {
         avatarPath[ProfileSchema.AVATAR] = avatar[0].multihash;
     }
     avatarData = null;
     const fetched = Object.assign({}, profileBase, avatarPath);
+    console.log('fetched', fetched);
     profiles.setShort(hash, fetched);
     return fetched;
 });

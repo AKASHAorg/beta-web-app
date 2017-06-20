@@ -1,6 +1,6 @@
 import * as Promise from 'bluebird';
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
-import { defaultPath, IPFS_PEER_ID } from '../../config/settings';
+import { defaultPath, IPFS_PEER_ID, generalSettings, BASE_URL } from '../../config/settings';
 
 const execute = Promise.coroutine(function*(data: IpfsStartRequest) {
     if (IpfsConnector.getInstance().serviceStatus.process) {
@@ -19,7 +19,8 @@ const execute = Promise.coroutine(function*(data: IpfsStartRequest) {
                 console.log('add ipfs peer err ', err);
             }
         });
-    return {};
+    generalSettings.set(BASE_URL, 'https://ipfs.io/ipfs/');
+    return { started: true };
 });
 
 export default { execute, name: 'startService' };
