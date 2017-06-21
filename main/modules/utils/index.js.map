@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["index.ts"],"names":[],"mappings":";;AAAA,uDAA4C;AAC5C,uCAA+B;AAC/B,mDAA2C;AAE3C,kBAAe,CAAC,yBAAW,EAAE,uBAAY,EAAE,iBAAM,CAAC,CAAC","sourcesContent":["import backupStore from './backup-keystore';\nimport osInfo from './os-info';\nimport checkUpdates from './check-updates';\n\nexport default [backupStore, checkUpdates, osInfo];\n"]}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["index.ts"],"names":[],"mappings":"AAAA,OAAO,MAAM,MAAM,WAAW,CAAC;AAE/B,eAAe,CAAC,MAAM,CAAC,CAAC"}

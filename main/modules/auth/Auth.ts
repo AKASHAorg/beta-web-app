@@ -3,6 +3,7 @@ import { addHexPrefix, hashPersonalMessage, stripHexPrefix, unpad } from 'ethere
 import contracts from '../../contracts/index';
 import * as Promise from 'bluebird';
 import { web3Api } from '../../services';
+import { gethStatus } from '../../event/responses';
 
 export const randomBytesAsync = Promise.promisify(randomBytes);
 
@@ -80,6 +81,7 @@ export class Auth {
                 if (!unpad(address) && !registering) {
                     throw new Error(`eth key: ${acc} has no profile attached`);
                 }
+                gethStatus.akashaKey = address;
                 // return gethHelper.hasKey(acc);
                 return true;
             })
@@ -114,7 +116,6 @@ export class Auth {
 
     public logout() {
         this._flushSession();
-
     }
 
     /**
@@ -145,6 +146,8 @@ export class Auth {
      */
     private _flushSession() {
         this._session = null;
+        gethStatus.akashaKey = '';
+        gethStatus.shouldLogout = false;
         clearTimeout(this._task);
         console.log('flushed session');
     }

@@ -12,7 +12,6 @@ window.addEventListener('load', function () {
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
     }
-    console.log('web3', web3Local);
     startApp(web3Local);
 });
 

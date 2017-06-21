@@ -11,6 +11,9 @@ class Service {
     }
 
     public get instance() {
+        if (!this._instance) {
+            throw new Error('No instance available');
+        }
         return this._instance;
     }
 }

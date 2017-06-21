@@ -21,7 +21,7 @@ export default class ModuleEmitter {
         return (data: any) => {
             let response: any;
             // console.time(method.name);
-            method
+            return method
                 .execute(data, (er, ev) => {
                     if (er) {
                         response = mainResponse({ error: { message: er } }, data);
@@ -49,13 +49,13 @@ export default class ModuleEmitter {
             let response: any;
             // const stamp = method.name + ' ' + (new Date()).getTime();
             // console.time(stamp);
-            method
+            return method
                 .execute(data)
                 .then((result: any) => {
                     response = mainResponse(result, data);
                 })
                 .catch((err: Error) => {
-                console.log(err);
+                    console.log(err);
                     response = mainResponse({ error: { message: err.message } }, data);
                 })
                 .finally(() => {
@@ -68,9 +68,9 @@ export default class ModuleEmitter {
 
     protected _initMethods(methods) {
         methods.forEach((method) => {
-                getChannels().server[this.MODULE_NAME][method.name].registerListener(
-                    method.hasStream ? this.generateStreamListener(method) : this.generateListener(method)
-                );
+            getChannels().server[this.MODULE_NAME][method.name].registerListener(
+                method.hasStream ? this.generateStreamListener(method) : this.generateListener(method)
+            );
         });
     }
 }

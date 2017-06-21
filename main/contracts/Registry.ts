@@ -34,6 +34,17 @@ export default class Registry extends BaseContract {
 
     /**
      *
+     * @param ethKey
+     * @returns {bool}
+     */
+    public isRegistered(ethKey: string) {
+        return this.contract
+            .isRegistered
+            .callAsync(ethKey);
+    }
+
+    /**
+     *
      * @param id
      * @returns {any}
      */
