@@ -3,7 +3,6 @@ import { profiles } from '../models/records';
 import { isEmpty } from 'ramda';
 import * as Promise from 'bluebird';
 import { Buffer } from 'safe-buffer';
-import createImage from '../helpers/create-image';
 
 export const ProfileSchema = {
     AVATAR: 'avatar',
@@ -26,7 +25,13 @@ export const create = Promise.coroutine(function*(data: IpfsProfileCreateRequest
     while (i < simpleLinks.length) {
         if (!isEmpty(data[simpleLinks[i]]) && data[simpleLinks[i]]) {
             console.log('adding avatar');
-            tmp = yield IpfsConnector.getInstance().api.add(Buffer.from(data[simpleLinks[i]]), simpleLinks[i] === ProfileSchema.AVATAR);
+            tmp = yield IpfsConnector.getInstance()
+                .api
+                .add(
+                    (simpleLinks[i] === ProfileSchema.AVATAR) ?
+                        Buffer.from(data[simpleLinks[i]]) : data[simpleLinks[i]],
+                    simpleLinks[i] === ProfileSchema.AVATAR
+                );
             console.log('tmp', tmp);
             saved = yield IpfsConnector.getInstance()
                 .api

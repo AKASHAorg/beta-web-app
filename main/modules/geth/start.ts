@@ -9,7 +9,10 @@ const execute = Promise.coroutine(function*() {
         web3Api.instance = regenWeb3();
         connected = web3Api.instance.isConnected();
     }
-    if (connected && web3Api.instance.version.network !== 'loading') {
+    if (connected) {
+        if (web3Api.instance.version.network === 'loading') {
+            throw new Error('METAMASK needs to be unlocked.');
+        }
         gethStatus.process = true;
         gethStatus.api = true;
         gethStatus.version = yield web3Api.instance.version.getNodeAsync();

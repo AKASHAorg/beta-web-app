@@ -43,7 +43,7 @@ class GethStatus {
     }
 
     public get ethKey() {
-        if (this._ethKey && web3Api.instance.eth.accounts[0] !== this._ethKey) {
+        if (web3Api.instance.eth.accounts[0] !== this._ethKey) {
             console.log('default account changed');
             this._ethKey = web3Api.instance.eth.accounts[0];
             this.shouldLogout = true;

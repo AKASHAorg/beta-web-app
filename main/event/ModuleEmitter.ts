@@ -1,5 +1,6 @@
 import getChannels from '../channels';
 import { mainResponse } from './responses';
+import { registerChannel } from '../channels';
 
 export default class ModuleEmitter {
     protected MODULE_NAME: string;
@@ -68,6 +69,7 @@ export default class ModuleEmitter {
 
     protected _initMethods(methods) {
         methods.forEach((method) => {
+            registerChannel(this.MODULE_NAME, method.name);
             getChannels().server[this.MODULE_NAME][method.name].registerListener(
                 method.hasStream ? this.generateStreamListener(method) : this.generateListener(method)
             );
