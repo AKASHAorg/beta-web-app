@@ -1,0 +1,29 @@
+import * as Promise from 'bluebird';
+import contracts from '../../contracts/index';
+const execute = Promise.coroutine(function* (data) {
+    let currentId = (data.start) ? data.start : yield contracts.instance.tags.getFirstTag();
+    if (currentId === '0') {
+        return { collection: [] };
+    }
+    let currentName;
+    const maxResults = (data.limit) ? data.limit : 20;
+    const results = [];
+    let counter = 0;
+    if (!data.start) {
+        currentName = yield contracts.instance.tags.getTagName(currentId);
+        results.push({ tagId: currentId, tagName: currentName });
+        counter = 1;
+    }
+    while (counter < maxResults) {
+        currentId = yield contracts.instance.tags.getNextTag(currentId);
+        if (currentId === '0') {
+            break;
+        }
+        currentName = yield contracts.instance.tags.getTagName(currentId);
+        results.push({ tagId: currentId, tagName: currentName });
+        counter++;
+    }
+    return { collection: results, limit: maxResults };
+});
+export default { execute, name: 'tagIterator' };
+//# sourceMappingURL=tags-iterator.js.map
