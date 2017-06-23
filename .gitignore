@@ -37,7 +37,7 @@ jspm_packages
 bin
 .idea
 docs
-main/*.js
+main/**/*.js
 *.d.ts
 *.map
 !main/typings/*.d.ts
