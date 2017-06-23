@@ -11,7 +11,6 @@ export class Auth {
     private _decipher: Decipher;
     private _cipher: Cipher;
     private _session: { address: string, expiration: Date, sig: string };
-    private _task;
     private _key;
 
     public constructor(key = 'session-key') {
@@ -108,7 +107,6 @@ export class Auth {
                                 )
                             )
                         );
-                        this._task = setTimeout(() => this._flushSession(), 1000 * 60 * timer);
                         return { token: token, expiration, account: acc };
                     });
             });
@@ -148,7 +146,6 @@ export class Auth {
         this._session = null;
         gethStatus.akashaKey = '';
         gethStatus.shouldLogout = false;
-        clearTimeout(this._task);
         console.log('flushed session');
     }
 
