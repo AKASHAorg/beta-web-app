@@ -1,7 +1,7 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { bootstrap } from '../app';
 import initModules from './init-modules';
-import { channel, ipfsApi, web3Api, regenWeb3 } from './services';
+import { channel, ipfsApi, regenWeb3, web3Api } from './services';
 import web3Helper from './modules/helpers/web3-helper';
 import getChannels from './channels';
 declare const web3;
@@ -23,7 +23,15 @@ const startApp = (web3) => {
     ipfsApi.instance = IpfsConnector.getInstance();
     console.time('bootstrap');
     IpfsConnector.getInstance().setOption('SignalServer', 'akasha.cloud');
-    IpfsConnector.getInstance().setOption('config', { Addresses: { Swarm: ['/libp2p-webrtc-star/dns4/akasha.cloud/wss'] } });
+    IpfsConnector.getInstance().setOption('config',
+        {
+            Addresses: {
+                Swarm: [
+                    '/libp2p-webrtc-star/dns4/star-signal.cloud.ipfs.team/wss',
+                    '/libp2p-webrtc-star/dns4/akasha.cloud/wss'
+                ]
+            }
+        });
     initModules();
     channel.instance = getChannels();
     // for dev only
