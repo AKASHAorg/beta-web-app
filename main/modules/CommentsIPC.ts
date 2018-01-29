@@ -1,5 +1,6 @@
 import ModuleEmitter from '../event/ModuleEmitter';
 import comments from './comments/index';
+import WebContents = Electron.WebContents;
 
 class CommentsIPC extends ModuleEmitter {
 
@@ -9,7 +10,8 @@ class CommentsIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['comment'];
     }
 
-    public initListeners() {
+    public initListeners(webContents: WebContents) {
+        this.webContents = webContents;
         this._initMethods(comments);
         this._manager();
     }

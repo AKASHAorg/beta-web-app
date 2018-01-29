@@ -1,12 +1,28 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import auth from '../auth/Auth';
+import pinner, { ObjectType, OperationType } from '../pinner/runner';
 import { mixed } from '../models/records';
-const execute = Promise.coroutine(function* (data) {
-    const txData = yield contracts.instance.feed.follow(data.akashaId, data.gas);
-    const tx = yield auth.signData(txData, data.token);
+import { profileAddress } from './helpers';
+import schema from '../utils/jsonschema';
+export const followProfile = {
+    'id': '/followProfile',
+    'type': 'object',
+    'properties': {
+        'ethAddress': { 'type': 'string', 'format': 'address' },
+        'akashaId': { 'type': 'string' },
+        'token': { 'type': 'string' }
+    },
+    'required': ['token']
+};
+const execute = Promise.coroutine(function* (data, cb) {
+    const v = new schema.Validator();
+    v.validate(data, followProfile, { throwError: true });
+    const address = yield profileAddress(data);
+    const txData = contracts.instance.Feed.follow.request(address, { gas: 400000 });
+    const transaction = yield contracts.send(txData, data.token, cb);
     mixed.flush();
-    return { tx, akashaId: data.akashaId };
+    pinner.execute({ type: ObjectType.PROFILE, id: address, operation: OperationType.ADD }).then(() => { });
+    return { tx: transaction.tx, receipt: transaction.receipt };
 });
-export default { execute, name: 'followProfile' };
+export default { execute, name: 'followProfile', hasStream: true };
 //# sourceMappingURL=follow-profile.js.map

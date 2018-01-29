@@ -6,7 +6,8 @@ class ProfileIPC extends ModuleEmitter {
         this.MODULE_NAME = 'profile';
         this.DEFAULT_MANAGED = ['getProfileData', 'getBalance'];
     }
-    initListeners() {
+    initListeners(webContents) {
+        this.webContents = webContents;
         this._initMethods(profile);
         this._manager();
     }

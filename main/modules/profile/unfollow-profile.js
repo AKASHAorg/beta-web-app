@@ -1,12 +1,17 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import auth from '../auth/Auth';
+import { profileAddress } from './helpers';
 import { mixed } from '../models/records';
-const execute = Promise.coroutine(function* (data) {
-    const txData = yield contracts.instance.feed.unFollow(data.akashaId, data.gas);
-    const tx = yield auth.signData(txData, data.token);
+import schema from '../utils/jsonschema';
+import { followProfile } from './follow-profile';
+const execute = Promise.coroutine(function* (data, cb) {
+    const v = new schema.Validator();
+    v.validate(data, followProfile, { throwError: true });
+    const address = yield profileAddress(data);
+    const txData = contracts.instance.Feed.unFollow.request(address, { gas: 400000 });
+    const transaction = yield contracts.send(txData, data.token, cb);
     mixed.flush();
-    return { tx, akashaId: data.akashaId };
+    return { tx: transaction.tx, receipt: transaction.receipt, akashaId: data.akashaId };
 });
-export default { execute, name: 'unFollowProfile' };
+export default { execute, name: 'unFollowProfile', hasStream: true };
 //# sourceMappingURL=unfollow-profile.js.map

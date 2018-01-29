@@ -6,7 +6,8 @@ class AuthIPC extends ModuleEmitter {
         this.MODULE_NAME = 'auth';
         this.DEFAULT_MANAGED = ['login', 'logout', 'requestEther'];
     }
-    initListeners() {
+    initListeners(webContents) {
+        this.webContents = webContents;
         this._initMethods(auth);
         this._manager();
     }

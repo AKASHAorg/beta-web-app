@@ -1,14 +1,16 @@
 import * as Promise from 'bluebird';
+import { arch, platform, type } from 'os';
 
-const execute = Promise.coroutine(function*() {
+
+const execute = Promise.coroutine(function* () {
     return Promise.resolve({
         platform: {
-            platform: 'a platform',
-            arch: 'an arch',
-            type: 'a type'
+            platform: platform(),
+            arch: arch(),
+            type: type()
         },
         resources: {
-            memoryUsage: 'over 9000'
+            memoryUsage: process.getProcessMemoryInfo()
         }
     });
 });

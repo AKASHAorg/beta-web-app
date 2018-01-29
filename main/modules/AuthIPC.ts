@@ -1,6 +1,7 @@
 /// <reference path="../typings/main.d.ts" />
 import ModuleEmitter from '../event/ModuleEmitter';
 import auth from './auth';
+import WebContents = Electron.WebContents;
 
 class AuthIPC extends ModuleEmitter {
     constructor() {
@@ -9,7 +10,8 @@ class AuthIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['login', 'logout', 'requestEther'];
     }
 
-    initListeners() {
+    initListeners(webContents: WebContents) {
+        this.webContents = webContents;
         this._initMethods(auth);
         this._manager();
     }

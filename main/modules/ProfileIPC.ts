@@ -1,5 +1,6 @@
 import ModuleEmitter from '../event/ModuleEmitter';
 import profile from './profile/index';
+import WebContents = Electron.WebContents;
 
 class ProfileIPC extends ModuleEmitter {
 
@@ -9,7 +10,8 @@ class ProfileIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['getProfileData', 'getBalance'];
     }
 
-    public initListeners() {
+    public initListeners(webContents: WebContents) {
+        this.webContents = webContents;
         this._initMethods(profile);
         this._manager();
     }

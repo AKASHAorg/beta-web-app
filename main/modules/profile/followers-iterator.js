@@ -1,33 +1,49 @@
 import * as Promise from 'bluebird';
+import { GethConnector } from '@akashaproject/geth-connector';
 import contracts from '../../contracts/index';
-import profileData from './profile-data';
+import { profileAddress } from './helpers';
+import schema from '../utils/jsonschema';
+import { uniq } from 'ramda';
+export const followersIterator = {
+    'id': '/followersIterator',
+    'type': 'object',
+    'properties': {
+        'ethAddress': { 'type': 'string', 'format': 'address' },
+        'akashaId': { 'type': 'string' },
+        'lastBlock': { 'type': 'number' },
+        'limit': { 'type': 'number' }
+    }
+};
 const execute = Promise.coroutine(function* (data) {
-    let currentId = (data.start) ? data.start : yield contracts.instance.feed.getFollowersFirst(data.akashaId);
-    if (currentId === '0') {
-        return { collection: [], akashaId: data.akashaId };
-    }
-    let profileId;
-    let profile;
-    let counter = 0;
-    const results = [];
-    const maxResults = (data.limit) ? data.limit : 10;
-    if (!data.start) {
-        profileId = yield contracts.instance.feed.getFollowersById(data.akashaId, currentId);
-        profile = yield profileData.execute({ profile: profileId });
-        results.push({ profile, address: profileId, index: currentId });
-        counter = 1;
-    }
-    while (counter < maxResults) {
-        currentId = yield contracts.instance.feed.getFollowersNext(data.akashaId, currentId);
-        if (currentId === '0') {
-            break;
+    const v = new schema.Validator();
+    v.validate(data, followersIterator, { throwError: true });
+    const collection = [];
+    const maxResults = data.limit || 5;
+    const address = yield profileAddress(data);
+    const lastBlock = yield GethConnector.getInstance().web3.eth.getBlockNumberAsync();
+    const toBlock = (!data.lastBlock) ? lastBlock : data.lastBlock;
+    const fetched = yield contracts.fromEvent(contracts.instance.Feed.Follow, { followed: address }, toBlock, maxResults, { lastIndex: data.lastIndex });
+    for (let event of fetched.results) {
+        const follows = yield contracts.instance.Feed.follows(event.args.follower, address);
+        if (!follows) {
+            continue;
         }
-        profileId = yield contracts.instance.feed.getFollowersById(data.akashaId, currentId);
-        profile = yield profileData.execute({ profile: profileId });
-        results.push({ profile, address: profileId, index: currentId });
-        counter++;
+        const unFollowed = yield contracts.fromEvent(contracts.instance.Feed.UnFollow, {
+            followed: address,
+            follower: event.args.follower
+        }, lastBlock, 1, { lastIndex: 0 });
+        if (unFollowed.results && unFollowed.results.length && unFollowed.results[0].blockNumber > event.blockNumber) {
+            continue;
+        }
+        collection.push({ ethAddress: event.args.follower });
     }
-    return { collection: results, akashaId: data.akashaId, limit: maxResults };
+    return {
+        collection: uniq(collection),
+        lastBlock: fetched.fromBlock,
+        lastIndex: fetched.lastIndex,
+        akashaId: data.akashaId,
+        limit: maxResults
+    };
 });
 export default { execute, name: 'followersIterator' };
 //# sourceMappingURL=followers-iterator.js.map

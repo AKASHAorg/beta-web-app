@@ -1,4 +1,6 @@
 import currentBalance from './current-balance';
+import commentsCount from './comments-count';
+import commentsIterator from './comments-iterator';
 import followProfile from './follow-profile';
 import followersCount from './followers-count';
 import followingCount from './following-count';
@@ -12,20 +14,48 @@ import isFollowing from './is-following';
 import followingList from './following-list';
 import getProfileList from './get-profile-list';
 import sendTip from './send-tip';
+import resolveProfileIpfsHash from './resolve-profile-ipfs-hash';
+import toggleDonations from './toggle-donations';
+import bondAeth from './bond-aeth';
+import cycleAeth from './aeth-cycle';
+import freeAeth from './aeth-free';
+import transformEssence from './transform-essence';
+import manaBurned from './mana-burned';
+import cyclingStates from './cycling-states';
+import transfer from './transfer';
+import transfersIterator from './aeth-transfers-iterator';
+import essenceIterator from './essence-iterator';
+import votesIterator from './votes-iterator';
+import karmaRanking from './ranking';
 
 export default [
+    essenceIterator,
+    transfer,
+    cyclingStates,
+    bondAeth,
+    cycleAeth,
     currentBalance,
     followProfile,
     followersCount,
     followingCount,
     followingList,
+    freeAeth,
     isFollower,
     isFollowing,
+    manaBurned,
     profileData,
+    transformEssence,
     unfollowProfile,
     updateProfile,
     followersIterator,
     followingIterator,
     getProfileList,
-    sendTip
+    sendTip,
+    resolveProfileIpfsHash,
+    toggleDonations,
+    transfersIterator,
+    commentsCount,
+    commentsIterator,
+    votesIterator,
+    karmaRanking
 ];

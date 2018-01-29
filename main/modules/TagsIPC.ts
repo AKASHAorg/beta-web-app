@@ -1,6 +1,7 @@
 /// <reference path="../typings/main.d.ts" />
 import ModuleEmitter from '../event/ModuleEmitter';
 import tags from './tags/index';
+import WebContents = Electron.WebContents;
 
 class TagsIPC extends ModuleEmitter {
 
@@ -10,7 +11,12 @@ class TagsIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['exists', 'getTagId', 'getTagName', 'searchTag'];
     }
 
-    public initListeners() {
+    /**
+     *
+     * @param webContents
+     */
+    public initListeners(webContents: WebContents) {
+        this.webContents = webContents;
         this._initMethods(tags);
         this._manager();
     }

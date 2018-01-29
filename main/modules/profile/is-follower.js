@@ -1,14 +1,37 @@
 import * as Promise from 'bluebird';
+import { profileAddress } from './helpers';
 import contracts from '../../contracts/index';
+import schema from '../utils/jsonschema';
+export const isFollower = {
+    'id': '/isFollower',
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'ethAddressFollower': { 'type': 'string', 'format': 'address' },
+            'ethAddressFollowing': { 'type': 'string', 'format': 'address' },
+            'akashaIdFollower': { 'type': 'string' },
+            'akashaIdFollowing': { 'type': 'string' }
+        }
+    },
+    'minItems': 1
+};
 const execute = Promise.coroutine(function* (data) {
-    if (!Array.isArray(data)) {
-        throw new Error('data must be an array');
-    }
+    const v = new schema.Validator();
+    v.validate(data, isFollower, { throwError: true });
     const requests = data.map((req) => {
-        return contracts.instance.feed
-            .isFollower(req.akashaId, req.following)
+        let addressFollower, addressFollowing;
+        return profileAddress({ akashaId: req.akashaIdFollower, ethAddress: req.ethAddressFollower })
+            .then((data1) => {
+            addressFollower = data1;
+            return profileAddress({ akashaId: req.akashaIdFollowing, ethAddress: req.ethAddressFollowing });
+        })
+            .then((data1) => {
+            addressFollowing = data1;
+            return contracts.instance.Feed.follows(addressFollower, addressFollowing);
+        })
             .then((result) => {
-            return { result, following: req.following, akashaId: req.akashaId };
+            return { result, addressFollower, addressFollowing };
         });
     });
     const collection = yield Promise.all(requests);
