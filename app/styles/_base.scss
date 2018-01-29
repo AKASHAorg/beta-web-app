@@ -11,15 +11,14 @@ For example:
 @import './themes/default'
 */
 // Mixins
-@import "./components/prefixer";
-@import "./components/mixins";
+@import "./prefixer";
+// @import "./components/mixins";
 // Variables;
-@import "./components/variables";
+// @import "./components/variables";
 // Reset
-@import "./components/normalize";
+// @import "./components/normalize";
 // components
-@import "./components/typography";
-@import "./components/globals";
+// @import "./components/typography";
+@import "./globals";
+@import "./transitions";
 @import "./tutorials/tutorials";
-// editor (megadraft)
-@import "./editor/editor";

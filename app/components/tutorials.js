@@ -44,25 +44,25 @@ class Tutorials extends Component {
         const { theme } = this.props;
         const containerClassName = 'intro_bg';
         const slider = this.slides.map((slide, key) =>
-          <div
-            className={`${styles.slide_item} ${styles[theme]} row between-xs`}
-            key={slide.iconClassName}
-            style={{ opacity: (key === this.state.currentSlide) ? 1 : 0 }}
-          >
-            <div className="col-xs-12">
-              <h1>
-                {slide.title}
-              </h1>
-            </div>
-            <div className="col-xs-12">
-              <div className={`${styles[`${slide.iconClassName}_${theme}`]} ${styles.slide_icon}`} />
-            </div>
-            <div className="col-xs-12">
-              <p className={`${styles.slide_text}`} >
-                {slide.content}
-              </p>
-            </div>
-          </div>
+            (<div
+              className={`${styles.slide_item} ${styles[theme]} row between-xs`}
+              key={slide.iconClassName}
+              style={{ opacity: (key === this.state.currentSlide) ? 1 : 0 }}
+                >
+              <div className="col-xs-12">
+                <h1>
+                  {slide.title}
+                </h1>
+              </div>
+              <div className="col-xs-12">
+                <div className={`${styles[`${slide.iconClassName}_${theme}`]} ${styles.slide_icon}`} />
+              </div>
+              <div className="col-xs-12">
+                <p className={`${styles.slide_text}`} >
+                  {slide.content}
+                </p>
+              </div>
+            </div>)
         );
         return (
           <div className={`${styles.root} ${styles[`${containerClassName}_${theme}`]}`} >

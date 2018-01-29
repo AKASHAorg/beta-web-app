@@ -1,19 +1,51 @@
-import * as Promise from 'bluebird';
-import auth from '../auth/Auth';
 import IpfsEntry from './ipfs';
+import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-const execute = Promise.coroutine(function* (data) {
-    const active = yield contracts.instance.entries.isMutable(data.entryId);
-    if (!active) {
-        throw new Error('This entry can no longer be edited.');
-    }
+import schema from '../utils/jsonschema';
+import { decodeHash, encodeHash } from '../ipfs/helpers';
+import { unpad } from 'ethereumjs-util';
+const update = {
+    'id': '/publish',
+    'type': 'object',
+    'properties': {
+        'content': {
+            'type': 'object'
+        },
+        'token': {
+            'type': 'string'
+        },
+        'tags': {
+            'type': 'array',
+            'items': {
+                'type': 'string'
+            },
+            'uniqueItems': true,
+            'minItems': 1
+        },
+        'entryType': {
+            'type': 'number'
+        },
+        'ethAddress': { 'type': 'string', 'format': 'address' }
+    },
+    'required': ['content', 'token', 'tags', 'ethAddress', 'entryType']
+};
+const execute = Promise.coroutine(function* (data, cb) {
+    const v = new schema.Validator();
+    v.validate(data, update, { throwError: true });
     let ipfsEntry = new IpfsEntry();
-    const entryEth = yield contracts.instance.entries.getEntry(data.entryId);
-    const hash = yield ipfsEntry.edit(data.content, data.tags, entryEth.ipfsHash);
-    const txData = yield contracts.instance.entries.updateEntryContent(hash, data.entryId, data.gas);
-    const tx = yield auth.signData(txData, data.token);
+    const [fn, digestSize, hash] = yield contracts.instance.Entries.getEntry(data.ethAddress, data.entryId);
+    if (!unpad(hash)) {
+        throw new Error(`entryId: ${data.entryId} published by ${data.ethAddress} does not exits`);
+    }
+    const ipfsHashPublished = encodeHash(fn, digestSize, hash);
+    const ipfsHash = yield ipfsEntry.edit(data.content, data.tags, data.entryType, ipfsHashPublished);
+    const decodedHash = decodeHash(ipfsHash);
+    delete data.content;
+    delete data.tags;
     ipfsEntry = null;
-    return { tx, entryId: data.entryId };
+    const txData = contracts.instance.Entries.edit.request(data.entryId, ...decodedHash);
+    const transaction = yield contracts.send(txData, data.token, cb);
+    return { tx: transaction.tx, receipt: transaction.receipt };
 });
-export default { execute, name: 'editEntry' };
+export default { execute, name: 'editEntry', hasStream: true };
 //# sourceMappingURL=edit-entry.js.map

@@ -1,6 +1,6 @@
-import Pica from 'pica/dist/pica.min';
+import Pica from 'pica/dist/pica';
+import { is, isEmpty } from 'ramda';
 import StreamReader from './stream-reader';
-import R from 'ramda';
 /**
  * Utility to extract best matching image key given a width
  * @param width <number> a given width
@@ -16,6 +16,10 @@ import R from 'ramda';
  */
 function findClosestMatch (width, obj, initialKey) {
     let imageKey = initialKey || '';
+    const pixelRatio = window.devicePixelRatio;
+    if (pixelRatio) {
+        width *= pixelRatio;
+    }
     const sortedKeys = Object.keys(obj).sort((a, b) => obj[a].width > obj[b].width);
     for (let i = sortedKeys.length - 1; i >= 0; i -= 1) {
         const key = sortedKeys[i];
@@ -47,9 +51,15 @@ function findBestMatch (width, obj, initialKey) {
     return imageKey;
 }
 
+function getBestAvailableImage (files) {
+    return Object.values(files)
+        .sort((a, b) => a.width < b.width)
+        .slice(0, 1)[0];
+}
+
 function imageCreator (arrayBuffer, baseUrl) {
     // if arrayBuffer is string it means that it comes from ipfs
-    if (baseUrl && R.is(String, arrayBuffer)) {
+    if (baseUrl && is(String, arrayBuffer)) {
         if (arrayBuffer.includes(`${baseUrl}`) && arrayBuffer !== `${baseUrl}/`) {
             return `${arrayBuffer}`;
         }
@@ -58,13 +68,14 @@ function imageCreator (arrayBuffer, baseUrl) {
         }
         return `${baseUrl}/${arrayBuffer}`;
     }
-    if (R.is(Uint8Array, arrayBuffer)) {
+    if (is(Uint8Array, arrayBuffer)) {
         const blobFile = new Blob([arrayBuffer]);
         return window.URL.createObjectURL(blobFile);
     }
     const arr = Object.keys(arrayBuffer).map(key => arrayBuffer[key]);
     const blobFile = new Blob([new Uint8Array(arr)]);
     return window.URL.createObjectURL(blobFile);
+    // return null;
 }
 /**
  * Utility to extract first image from draftjs generated content;
@@ -72,21 +83,28 @@ function imageCreator (arrayBuffer, baseUrl) {
  * @returns {array} image Array of versions of an image;
  */
 function extractImageFromContent (content) {
-    const { entityMap } = content;
-    if (!entityMap) {
-        console.error(`entityMap not found inside content param.
-            Make sure you have passed the right content!`
-        );
+    const { blocks } = content;
+    if (!blocks) {
+        console.error('no blocks not found inside content param');
         return null;
     }
-    if (entityMap.length === 0) {
+    if (blocks.length === 0) {
         return null;
     }
-    const imageEntity = entityMap.filter(entity => entity.type === 'image');
-    if (imageEntity.length > 0) {
-        return imageEntity[0].data;
+    let firstImage;
+    for (let i = 0; i < blocks.length; i++) {
+        if (
+            blocks[i].type === 'atomic' &&
+            blocks[i].data.type &&
+            blocks[i].data.type === 'image' &&
+            blocks[i].data.files &&
+            !isEmpty(blocks[i].data.files)
+        ) {
+            firstImage = blocks[i].data.files;
+            break;
+        }
     }
-    return null;
+    return firstImage;
 }
 /**
  * @TODO Move this to a config file
@@ -152,14 +170,29 @@ const canvasToArray = canvas =>
                 height: canvas.height
             });
         } catch (exception) {
-            console.log(exception);
+            // console.log(exception);
             return reject(exception);
         }
     });
+
 // method to resize static (non animated gifs) images;
 const resizeImage = (image, options) => {
     const { actualWidth, actualHeight } = options;
-    const imageWidths = settings.imageWidths.filter(widthObj => widthObj.res <= actualWidth);
+    const imageWidths = settings.imageWidths.filter((widthObj) => {
+        if (options.maxResizeWidth) {
+            return widthObj.res <= actualWidth && widthObj.res <= options.maxResizeWidth;
+        }
+        return widthObj.res <= actualWidth;
+    });
+
+    // If image is smaller than 320px (xs) but this is allowed, skip the resize
+    const smallestWidth = settings.imageWidths[settings.imageWidths.length - 1];
+    const { minWidth } = options;
+    const skipResize = minWidth && actualWidth < smallestWidth.res && actualWidth > minWidth;
+    if (!imageWidths.length && skipResize) {
+        imageWidths.push(smallestWidth);
+    }
+
     const imageObject = {};
     let p = Promise.resolve();
     const canvas = document.createElement('canvas');
@@ -171,8 +204,9 @@ const resizeImage = (image, options) => {
      */
     imageWidths.forEach((widthObj, index) => {
         p = p.then(() => {
-            const targetWidth = widthObj.res;
-            const targetHeight = (actualHeight * widthObj.res) / actualWidth;
+            const targetWidth = skipResize ? actualWidth : widthObj.res;
+            // console.log('target width', targetWidth);
+            const targetHeight = (actualHeight * targetWidth) / actualWidth;
             ctx.canvas.width = targetWidth;
             ctx.canvas.height = targetHeight;
             ctx.fillStyle = 'white';
@@ -183,7 +217,6 @@ const resizeImage = (image, options) => {
                 quality: 3,
                 alpha: true
             }).then(destCanvas =>
-                // console.timeEnd(`resize to ${widthObj.res} took`);
                 canvasToArray(destCanvas).then((result) => {
                     if (options.progressHandler && typeof options.progressHandler === 'function') {
                         const { maxProgress } = options;
@@ -193,10 +226,13 @@ const resizeImage = (image, options) => {
                         const currentProgress = index * (maxProgress / (imageWidths.length - 1));
                         options.progressHandler(currentProgress);
                     }
+                    if (options.idGenerator && typeof options.idGenerator === 'function') {
+                        result.id = options.idGenerator();
+                    }
                     imageObject[widthObj.key] = result;
                     return imageObject;
                 })
-            ).catch(err => Promise.reject(err));
+            );
         });
     });
     return p;
@@ -208,11 +244,9 @@ const resizeAnimatedGif = (dataUrl, image, options) => {
     const streamReader = new StreamReader(imageArray.value);
     return new Promise((resolve, reject) => {
         if (streamReader.readAscii(3) !== 'GIF') {
-            // console.log('It is not an animated gif. Not sure if this is an image, actually!');
             return reject('Gif file not recognised!');
         }
         const frameCount = streamReader.getFrameNumber();
-        // console.log('number of frames:', frameCount);
         // resize 1 frame for presentation;
         return resizeImage(image, options).then((imageObj) => {
             if (frameCount > 0) {
@@ -233,7 +267,7 @@ const getRawDataUrl = file =>
         const reader = new FileReader();
 
         reader.onloadend = () => resolve(reader.result);
-
+        reader.onerror = () => reject(new Error('Error while reading raw data url!'));
         try {
             reader.readAsDataURL(file);
         } catch (exception) {
@@ -255,6 +289,10 @@ const getImageSize = (imagePath, options) => {
                 return reject(`Please provide an image with minimum height of ${options.minHeight} pixels`);
             }
             return resolve({ width: imageWidth, height: imageHeight, imageObj: image });
+        };
+        image.onerror = () => {
+            const error = new Error('Image could not be loaded');
+            reject(error);
         };
         image.src = imagePath;
     });
@@ -308,21 +346,15 @@ const getResizedImages = (inputFiles, options) => {
         if (ext === 'gif' && settings.animatedGifSupport) {
             gifPromises[index] = getRawDataUrl(file, options).then(imageDataUrl =>
                 // imageData should be the original animated gif Uint8Array
-                getImageSize(URL.createObjectURL(file), options).then((size) => {
+                getImageSize(file.path, options).then((size) => {
                     const { height, width } = size;
-
-                    console.info(`original image size ${width}px width x ${height}px height.`);
-
                     options.actualHeight = height;
                     options.actualWidth = width;
                     return resizeAnimatedGif(imageDataUrl, size.imageObj, options);
                 }));
         } else if (settings.extentions.includes(ext)) {
-            imagePromises[index] = getImageSize(URL.createObjectURL(file), options).then((results) => {
+            imagePromises[index] = getImageSize(file.path, options).then((results) => {
                 const { height, width } = results;
-
-                console.info(`original image size ${width}px width x ${height}px height.`);
-
                 options.actualWidth = width;
                 options.actualHeight = height;
                 return resizeImage(results.imageObj, options);
@@ -333,4 +365,11 @@ const getResizedImages = (inputFiles, options) => {
 };
 
 export default imageCreator;
-export { getResizedImages, getImageSize, extractImageFromContent, findBestMatch, findClosestMatch };
+export {
+    getResizedImages,
+    getImageSize,
+    extractImageFromContent,
+    findBestMatch,
+    findClosestMatch,
+    getBestAvailableImage
+};

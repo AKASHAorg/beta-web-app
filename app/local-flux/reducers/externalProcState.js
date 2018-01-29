@@ -32,6 +32,7 @@ const computeGethStatus = (status) => {
 const computeIpfsStatus = (newStatus) => {
     if (newStatus.started || newStatus.process) {
         newStatus.downloading = null;
+        newStatus.starting = false;
     }
     if (newStatus.downloading) {
         newStatus.upgrading = null;
@@ -68,7 +69,8 @@ const eProcState = createReducer(initialState, {
                 gethStarting: false,
             }),
             status: state.getIn(['geth', 'status']).merge(newStatus),
-            syncActionId
+            syncActionId,
+            syncStatus: new GethSyncStatus()
         });
     },
 
@@ -95,10 +97,10 @@ const eProcState = createReducer(initialState, {
     },
 
     [types.GETH_GET_STATUS_SUCCESS]: (state, { data, services }) =>
-        state.mergeIn(['geth'], {
-            status: state.getIn(['geth', 'status']).merge(Object.assign({}, data, services.geth)),
-            syncActionId: 1
-        }),
+        state.setIn(
+            ['geth', 'status'],
+            state.getIn(['geth', 'status']).merge(Object.assign({}, data, services.geth)),
+        ),
 
     [types.IPFS_START]: state =>
         state.mergeIn(['ipfs'], {
@@ -163,6 +165,7 @@ const eProcState = createReducer(initialState, {
             flags: state.getIn(['ipfs', 'flags']).setIn(['portsRequested'], false),
             status: state.getIn(['ipfs', 'status']).merge({
                 api: services.ipfs.api,
+                baseUrl: services.ipfs.baseUrl,
                 process: services.ipfs.process
             })
         }),
@@ -171,7 +174,13 @@ const eProcState = createReducer(initialState, {
         state.setIn(['ipfs', 'flags', 'portsRequested'], false),
 
     [types.GETH_GET_SYNC_STATUS_SUCCESS]: (state, { data, services }) => {
-        const syncActionId = data.synced ? 4 : state.getIn(['geth', 'syncActionId']);
+        const oldSyncActionId = state.getIn(['geth', 'syncActionId']);
+        let syncActionId = oldSyncActionId;
+        if (data.synced) {
+            syncActionId = 4;
+        } else if (!oldSyncActionId) {
+            syncActionId = 1;
+        }
         return state.mergeIn(['geth'], {
             status: state.getIn(['geth', 'status']).merge(services.geth),
             syncActionId,

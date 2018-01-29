@@ -1,657 +1,440 @@
-/* eslint new-cap: ["error", { "capIsNewExceptions": ["Record"] }]*/
-import { fromJS, List, Map } from 'immutable';
+import { List, Map, Record, Collection, fromJS } from 'immutable';
 import * as types from '../constants';
-import * as profileTypes from '../constants/ProfileConstants';
-import * as appTypes from '../constants/AppConstants';
-import * as tagTypes from '../constants/TagConstants';
+import * as actionTypes from '../../constants/action-types';
 import { createReducer } from './create-reducer';
-import { ErrorRecord, LoggedProfile, ProfileRecord, ProfileState } from './records';
+import {
+    AethBalance,
+    Balance,
+    ErrorRecord,
+    EssenceBalance,
+    LoggedProfile,
+    ManaBalance,
+    ProfileExistsRecord,
+    ProfileRecord,
+    ProfileState
+} from './records';
+import { balanceToNumber } from '../../utils/number-formatter';
 
 const initialState = new ProfileState();
 
-const flagHandler = (state, { flags }) =>
-    state.merge({
-        flags: state.get('flags').merge(flags)
-    });
-
-const errorHandler = (state, { error, flags }) =>
-    state.merge({
-        errors: state.get('errors').push(new ErrorRecord(error)),
-        flags: state.get('flags').merge(flags)
-    });
-
-const addProfileData = (byId, profileData) => {
+const EssenceEvent = Record({
+    amount: null,
+    action: '',
+    sourceId: '',
+    blockNumber: null
+});
+const EssenceIterator = Record({ lastBlock: null, lastIndex: null });
+const addProfileData = (byEthAddress, { ...profileData }, full) => {
     if (!profileData) {
-        return byId;
+        return byEthAddress;
     }
-    const { avatar, baseUrl } = profileData;
-    if (avatar && baseUrl && !avatar.includes(baseUrl)) {
-        profileData.avatar = `${baseUrl}/${avatar}`;
+    profileData.followersCount = Number(profileData.followersCount);
+    profileData.followingCount = Number(profileData.followingCount);
+
+    const oldProfile = byEthAddress.get(profileData.ethAddress);
+    if (!full && oldProfile) {
+        profileData.backgroundImage = oldProfile.get('backgroundImage');
+        profileData.links = oldProfile.get('links');
     }
-    return byId.set(profileData.akashaId, new ProfileRecord(profileData));
+    if (oldProfile) {
+        /*
+        * Prevent data from being overwriten if the new response is an unresolved profile
+        */
+        profileData.avatar = profileData.avatar || oldProfile.get('avatar');
+        profileData.firstName = profileData.firstName || oldProfile.get('firstName');
+        profileData.lastName = profileData.lastName || oldProfile.get('lastName');
+    }
+    return byEthAddress.set(profileData.ethAddress, new ProfileRecord(profileData));
 };
 
-const commentsIteratorHandler = (state, { data }) => {
-    let byId = state.get('byId');
-    data.collection.forEach((comm) => {
-        const publisher = comm.data.profile;
-        if (publisher && !byId.get(publisher.akashaId)) {
-            byId = addProfileData(byId, publisher);
-        }
-    });
-    return state.set('byId', byId);
-};
-
-const entryIteratorHandler = (state, { data }) => {
-    let byId = state.get('byId');
-    data.collection.forEach((entry) => {
-        const publisher = entry.entryEth.publisher;
-        if (publisher && !byId.get(publisher.akashaId)) {
-            byId = addProfileData(byId, publisher);
-        }
-    });
-    return state.set('byId', byId);
-};
-
-const getLastIndex = (collection) => {
+const getKarmaPopoverDefaultState = (collection, myRanking) => {
+    let defaultState = [];
+    if (collection.length < 4) {
+        return collection;
+    }
     if (collection.length) {
-        return collection[collection.length - 1].index;
+        if (myRanking === 0) {
+            defaultState = collection.slice(myRanking, myRanking + 3);
+        } else if (myRanking === collection.length - 1) {
+            defaultState = collection.slice(myRanking - 2);
+        } else {
+            defaultState = collection.slice(myRanking - 1, myRanking + 2);
+        }
     }
-    return 0;
+    return defaultState;
 };
 
 const profileState = createReducer(initialState, {
 
-    [profileTypes.LOGOUT_SUCCESS]: state =>
-        state.set('loggedProfile', new LoggedProfile()),
-
-    [profileTypes.LOGOUT_ERROR]: (state, { error }) =>
-        state.merge({
-            errors: state.get('errors').push(new ErrorRecord(error))
-        }),
-
-    [profileTypes.CLEAR_LOCAL_PROFILES_SUCCESS]: state =>
-        state.set('profiles', new List()),
-
-    [profileTypes.CLEAR_OTHER_PROFILES]: state =>
-        state.set('profiles', state.get('profiles').filter(profile =>
-            profile.get('profile') === state.getIn(['loggedProfile', 'profile'])
-        )),
-
-    [profileTypes.GET_PROFILE_DATA]: flagHandler,
-
-    [profileTypes.GET_PROFILE_DATA_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('profile') === data.profile
-        );
-        // if we only fetch a single profile (loggedProfile) the state is empty
-        // so this must be true
-        if (profileIndex === -1) {
-            return state.merge({
-                profiles: state.get('profiles').push(new ProfileRecord(data)),
-                flags: state.get('flags').merge(flags)
-            });
+    [types.ACTION_ADD]: (state, { actionType }) => {
+        if (actionType === actionTypes.faucet) {
+            return state.set('faucet', 'requested');
         }
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], data),
-            flags: state.get('flags').merge(flags)
-        });
+        return state;
     },
+    [types.ENTRY_GET_FULL_SUCCESS]: (state, { request }) =>
+        state.set('byId', addProfileData(state.get('byId'), { ethAddress: request.ethAddress })),
 
-    [profileTypes.GET_PROFILE_DATA_ERROR]: errorHandler,
-
-    [profileTypes.GET_PROFILE_BALANCE_SUCCESS]: (state, { data }) => {
-        const loggedProfileAccount = state.getIn(['loggedProfile', 'account']);
-        if (loggedProfileAccount !== data.etherBase) {
-            return state;
-        }
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.akashaId === state.getIn(['loggedProfile', 'akashaId'])
-        );
-        return state.mergeIn(['profiles', profileIndex], {
-            balance: data.balance
-        });
-    },
-
-    [profileTypes.CLEAR_PROFILE_ERRORS]: state =>
-        state.merge({
-            errors: new List()
-        }),
-
-    [profileTypes.CLEAR_LOGIN_ERRORS]: state =>
-        state.merge({
-            errors: state.get('errors').filter(err => err.get('type') !== 'login')
-        }),
-
-    [profileTypes.UPDATE_PROFILE_DATA]: flagHandler,
-
-    [profileTypes.UPDATE_PROFILE_DATA_ERROR]: errorHandler,
-
-    [profileTypes.UPDATE_PROFILE_DATA_SUCCESS]: flagHandler,
-
-    [profileTypes.RESET_FLAGS]: state =>
-        state.merge({
-            flags: new Map({
-                followPending: new List(),
-                sendingTip: new List()
-            })
-        }),
-
-    [profileTypes.GET_FOLLOWERS_COUNT_SUCCESS]: (state, { akashaId, count }) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === akashaId
-        );
-
-        return state.mergeIn(['profiles', profileIndex], {
-            followersCount: parseInt(count, 10)
-        });
-    },
-
-    [profileTypes.GET_FOLLOWING_COUNT_SUCCESS]: (state, { akashaId, count }) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === akashaId
-        );
-
-        return state.mergeIn(['profiles', profileIndex], {
-            followingCount: parseInt(count, 10)
-        });
-    },
-
-    [profileTypes.FOLLOWERS_ITERATOR]: flagHandler,
-
-    [profileTypes.FOLLOWERS_ITERATOR_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('akashaId') === data.akashaId
-        );
-        const moreFollowers = data.limit === data.collection.length;
-        const followersList = moreFollowers ?
-            fromJS(data.collection.slice(0, -1)) :
-            fromJS(data.collection);
-        if (profileIndex === -1) {
-            return state.merge({
-                profiles: state.get('profiles').push(new ProfileRecord({
-                    akashaId: data.akashaId,
-                    followers: followersList,
-                    moreFollowers
-                })),
-                flags: state.get('flags').merge(flags)
-            });
-        }
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                followers: followersList,
-                moreFollowers
-            }),
-            flags: state.get('flags').merge(flags)
-        });
-    },
-
-    [profileTypes.FOLLOWERS_ITERATOR_ERROR]: errorHandler,
-
-    [profileTypes.MORE_FOLLOWERS_ITERATOR]: flagHandler,
-
-    [profileTypes.MORE_FOLLOWERS_ITERATOR_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('akashaId') === data.akashaId
-        );
-        const moreFollowers = data.limit === data.collection.length;
-        const followersList = moreFollowers ?
-            fromJS(data.collection.slice(0, -1)) :
-            fromJS(data.collection);
-
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                followers: state.getIn(['profiles', profileIndex, 'followers'])
-                    .concat(followersList),
-                moreFollowers
-            }),
-            flags: state.get('flags').merge(flags)
-        });
-    },
-
-    [profileTypes.MORE_FOLLOWERS_ITERATOR_ERROR]: errorHandler,
-
-    [profileTypes.FOLLOWING_ITERATOR]: flagHandler,
-
-    [profileTypes.FOLLOWING_ITERATOR_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('akashaId') === data.akashaId
-        );
-        const moreFollowing = data.limit === data.collection.length;
-        const followingList = moreFollowing ?
-            fromJS(data.collection.slice(0, -1)) :
-            fromJS(data.collection);
-        if (profileIndex === -1) {
-            return state.merge({
-                profiles: state.get('profiles').push(new ProfileRecord({
-                    akashaId: data.akashaId,
-                    following: followingList,
-                    moreFollowing
-                })),
-                flags: state.get('flags').merge(flags)
-            });
-        }
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                following: followingList,
-                moreFollowing
-            }),
-            flags: state.get('flags').merge(flags)
-        });
-    },
-
-    [profileTypes.FOLLOWING_ITERATOR_ERROR]: errorHandler,
-
-    [profileTypes.GET_FOLLOWINGS_LIST_SUCCESS]: (state, { data }) =>
-        state.setIn(['followingsList'], new List(data.collection)),
-
-    [profileTypes.GET_FOLLOWINGS_LIST_ERROR]: errorHandler,
-
-    [profileTypes.MORE_FOLLOWING_ITERATOR]: flagHandler,
-
-    [profileTypes.MORE_FOLLOWING_ITERATOR_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('akashaId') === data.akashaId
-        );
-        const moreFollowing = data.limit === data.collection.length;
-        const followingList = moreFollowing ?
-            fromJS(data.collection.slice(0, -1)) :
-            fromJS(data.collection);
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                following: state.getIn(['profiles', profileIndex, 'following'])
-                    .concat(followingList),
-                moreFollowing
-            }),
-            flags: state.get('flags').merge(flags)
-        });
-    },
-
-    [profileTypes.MORE_FOLLOWING_ITERATOR_ERROR]: errorHandler,
-
-    [profileTypes.FOLLOW_PROFILE]: (state, { flags }) => {
-        const followPending = state.getIn(['flags', 'followPending']);
-        const index = followPending.findIndex(flag =>
-            flag.akashaId === flags.followPending.akashaId
-        );
-        if (index === -1) {
-            return state.merge({
-                flags: state.get('flags').merge({
-                    followPending: state.getIn(['flags', 'followPending']).push(flags.followPending)
-                })
-            });
-        }
-        return state.merge({
-            flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-        });
-    },
-
-    [profileTypes.FOLLOW_PROFILE_ERROR]: (state, { error, flags }) => {
-        const followPending = state.getIn(['flags', 'followPending']);
-        const index = followPending.findIndex(flag =>
-            flag.akashaId === flags.followPending.akashaId
-        );
-        return state.merge({
-            errors: state.get('errors').push(new ErrorRecord(error)),
-            flags: state.get('flags').mergeIn(['followPending', index], flags.followPending),
-        });
-    },
-
-    [profileTypes.FOLLOW_PROFILE_SUCCESS]: (state, { profile, flags }) => {
-        const followPending = state.getIn(['flags', 'followPending']);
-        const index = followPending.findIndex(flag =>
-            flag.akashaId === flags.followPending.akashaId
-        );
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === flags.followPending.akashaId);
-        const loggedProfileData = state.get('profiles').find(prf =>
-            prf.get('profile') === state.getIn(['loggedProfile', 'profile']));
-
-        if (profileIndex === -1) {
-            return state.merge({
-                followingsList: state.get('followingsList').push(profile),
-                flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-            });
-        }
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                followers: state.getIn(['profiles', profileIndex, 'followers'])
-                    .insert(0, fromJS({ profile: loggedProfileData }))
-            }),
-            followingsList: state.get('followingsList').push(profile),
-            flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-        });
-    },
-
-    [profileTypes.UNFOLLOW_PROFILE]: (state, { flags }) => {
-        const followPending = state.getIn(['flags', 'followPending']);
-        const index = followPending.findIndex(flag =>
-            flag.akashaId === flags.followPending.akashaId
-        );
-        if (index === -1) {
-            return state.merge({
-                flags: state.get('flags').merge({
-                    followPending: state.getIn(['flags', 'followPending']).push(flags.followPending)
-                })
-            });
-        }
-        return state.merge({
-            flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-        });
-    },
-
-    [profileTypes.UNFOLLOW_PROFILE_ERROR]: (state, { error, flags }) => {
-        const index = state.getIn(['flags', 'followPending']).findIndex(flag =>
-            flag.akashaId === flags.followPending.akashaId
-        );
-        return state.merge({
-            errors: state.get('errors').push(new ErrorRecord(error)),
-            flags: state.mergeIn(['flags', 'followPending', index], flags.followPending),
-        });
-    },
-
-    [profileTypes.UNFOLLOW_PROFILE_SUCCESS]: (state, { profile, flags }) => {
-        const { akashaId } = flags.followPending;
-        const index = state.getIn(['flags', 'followPending']).findIndex(flag =>
-            flag.akashaId === akashaId
-        );
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === akashaId);
-        const loggedProfileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('profile') === state.getIn(['loggedProfile', 'profile']));
-        const loggedProfileData = state.getIn(['profiles', loggedProfileIndex]);
-        if (profileIndex === -1) {
-            return state.merge({
-                profiles: state.get('profiles').mergeIn([loggedProfileIndex], {
-                    following: state.getIn(['profiles', loggedProfileIndex, 'following'])
-                        .filter(following => following.getIn(['profile', 'akashaId']) !== akashaId)
-                }),
-                followingsList: state.get('followingsList').delete(state.get('followingsList').findIndex(pro => pro === profile)),
-                flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-            });
-        }
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                followers: state.getIn(['profiles', profileIndex, 'followers']).filter(follower =>
-                    follower.getIn(['profile', 'akashaId']) !== loggedProfileData.get('akashaId')
-                )
-            }),
-            followingsList: state.get('followingsList').delete(state.get('followingsList').findIndex(pro => pro === profile)),
-            flags: state.get('flags').mergeIn(['followPending', index], flags.followPending)
-        });
-    },
-
-    [profileTypes.IS_FOLLOWER]: flagHandler,
-
-    [profileTypes.IS_FOLLOWER_SUCCESS]: (state, { data, flags }) => {
-        const profileIndex = state.get('profiles').findIndex(profile =>
-            profile.get('akashaId') === data.akashaId
-        );
-
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex, 'isFollower'], {
-                [data.following]: data.count
-            }),
-            flags: state.get('flags').merge(flags)
-        });
-    },
-
-    [profileTypes.IS_FOLLOWER_ERROR]: errorHandler,
-
-    [profileTypes.CLEAR_FOLLOWERS]: (state, { akashaId }) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === akashaId);
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                followers: new List()
-            })
-        });
-    },
-
-    [profileTypes.CLEAR_FOLLOWING]: (state, { akashaId }) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('akashaId') === akashaId);
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                following: new List()
-            })
-        });
-    },
-
-    [tagTypes.SUBSCRIBE_TAG_SUCCESS]: (state) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('profile') === state.getIn(['loggedProfile', 'profile']));
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                subscriptionsCount:
-                    parseInt(state.getIn(['profiles', profileIndex, 'subscriptionsCount']), 10) + 1
-            })
-        });
-    },
-    [tagTypes.UNSUBSCRIBE_TAG_SUCCESS]: (state) => {
-        const profileIndex = state.get('profiles').findIndex(prf =>
-            prf.get('profile') === state.getIn(['loggedProfile', 'profile']));
-        return state.merge({
-            profiles: state.get('profiles').mergeIn([profileIndex], {
-                subscriptionsCount:
-                    parseInt(state.getIn(['profiles', profileIndex, 'subscriptionsCount']), 10) - 1
-            })
-        });
-    },
-    [appTypes.CLEAN_STORE]: () => initialState,
-
-// ***************************** NEW REDUCERS **************************************
-
-    [types.COMMENTS_ITERATOR_SUCCESS]: commentsIteratorHandler,
-
-    [types.COMMENTS_MORE_ITERATOR_SUCCESS]: commentsIteratorHandler,
-
-    [types.ENTRY_GET_FULL_SUCCESS]: (state, { data }) => {
-        const { publisher } = data.entryEth;
-        if (!publisher) {
-            return state;
-        }
-        return state.set('byId', addProfileData(state.get('byId'), publisher));
-    },
-
-    [types.ENTRY_MORE_NEWEST_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_MORE_PROFILE_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_MORE_STREAM_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_MORE_TAG_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_NEWEST_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_PROFILE_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_STREAM_ITERATOR_SUCCESS]: entryIteratorHandler,
-
-    [types.ENTRY_TAG_ITERATOR_SUCCESS]: entryIteratorHandler,
+    [types.PROFILE_ALL_FOLLOWINGS]: (state, { following }) =>
+        state.set('allFollowings', following),
 
     [types.PROFILE_CLEAR_LOCAL]: state =>
         state.merge({
-            ethAddresses: new Map(),
             localProfiles: new List()
         }),
 
     [types.PROFILE_CLEAR_LOGIN_ERRORS]: state =>
         state.set('loginErrors', new List()),
 
+    [types.PROFILE_CREATE_ETH_ADDRESS]: state =>
+        state.setIn(['flags', 'ethAddressPending'], true),
+
+    [types.PROFILE_CREATE_ETH_ADDRESS_ERROR]: state =>
+        state.setIn(['flags', 'ethAddressPending'], false),
+
+    [types.PROFILE_CREATE_ETH_ADDRESS_SUCCESS]: state =>
+        state.setIn(['flags', 'ethAddressPending'], false),
+
+    [types.PROFILE_CYCLING_STATES_SUCCESS]: (state, { data }) => {
+        return state.mergeIn(['cyclingStates'], data);
+    },
+
     [types.PROFILE_DELETE_LOGGED_SUCCESS]: state =>
         state.set('loggedProfile', new LoggedProfile()),
 
-    [types.PROFILE_FOLLOW]: (state, { akashaId }) =>
-        state.setIn(['flags', 'followPending', akashaId], true),
+    [types.PROFILE_ESSENCE_ITERATOR]: (state) => {
+        const flag = state.getIn(['essenceIterator', 'lastIndex']) ?
+            'fetchingMoreEssenceIterator' :
+            'fetchingEssenceIterator';
+        return state.setIn(['flags', flag], true);
+    },
 
-    [types.PROFILE_FOLLOW_ERROR]: (state, { request }) =>
-        state.setIn(['flags', 'followPending', request.akashaId], false),
+    [types.PROFILE_ESSENCE_ITERATOR_ERROR]: (state, { request }) => {
+        const flag = request.lastIndex ?
+            'fetchingMoreEssenceIterator' :
+            'fetchingEssenceIterator';
+        return state.setIn(['flags', flag], false);
+    },
 
+    [types.PROFILE_ESSENCE_ITERATOR_SUCCESS]: (state, { data, request }) => {
+        let latestIterable = new List();
+        const essenceEvents = state.get('essenceEvents');
+        data.collection.forEach((event) => {
+            const newEssenceRecord = new EssenceEvent({
+                amount: balanceToNumber(event.amount),
+                action: event.action,
+                sourceId: event.sourceId,
+                blockNumber: event.blockNumber
+            });
+
+            if (!essenceEvents.includes(newEssenceRecord)) {
+                latestIterable = latestIterable.push(newEssenceRecord);
+            }
+        });
+
+        const latestSet = Collection.Set(latestIterable);
+        latestIterable = essenceEvents.concat(latestSet);
+        const flag = request.lastIndex ? 'fetchingMoreEssenceIterator' : 'fetchingEssenceIterator';
+
+        return state.merge({
+            essenceEvents: latestIterable,
+            flags: state.get('flags').set(flag, false),
+            essenceIterator: new EssenceIterator({ lastBlock: data.lastBlock, lastIndex: data.lastIndex })
+        });
+    },
+
+    [types.PROFILE_EXISTS_SUCCESS]: (state, { data }) =>
+        state.merge({
+            exists: state.get('exists').merge({
+                akashaId: data.akashaId,
+                data: new ProfileExistsRecord(data)
+            })
+        }),
+    [types.PROFILE_FAUCET]: state => state.set('faucet', 'requested'),
+    [types.PROFILE_FAUCET_ERROR]: state => state.set('faucet', 'error'),
+
+    [types.PROFILE_FAUCET_SUCCESS]: state => state.set('faucet', 'success'),
+    [types.PROFILE_RESET_FAUCET]: state => state.set('faucet', null),
     [types.PROFILE_FOLLOW_SUCCESS]: (state, { data }) => {
-        const loggedAkashaId = state.getIn(['loggedProfile', 'akashaId']);
-        const loggedProfile = state.getIn(['byId', loggedAkashaId]);
+        const { ethAddress } = data;
+        const loggedEthAddress = state.getIn(['loggedProfile', 'ethAddress']);
+        const loggedProfile = state.getIn(['byEthAddress', loggedEthAddress]);
         const followingCount = loggedProfile.get('followingCount');
-        const profile = state.getIn(['byId', data]);
+        const profile = state.getIn(['byEthAddress', ethAddress]);
         const oldFollowers = state.get('followers');
         const oldFollowings = state.get('followings');
-        const followersList = oldFollowers.get(data);
-        const followingsList = oldFollowings.get(loggedAkashaId);
+        const followersList = oldFollowers.get(ethAddress);
+        const followingsList = oldFollowings.get(loggedEthAddress);
         const followers = followersList ?
-            oldFollowers.set(data, followersList.unshift(loggedAkashaId)) :
+            oldFollowers.set(ethAddress, followersList.unshift(loggedEthAddress)) :
             oldFollowers;
         const followings = followingsList ?
-            oldFollowings.set(loggedAkashaId, followingsList.unshift(data)) :
+            oldFollowings.set(loggedEthAddress, followingsList.unshift(ethAddress)) :
             oldFollowings;
+        const allFollowings = state.get('allFollowings');
+        if (allFollowings.indexOf(ethAddress) === -1) {
+            allFollowings.push(ethAddress);
+        }
         return state.merge({
-            byId: state.get('byId').merge({
-                [data]: profile ?
-                    profile.set('followersCount', profile.get('followersCount') + 1) :
+            allFollowings,
+            byEthAddress: state.get('byEthAddress').merge({
+                [ethAddress]: profile ?
+                    profile.set('followersCount', +profile.get('followersCount') + 1) :
                     undefined,
-                [loggedAkashaId]: loggedProfile.set('followingCount', followingCount + 1)
+                [loggedEthAddress]: loggedProfile.set('followingCount', +followingCount + 1)
             }),
-            flags: state.get('flags').setIn(['followPending', data], false),
             followers,
             followings,
-            isFollower: state.get('isFollower').set(data, true)
+            isFollower: state.get('isFollower').set(ethAddress, true)
         });
     },
 
-    [types.PROFILE_FOLLOWERS_ITERATOR_SUCCESS]: (state, { data }) => {
-        const moreFollowers = data.limit === data.collection.length;
-        let byId = state.get('byId');
+    [types.PROFILE_FOLLOWERS_ITERATOR]: (state, { ethAddress }) =>
+        state.setIn(['flags', 'fetchingFollowers', ethAddress], true),
+
+    [types.PROFILE_FOLLOWERS_ITERATOR_ERROR]: (state, { request }) =>
+        state.setIn(['flags', 'fetchingFollowers', request.ethAddress], false),
+
+    [types.PROFILE_FOLLOWERS_ITERATOR_SUCCESS]: (state, { data, request }) => {
+        const moreFollowers = data.lastBlock > 0;
         let followersList = new List();
-        const lastIndex = getLastIndex(data.collection);
-        data.collection.forEach((follower, index) => {
-            if (!moreFollowers || index !== (data.collection.length - 1)) {
-                followersList = followersList.push(follower.profile.akashaId);
-                byId = addProfileData(byId, follower.profile);
-            }
+        const last = {
+            lastIndex: data.lastIndex,
+            lastBlock: data.lastBlock
+        };
+        data.collection.forEach((follower) => {
+            followersList = followersList.push(follower.ethAddress);
         });
 
         return state.merge({
-            byId,
-            flags: state.get('flags').setIn(['fetchingFollowers', data.akashaId], false),
-            followers: state.get('followers').set(data.akashaId, followersList),
-            lastFollower: state.get('lastFollowing').set(data.akashaId, lastIndex),
-            moreFollowers: state.get('moreFollowers').set(data.akashaId, moreFollowers)
+            flags: state.get('flags').setIn(['fetchingFollowers', request.ethAddress], false),
+            followers: state.get('followers').set(request.ethAddress, followersList),
+            lastFollower: state.get('lastFollower').set(request.ethAddress, last),
+            moreFollowers: state.get('moreFollowers').set(request.ethAddress, moreFollowers)
         });
     },
 
-    [types.PROFILE_FOLLOWINGS_ITERATOR_SUCCESS]: (state, { data }) => {
-        const moreFollowings = data.limit === data.collection.length;
-        let byId = state.get('byId');
+    [types.PROFILE_FOLLOWINGS_ITERATOR]: (state, { ethAddress }) =>
+        state.setIn(['flags', 'fetchingFollowings', ethAddress], true),
+
+    [types.PROFILE_FOLLOWINGS_ITERATOR_ERROR]: (state, { request }) =>
+        state.setIn(['flags', 'fetchingFollowings', request.ethAddress], false),
+
+    [types.PROFILE_FOLLOWINGS_ITERATOR_SUCCESS]: (state, { data, request }) => {
+        const moreFollowings = data.lastBlock > 0;
         let followingsList = new List();
-        const lastIndex = getLastIndex(data.collection);
-        data.collection.forEach((following, index) => {
-            if (!moreFollowings || index !== (data.collection.length - 1)) {
-                followingsList = followingsList.push(following.profile.akashaId);
-                byId = addProfileData(byId, following.profile);
-            }
+        const last = {
+            lastIndex: data.lastIndex,
+            lastBlock: data.lastBlock
+        };
+        data.collection.forEach((following) => {
+            followingsList = followingsList.push(following.ethAddress);
         });
 
         return state.merge({
-            byId,
-            flags: state.get('flags').setIn(['fetchingFollowings', data.akashaId], false),
-            followings: state.get('followings').set(data.akashaId, followingsList),
-            lastFollowing: state.get('lastFollowing').set(data.akashaId, lastIndex),
-            moreFollowings: state.get('moreFollowings').set(data.akashaId, moreFollowings)
+            flags: state.get('flags').setIn(['fetchingFollowings', request.ethAddress], false),
+            followings: state.get('followings').set(request.ethAddress, followingsList),
+            lastFollowing: state.get('lastFollowing').set(request.ethAddress, last),
+            moreFollowings: state.get('moreFollowings').set(request.ethAddress, moreFollowings)
         });
     },
 
     [types.PROFILE_GET_BALANCE_SUCCESS]: (state, { data }) => {
-        if (state.getIn(['loggedProfile', 'account']) !== data.etherBase) {
+        const loggedEthAddress = state.getIn(['loggedProfile', 'ethAddress']);
+        if (loggedEthAddress !== data.etherBase) {
             return state;
         }
-        return state.set('balance', data.balance);
-    },
-
-    [types.PROFILE_GET_CURRENT]: state =>
-        state.setIn(['flags', 'currentProfilePending'], true),
-
-    [types.PROFILE_GET_CURRENT_ERROR]: state =>
-        state.setIn(['flags', 'currentProfilePending'], false),
-
-    [types.PROFILE_GET_CURRENT_SUCCESS]: (state, { data }) => {
-        const loggedProfile = state.getIn(['loggedProfile', 'account']) ?
-            state.get('loggedProfile').merge({
-                akashaId: data.akashaId,
-                profile: data.profileAddress
-            }) :
-            state.get('loggedProfile');
+        const balance = new Balance().merge({
+            aeth: new AethBalance(data.AETH),
+            essence: new EssenceBalance(data.essence),
+            eth: data.balance,
+            mana: new ManaBalance(data.mana)
+        });
         return state.merge({
-            loggedProfile,
-            flags: state.get('flags').set('currentProfilePending', false)
+            balance,
+            byEthAddress: state.get('byEthAddress').mergeIn([loggedEthAddress], {
+                essence: data.essence.total,
+                karma: data.karma.total
+            })
         });
     },
 
-    [types.PROFILE_GET_DATA]: state =>
-        state.setIn(['flags', 'fetchingProfileData'], true),
+    [types.PROFILE_GET_DATA]: (state, { context, akashaId, ethAddress }) => {
+        const flags = context ?
+            state.get('flags').setIn(['pendingProfiles', context, ethAddress], true) :
+            state.get('flags');
+        const byEthAddress = state.get('byEthAddress');
+        if (byEthAddress.get(ethAddress)) {
+            return state.set('flags', flags);
+        }
+        return state.merge({
+            byEthAddress: byEthAddress.set(ethAddress, new ProfileRecord({ akashaId, ethAddress })),
+            flags
+        });
+    },
 
-    [types.PROFILE_GET_DATA_ERROR]: state =>
-        state.setIn(['flags', 'fetchingProfileData'], false),
+    [types.PROFILE_GET_DATA_ERROR]: (state, { request }) => {
+        const { context, ethAddress } = request;
+        if (!context) {
+            return state;
+        }
+        return state.setIn(['flags', 'pendingProfiles', context, ethAddress], false);
+    },
 
-    [types.PROFILE_GET_DATA_SUCCESS]: (state, { data }) =>
-        state.merge({
-            byId: addProfileData(state.get('byId'), data),
-            flags: state.get('flags').set('fetchingProfileData', false)
-        }),
+    [types.PROFILE_GET_DATA_SUCCESS]: (state, { data, request }) => {
+        const { context, ethAddress, full } = request;
+        if (!context) {
+            return state.set('byEthAddress', addProfileData(state.get('byEthAddress'), data, full));
+        }
+        return state.merge({
+            byEthAddress: addProfileData(state.get('byEthAddress'), data, full),
+            flags: state.get('flags').setIn(['pendingProfiles', context, ethAddress], false)
+        });
+    },
 
-    [types.PROFILE_GET_LIST]: state =>
-        state.setIn(['flags', 'fetchingProfileList'], true),
-
-    [types.PROFILE_GET_LIST_ERROR]: state =>
-        state.setIn(['flags', 'fetchingProfileList'], false),
+    [types.PROFILE_GET_LIST]: (state, { ethAddresses }) => {
+        let pendingListProfiles = state.getIn(['flags', 'pendingListProfiles']);
+        ethAddresses.forEach((item) => {
+            pendingListProfiles = pendingListProfiles.set(item.ethAddress, true);
+        });
+        return state.setIn(['flags', 'pendingListProfiles'], pendingListProfiles);
+    },
 
     [types.PROFILE_GET_LIST_SUCCESS]: (state, { data }) => {
-        let byId = state.get('byId');
-        data.collection.forEach((profileData) => {
-            byId = addProfileData(byId, profileData);
-        });
+        if (data.done) {
+            return state;
+        }
         return state.merge({
-            byId,
-            flags: state.get('flags').set('fetchingProfileList', false)
+            byEthAddress: addProfileData(state.get('byEthAddress'), data),
+            flags: state.get('flags').setIn(['pendingListProfiles', data.ethAddress], false)
         });
     },
 
-    [types.PROFILE_GET_LOCAL]: state =>
-        state.mergeIn(['flags'], {
+    [types.PROFILE_GET_LOCAL]: (state, { polling }) => {
+        if (polling) {
+            return state;
+        }
+        return state.mergeIn(['flags'], {
             fetchingLocalProfiles: true,
             localProfilesFetched: false
-        }),
+        });
+    },
 
-    [types.PROFILE_GET_LOCAL_ERROR]: state =>
-        state.mergeIn(['flags'], {
+    [types.PROFILE_GET_LOCAL_ERROR]: (state, { request }) => {
+        if (request.polling) {
+            return state;
+        }
+        return state.mergeIn(['flags'], {
             fetchingLocalProfiles: false,
             localProfilesFetched: true
-        }),
+        });
+    },
 
-    [types.PROFILE_GET_LOCAL_SUCCESS]: (state, { data }) => {
-        let ethAddresses = state.get('ethAddresses');
+    [types.PROFILE_GET_LOCAL_SUCCESS]: (state, { data, request }) => {
+        let byEthAddress = state.get('byEthAddress');
+        if (!request.polling) {
+            let localProfiles = new List();
+            data.forEach((prf) => {
+                byEthAddress = byEthAddress.set(prf.ethAddress, new ProfileRecord(prf));
+                localProfiles = localProfiles.push(prf.ethAddress);
+            });
+
+            return state.merge({
+                byEthAddress,
+                flags: state.get('flags').merge({
+                    fetchingLocalProfiles: false,
+                    localProfilesFetched: true
+                }),
+                localProfiles
+            });
+        }
         let localProfiles = state.get('localProfiles');
         data.forEach((prf) => {
-            ethAddresses = ethAddresses.set(prf.akashaId, prf.key);
-            localProfiles = localProfiles.push(prf.akashaId);
+            if (!localProfiles.includes(prf.ethAddress)) {
+                byEthAddress = byEthAddress.set(prf.ethAddress, new ProfileRecord(prf));
+                localProfiles = localProfiles.push(prf.ethAddress);
+            }
         });
+        const ethAddresses = data.map(prf => prf.ethAddress);
+        localProfiles = localProfiles.filter(ethAddress => ethAddresses.includes(ethAddress));
         return state.merge({
-            ethAddresses,
-            flags: state.get('flags').merge({
-                fetchingLocalProfiles: false,
-                localProfilesFetched: true
-            }),
+            byEthAddress,
             localProfiles
         });
     },
 
-    [types.PROFILE_GET_LOGGED_SUCCESS]: (state, { data }) =>
-        state.set('loggedProfile', new LoggedProfile(data)),
+    [types.PROFILE_GET_LOGGED_SUCCESS]: (state, { data }) => {
+        const { akashaId, ethAddress } = data;
+        if (akashaId) {
+            return state.set('loggedProfile', new LoggedProfile(data));
+        }
+        return state.merge({
+            byEthAddress: state.get('byEthAddress').set(ethAddress, new ProfileRecord({ ethAddress })),
+            loggedProfile: new LoggedProfile(data)
+        });
+    },
+
+    [types.PROFILE_GET_PUBLISHING_COST_SUCCESS]: (state, { data }) =>
+        state.set('publishingCost', fromJS(data)),
 
     [types.PROFILE_IS_FOLLOWER_SUCCESS]: (state, { data }) => {
         let isFollower = state.get('isFollower');
         data.collection.forEach((resp) => {
-            isFollower = isFollower.set(resp.following, resp.result);
+            const { addressFollowing, result } = resp;
+            isFollower = isFollower.set(addressFollowing, result);
         });
         return state.set('isFollower', isFollower);
+    },
+
+    [types.PROFILE_KARMA_RANKING]: state =>
+        state.merge({
+            flags: state.get('flags').set('karmaRankingPending', true),
+            karmaRanking: new Map()
+        }),
+
+    [types.PROFILE_KARMA_RANKING_LOAD_MORE]: (state, { data }) => {
+        const collection = state.getIn(['karmaRanking', 'collection']);
+        let above = state.getIn(['karmaRanking', 'above']);
+        const below = state.getIn(['karmaRanking', 'below']);
+        if (data === 'above') {
+            const newAbove = [];
+            for (let i = 4; i > 0; i--) {
+                if (above[0] && collection[above[0].rank - i]) {
+                    newAbove.push(collection[above[0].rank - i]);
+                }
+            }
+            if (above[0] && newAbove[0] && above[0].rank !== newAbove[0].rank) {
+                above = newAbove.concat(above);
+            }
+            return state.setIn(['karmaRanking', 'above'], above);
+        }
+        if (data === 'below' && below.length) {
+            const last = below[below.length - 1].rank;
+            const newBelow = (last && last === collection[collection.length - 1].rank) ?
+                below : below.concat(collection.slice(last + 1, last + 5));
+            return state.setIn(['karmaRanking', 'below'], newBelow);
+        }
+        return state;
+    },
+
+    [types.PROFILE_KARMA_RANKING_SUCCESS]: (state, { data }) => {
+        const defaultState = getKarmaPopoverDefaultState(data.collection, data.myRanking);
+        const first = ((defaultState[0].rank - 3) > -1) ? defaultState[0].rank - 3 : 0;
+        const above = data.collection.slice(first, defaultState[0].rank);
+        const below = (defaultState[defaultState.length - 1].rank === data.collection.length - 1) ?
+            [] :
+            data.collection.slice(defaultState[defaultState.length - 1].rank + 1,
+                defaultState[defaultState.length - 1].rank + 4);
+        return state.merge({
+            flags: state.get('flags').set('karmaRankingPending', false),
+            karmaRanking: state.get('karmaRanking').merge({
+                collection: data.collection,
+                myRanking: data.myRanking,
+                above,
+                below,
+                defaultState
+            })
+        });
     },
 
     [types.PROFILE_LOGIN]: state =>
@@ -669,91 +452,143 @@ const profileState = createReducer(initialState, {
             loggedProfile: state.get('loggedProfile').merge(data)
         }),
 
-    [types.PROFILE_MORE_FOLLOWERS_ITERATOR_SUCCESS]: (state, { data }) => {
-        const moreFollowers = data.limit === data.collection.length;
-        let byId = state.get('byId');
-        let followersList = state.getIn(['followers', data.akashaId]) || new List();
-        const lastIndex = getLastIndex(data.collection);
-        data.collection.forEach((follower, index) => {
-            if (!moreFollowers || index !== (data.collection.length - 1)) {
-                followersList = followersList.push(follower.profile.akashaId);
-                byId = addProfileData(byId, follower.profile);
+    [types.PROFILE_LOGOUT_SUCCESS]: () => initialState,
+
+    [types.PROFILE_MANA_BURNED_SUCCESS]: (state, { data }) => {
+        const comments = balanceToNumber(data.comments.manaCost);
+        const entriesTotal = balanceToNumber(data.entries.manaCost);
+        const votes = balanceToNumber(data.votes.manaCost);
+        return state.mergeIn(['manaBurned'], { comments, entriesTotal, votes });
+    },
+
+    [types.PROFILE_MORE_FOLLOWERS_ITERATOR]: (state, { ethAddress }) =>
+        state.setIn(['flags', 'fetchingMoreFollowers', ethAddress], true),
+
+    [types.PROFILE_MORE_FOLLOWERS_ITERATOR_ERROR]: (state, { request }) =>
+        state.setIn(['flags', 'fetchingMoreFollowers', request.ethAddress], false),
+
+    [types.PROFILE_MORE_FOLLOWERS_ITERATOR_SUCCESS]: (state, { data, request }) => {
+        const moreFollowers = data.lastBlock > 0;
+        let followersList = state.getIn(['followers', request.ethAddress]) || new List();
+        const last = {
+            lastIndex: data.lastIndex,
+            lastBlock: data.lastBlock
+        };
+        data.collection.forEach((follower) => {
+            if (!followersList.includes(follower.ethAddress)) {
+                followersList = followersList.push(follower.ethAddress);
             }
         });
-
         return state.merge({
-            byId,
-            flags: state.get('flags').setIn(['fetchingMoreFollowers', data.akashaId], false),
-            followers: state.get('followers').set(data.akashaId, followersList),
-            lastFollower: state.get('lastFollowing').set(data.akashaId, lastIndex),
-            moreFollowers: state.get('moreFollowers').set(data.akashaId, moreFollowers)
+            flags: state.get('flags').setIn(['fetchingMoreFollowers', request.ethAddress], false),
+            followers: state.get('followers').set(request.ethAddress, followersList),
+            lastFollower: state.get('lastFollowing').set(request.ethAddress, last),
+            moreFollowers: state.get('moreFollowers').set(request.ethAddress, moreFollowers)
         });
     },
 
-    [types.PROFILE_MORE_FOLLOWINGS_ITERATOR_SUCCESS]: (state, { data }) => {
-        const moreFollowings = data.limit === data.collection.length;
-        let byId = state.get('byId');
-        let followingsList = state.getIn(['followings', data.akashaId]) || new List();
-        const lastIndex = getLastIndex(data.collection);
-        data.collection.forEach((following, index) => {
-            if (!moreFollowings || index !== (data.collection.length - 1)) {
-                followingsList = followingsList.push(following.profile.akashaId);
-                byId = addProfileData(byId, following.profile);
+    [types.PROFILE_MORE_FOLLOWINGS_ITERATOR]: (state, { ethAddress }) =>
+        state.setIn(['flags', 'fetchingMoreFollowings', ethAddress], true),
+
+    [types.PROFILE_MORE_FOLLOWINGS_ITERATOR_ERROR]: (state, { request }) =>
+        state.setIn(['flags', 'fetchingMoreFollowings', request.ethAddress], false),
+
+    [types.PROFILE_MORE_FOLLOWINGS_ITERATOR_SUCCESS]: (state, { data, request }) => {
+        const moreFollowings = data.lastBlock > 0;
+        let followingsList = state.getIn(['followings', request.ethAddress]) || new List();
+        const last = {
+            lastIndex: data.lastIndex,
+            lastBlock: data.lastBlock
+        };
+        data.collection.forEach((following) => {
+            if (!followingsList.includes(following.ethAddress)) {
+                followingsList = followingsList.push(following.ethAddress);
             }
         });
-
         return state.merge({
-            byId,
-            flags: state.get('flags').setIn(['fetchingMoreFollowings', data.akashaId], false),
-            followings: state.get('followings').set(data.akashaId, followingsList),
-            lastFollowing: state.get('lastFollowing').set(data.akashaId, lastIndex),
-            moreFollowings: state.get('moreFollowings').set(data.akashaId, moreFollowings)
+            flags: state.get('flags').setIn(['fetchingMoreFollowings', request.ethAddress], false),
+            followings: state.get('followings').set(request.ethAddress, followingsList),
+            lastFollowing: state.get('lastFollowing').set(request.ethAddress, last),
+            moreFollowings: state.get('moreFollowings').set(request.ethAddress, moreFollowings)
         });
     },
 
-    [types.PROFILE_SEND_TIP]: (state, { akashaId }) =>
-        state.setIn(['flags', 'sendingTip', akashaId], true),
+    [types.PROFILE_RESET_COLUMNS]: (state, { ethAddress }) =>
+        state.merge({
+            followers: state.get('followers').set(ethAddress, new List()),
+            followings: state.get('followings').set(ethAddress, new List()),
+            lastFollower: state.get('lastFollower').set(ethAddress, new List()),
+            lastFollowing: state.get('lastFollowing').set(ethAddress, new List()),
+            moreFollowers: state.get('moreFollowers').set(ethAddress, false),
+            moreFollowings: state.get('moreFollowings').set(ethAddress, false),
+        }),
 
-    [types.PROFILE_SEND_TIP_ERROR]: (state, { request }) =>
-        state.setIn(['flags', 'sendingTip', request.akashaId], false),
+    [types.PROFILE_RESET_ESSENCE_EVENTS]: state => state.merge({
+        essenceEvents: new Collection.Set([]),
+        essenceIterator: new EssenceIterator()
+    }),
 
-    [types.PROFILE_SEND_TIP_SUCCESS]: (state, { data }) =>
-        state.setIn(['flags', 'sendingTip', data.akashaId], false),
+    [types.PROFILE_RESOLVE_IPFS_HASH]: (state, { ipfsHash, columnId }) => {
+        let newHashes = new Map();
+        ipfsHash.forEach((hash) => { newHashes = newHashes.set(hash, true); });
+        return state.mergeIn(['flags', 'resolvingIpfsHash', columnId], newHashes);
+    },
 
-    [types.PROFILE_UNFOLLOW]: (state, { akashaId }) =>
-        state.setIn(['flags', 'followPending', akashaId], true),
+    [types.PROFILE_RESOLVE_IPFS_HASH_ERROR]: (state, { error, request }) =>
+        state.setIn(['flags', 'resolvingIpfsHash', request.columnId, error.ipfsHash], false),
 
-    [types.PROFILE_UNFOLLOW_ERROR]: (state, { request }) =>
-        state.setIn(['flags', 'followPending', request.akashaId], false),
+    [types.PROFILE_RESOLVE_IPFS_HASH_SUCCESS]: (state, { data, request }) => {
+        const index = request.ipfsHash.indexOf(data.ipfsHash);
+        const akashaId = request.akashaIds[index];
+        return state.merge({
+            flags: state.get('flags').setIn(['resolvingIpfsHash', request.columnId, data.ipfsHash], false),
+            byId: state.get('byId').mergeIn([akashaId], data.profile)
+        });
+    },
+
+    [types.PROFILE_TOGGLE_INTEREST]: (state, { interest, interestType }) => {
+        const interestState = state.getIn(['interests', interestType]);
+        const newList = interestState.includes(interest) ?
+            interestState.delete(interestState.indexOf(interest)) :
+            interestState.push(interest);
+        return state.setIn(['interests', interestType], newList);
+    },
 
     [types.PROFILE_UNFOLLOW_SUCCESS]: (state, { data }) => {
-        const loggedAkashaId = state.getIn(['loggedProfile', 'akashaId']);
-        const loggedProfile = state.getIn(['byId', loggedAkashaId]);
+        const { ethAddress } = data;
+        const loggedEthAddress = state.getIn(['loggedProfile', 'ethAddress']);
+        const loggedProfile = state.getIn(['byEthAddress', loggedEthAddress]);
         const followingCount = loggedProfile.get('followingCount');
-        const profile = state.getIn(['byId', data]);
+        const profile = state.getIn(['byEthAddress', ethAddress]);
         const oldFollowers = state.get('followers');
         const oldFollowings = state.get('followings');
-        const followersList = oldFollowers.get(data);
-        const followingsList = oldFollowings.get(loggedAkashaId);
+        const followersList = oldFollowers.get(ethAddress);
+        const followingsList = oldFollowings.get(loggedEthAddress);
         const followers = followersList ?
-            oldFollowers.set(data, followersList.filter(id => id !== loggedAkashaId)) :
+            oldFollowers.set(ethAddress, followersList.filter(id => id !== loggedEthAddress)) :
             oldFollowers;
         const followings = followingsList ?
-            oldFollowings.set(loggedAkashaId, followingsList.filter(id => id !== data)) :
+            oldFollowings.set(loggedEthAddress, followingsList.filter(id => id !== ethAddress)) :
             oldFollowings;
+        const allFollowings = state.get('allFollowings');
+        if (allFollowings.indexOf(ethAddress) > -1) {
+            allFollowings.splice(allFollowings.indexOf(ethAddress), 1);
+        }
         return state.merge({
-            byId: state.get('byId').merge({
-                [data]: profile ?
-                    profile.set('followersCount', profile.get('followersCount') - 1) :
+            allFollowings,
+            byEthAddress: state.get('byEthAddress').merge({
+                [ethAddress]: profile ?
+                    profile.set('followersCount', +profile.get('followersCount') - 1) :
                     undefined,
-                [loggedAkashaId]: loggedProfile.set('followingCount', followingCount - 1)
+                [loggedEthAddress]: loggedProfile.set('followingCount', +followingCount - 1)
             }),
-            flags: state.get('flags').setIn(['followPending', data], false),
             followers,
             followings,
-            isFollower: state.get('isFollower').set(data, false)
+            isFollower: state.get('isFollower').set(ethAddress, false)
         });
     },
+    [types.TAG_CAN_CREATE_SUCCESS]: (state, data) =>
+        state.set('canCreateTags', data.data.can),
 });
 
 export default profileState;

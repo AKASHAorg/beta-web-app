@@ -1,10 +1,11 @@
 import BaseService from './base-service';
-import { channel } from 'services';
+
+const Channel = global.Channel;
 
 class NotificationsService extends BaseService {
     constructor () {
         super();
-        this.clientManager = channel.instance.client.notifications.manager;
+        this.clientManager = Channel.client.notifications.manager;
     }
 
     // set profiles< address > to push notifications
@@ -17,66 +18,66 @@ class NotificationsService extends BaseService {
     }) {
         this.openChannel({
             clientManager: this.clientManager,
-            serverChannel: channel.instance.server.notifications.setFilter,
-            clientChannel: channel.instance.client.notifications.setFilter,
+            serverChannel: Channel.server.notifications.setFilter,
+            clientChannel: Channel.client.notifications.setFilter,
             listenerCb: this.createListener(
                 onError,
                 onSuccess,
-                channel.instance.client.notifications.setFilter.channelName
+                Channel.client.notifications.setFilter.channelName
             )
         }, () => {
-            channel.instance.server.notifications.setFilter.send({ profiles, blockNr, exclude });
+            Channel.server.notifications.setFilter.send({ profiles, blockNr, exclude });
         });
     }
 
     listenFeed ({ onError = () => {}, onSuccess, stop = false, newerThan = null }) {
         this.openChannel({
             clientManager: this.clientManager,
-            serverChannel: channel.instance.server.notifications.feed,
-            clientChannel: channel.instance.client.notifications.feed,
+            serverChannel: Channel.server.notifications.feed,
+            clientChannel: Channel.client.notifications.feed,
             listenerCb: this.createListener(
                 onError,
                 onSuccess,
-                channel.instance.client.notifications.setFilter.feed
+                Channel.client.notifications.setFilter.feed
             )
         }, () => {
-            channel.instance.server.notifications.feed.send({ stop, newerThan });
+            Channel.server.notifications.feed.send({ stop, newerThan });
         });
     }
 
     includeFilter ({ profiles, onError = () => {}, onSuccess = () => {} }) {
         this.openChannel({
             clientManager: this.clientManager,
-            serverChannel: channel.instance.server.notifications.includeFilter,
-            clientChannel: channel.instance.client.notifications.includeFilter,
+            serverChannel: Channel.server.notifications.includeFilter,
+            clientChannel: Channel.client.notifications.includeFilter,
             listenerCb: this.createListener(
                 onError,
                 onSuccess,
-                channel.instance.client.notifications.includeFilter.channelName
+                Channel.client.notifications.includeFilter.channelName
             )
         }, () => {
-            channel.instance.server.notifications.includeFilter.send({ profiles });
+            Channel.server.notifications.includeFilter.send({ profiles });
         });
     }
 
     excludeFilter ({ profiles, onError = () => {}, onSuccess = () => {} }) {
         this.openChannel({
             clientManager: this.clientManager,
-            serverChannel: channel.instance.server.notifications.excludeFilter,
-            clientChannel: channel.instance.client.notifications.excludeFilter,
+            serverChannel: Channel.server.notifications.excludeFilter,
+            clientChannel: Channel.client.notifications.excludeFilter,
             listenerCb: this.createListener(
                 onError,
                 onSuccess,
-                channel.instance.client.notifications.excludeFilter.channelName
+                Channel.client.notifications.excludeFilter.channelName
             )
         }, () => {
-            channel.instance.server.notifications.excludeFilter.send({ profiles });
+            Channel.server.notifications.excludeFilter.send({ profiles });
         });
     }
 
     mention = ({ mention, entryId, commentId, onSuccess = () => {}, onError = () => {} }) => {
-        const clientChannel = channel.instance.client.notifications.mention;
-        const serverChannel = channel.instance.server.notifications.mention;
+        const clientChannel = Channel.client.notifications.mention;
+        const serverChannel = Channel.server.notifications.mention;
         this.openChannel({
             clientManager: this.clientManager,
             serverChannel,
@@ -90,6 +91,5 @@ class NotificationsService extends BaseService {
             serverChannel.send({ mention, entryId, commentId });
         });
     };
-
 }
 export { NotificationsService };

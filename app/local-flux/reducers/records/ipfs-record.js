@@ -1,14 +1,17 @@
 import { Record, OrderedSet } from 'immutable';
 
-const IpfsStatus = Record({
-    downloading: null,
+export const IpfsStatus = Record({
     api: false,
+    baseUrl: '',
+    downloading: null,
     process: false,
-    starting: null,
+    progress: null,
     started: null,
+    starting: null,
     stopped: null,
     upgrading: null,
     version: null,
+    state: null,
 });
 
 const IpfsFlags = Record({
@@ -18,11 +21,9 @@ const IpfsFlags = Record({
     settingPorts: false
 });
 
-const IpfsRecord = Record({
+export const IpfsRecord = Record({
     flags: new IpfsFlags(),
     lastLogTimestamp: null,
     logs: new OrderedSet(),
     status: new IpfsStatus(),
 });
-
-export { IpfsRecord, IpfsStatus };

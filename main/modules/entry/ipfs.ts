@@ -1,5 +1,4 @@
-import IpfsConnector from '@akashaproject/ipfs-js-connector';
-import { Buffer } from 'safe-buffer';
+import { IpfsConnector } from '@akashaproject/ipfs-connector';
 import * as Promise from 'bluebird';
 import { is, isEmpty, values } from 'ramda';
 import { entries } from '../models/records';
@@ -10,6 +9,7 @@ export const IMAGE_TYPE = 'image';
 export const max_size = 200 * 1000;
 export const EXCERPT = 'excerpt';
 export const FEATURED_IMAGE = 'featuredImage';
+export const CARD_INFO = 'cardInfo';
 export const DRAFT_PART = 'draft-part';
 export const PREVIOUS_VERSION = 'previous-version';
 
@@ -26,11 +26,12 @@ class IpfsEntry {
     /**
      *
      * @param content
-     * @param tags
-     * @param previous
-     * @returns {Bluebird<U>}
+     * @param {any[]} tags
+     * @param {number} entryType
+     * @param {{hash: string; version: number}} previous
+     * @returns {Bluebird<any>}
      */
-    create(content: any, tags: any[], previous?: { hash: string, version: number }) {
+    create(content: any, tags: any[], entryType: number, previous?: { hash: string, version: number }) {
         const ipfsApiRequests = [];
         this.entryLinks = [];
         this.draft = Object.assign({}, content.draft);
@@ -39,13 +40,35 @@ class IpfsEntry {
         this.licence = content.licence;
         this.tags = tags;
         this.wordCount = content.wordCount;
-        if (content.featuredImage) {
+        if (content.featuredImage && is(Object, content.featuredImage)) {
+            const req = (Object.keys(content.featuredImage).sort()).map((imSize) => {
+                if (!content.featuredImage[imSize].src) {
+                    return Promise.resolve({});
+                }
+                const mediaData = this._normalizeImage(content.featuredImage[imSize].src);
+                return IpfsConnector.getInstance().api
+                    .add(content.featuredImage[imSize].src, true, is(String, mediaData))
+                    .then((obj) => {
+                        return { [imSize]: Object.assign({}, content.featuredImage[imSize], { src: obj.hash }) };
+                    });
+            });
+            ipfsApiRequests.push(
+                Promise.all(req).then((sizes) => {
+                    const LINK = {};
+                    sizes.forEach((record) => {
+                        Object.assign(LINK, record);
+                    });
+                    return IpfsConnector.getInstance().api.add(LINK);
+                }).then((obj) => {
+                    this.entryLinks.push(Object.assign({}, obj, { name: FEATURED_IMAGE }));
+                })
+            );
+        }
+        if (content.cardInfo) {
             ipfsApiRequests.push(
                 IpfsConnector.getInstance().api
-                    .add(content.featuredImage, true)
-                    .then((obj) => {
-                        this.entryLinks.push(Object.assign({}, obj, { name: FEATURED_IMAGE }));
-                    }));
+                    .add(content.cardInfo)
+                    .then((obj) => this.entryLinks.push(Object.assign({}, obj, { name: CARD_INFO }))));
         }
 
         ipfsApiRequests.push(
@@ -71,6 +94,7 @@ class IpfsEntry {
                         tags: this.tags,
                         title: this.title,
                         wordCount: this.wordCount,
+                        entryType: entryType,
                         version: (previous && previous.hasOwnProperty('version')) ? ++previous.version : 0
                     }, this.entryLinks).then((node) => node.hash);
             });
@@ -82,7 +106,7 @@ class IpfsEntry {
      * @param tags
      * @param previousHash
      */
-    edit(content: any, tags: any[], previousHash) {
+    edit(content: any, tags: any[], entryType: number, previousHash) {
         return IpfsConnector.getInstance().api
             .get(previousHash)
             .then((data) => {
@@ -93,6 +117,7 @@ class IpfsEntry {
                 return this.create(
                     content,
                     tags,
+                    entryType,
                     {
                         hash: previousHash,
                         version: (data.version) ? data.version : 0
@@ -117,6 +142,13 @@ class IpfsEntry {
         return { blockIndex, imageEntities };
     }
 
+    private _normalizeImage(data) {
+        if (is(String, data) || Buffer.isBuffer(data)) {
+            return data;
+        }
+        return Buffer.from(values(data));
+    }
+
     private _uploadMediaDraft() {
         /**
          * filter draft object for images and upload them to ipfs
@@ -127,16 +159,13 @@ class IpfsEntry {
         imageEntities.forEach((element, index) => {
             const keys = Object.keys(element.data.files).sort();
             keys.forEach((imSize) => {
-                if (!element.data.files[imSize].src || is(String, element.data.files[imSize].src)) {
-                    return false;
+                if (!element.data.files[imSize].src) {
+                    return;
                 }
-                const mediaData = Buffer.isBuffer(element.data.files[imSize].src) ?
-                    element.data.files[imSize].src
-                    :
-                    Buffer.from(values(element.data.files[imSize].src));
+                const mediaData = this._normalizeImage(element.data.files[imSize].src);
                 uploads.push(
                     IpfsConnector.getInstance().api
-                        .add(mediaData, true)
+                        .add(mediaData, true, is(String, mediaData))
                         .then(
                             (obj) => {
                                 this.entryLinks.push(Object.assign({}, obj, { name: (imSize + index) }));
@@ -177,28 +206,25 @@ class IpfsEntry {
         });
     }
 }
+
 /**
  *
  * @param hash
  * @returns {any}
  */
-export const getShortContent = Promise.coroutine(function*(hash) {
+export const getShortContent = Promise.coroutine(function* (hash) {
     if (entries.hasShort(hash)) {
         return Promise.resolve(entries.getShort(hash));
     }
     const response = {
         [EXCERPT]: '',
-        [FEATURED_IMAGE]: ''
+        [FEATURED_IMAGE]: '',
+        [CARD_INFO]: ''
     };
     const root = yield IpfsConnector.getInstance().api.get(hash);
-    const extraData = yield IpfsConnector.getInstance().api.findLinks(hash, [EXCERPT, FEATURED_IMAGE]);
+    const extraData = yield IpfsConnector.getInstance().api.findLinks(hash, [EXCERPT, FEATURED_IMAGE, CARD_INFO]);
     for (let i = 0; i < extraData.length; i++) {
-        if (extraData[i].name === FEATURED_IMAGE) {
-            response[FEATURED_IMAGE] = extraData[i].multihash;
-        }
-        if (extraData[i].name === EXCERPT) {
-            response[EXCERPT] = yield IpfsConnector.getInstance().api.get(extraData[i].multihash);
-        }
+        response[extraData[i].name] = yield IpfsConnector.getInstance().api.get(extraData[i].multihash);
     }
     const data = Object.assign({}, root, response);
     entries.setShort(hash, data);
@@ -209,7 +235,7 @@ export const getShortContent = Promise.coroutine(function*(hash) {
  *
  * @type {Function}
  */
-const findVersion = Promise.coroutine(function*(hash: string, version: number) {
+const findVersion = Promise.coroutine(function* (hash: string, version: number) {
     const root = yield IpfsConnector.getInstance().api.get(hash);
     if (!root.hasOwnProperty('version')) {
         throw new Error('Cannot find version ' + version);
@@ -235,7 +261,7 @@ const findVersion = Promise.coroutine(function*(hash: string, version: number) {
  * @param hash
  * @returns {any}
  */
-export const getFullContent = Promise.coroutine(function*(hash: string, version?: number) {
+export const getFullContent = Promise.coroutine(function* (hash: string, version: any) {
     const indexedVersion = (is(Number, version)) ? `${hash}/v/${version}` : hash;
 
     if (entries.hasFull(indexedVersion)) {

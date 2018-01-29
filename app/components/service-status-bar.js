@@ -2,61 +2,32 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import ReactTooltip from 'react-tooltip';
-import { SvgIcon, IconButton } from 'material-ui';
-import { StatusBarEthereum, StatusBarIpfs } from '../shared-components/svg';
+import { Select, Tooltip } from 'antd';
 import serviceState from '../constants/serviceState';
-import { generalMessages } from '../locale-data/messages';
-import { toggleGethDetailsModal,
+import { generalMessages, settingsMessages } from '../locale-data/messages';
+import { appSettingsToggle, toggleGethDetailsModal,
     toggleIpfsDetailsModal } from '../local-flux/actions/app-actions';
+import { saveGeneralSettings } from '../local-flux/actions/settings-actions';
+import { selectGeneralSettings } from '../local-flux/selectors';
+import { Icon } from './';
 
-const containerStyle = {
-    border: '2px solid',
-    borderRadius: '16px',
-    lineHeight: '32px',
-    height: '32px',
-    width: '32px',
-    display: 'inline-flex',
-    textAlign: 'center',
-    margin: '0 5px',
-    justifyContent: 'center',
-    alignItems: 'center'
-};
-const buttonStyle = {
-    width: '32px',
-    minWidth: '32px',
-    height: '32px',
-    borderRadius: '16px',
-    padding: '0px'
-};
+const { Option } = Select;
 
 class ServiceStatusBar extends Component {
-    componentDidMount () {
-        ReactTooltip.rebuild();
-    }
-
-    getContainerStyle (state) {
-        const { palette } = this.context.muiTheme;
-        const style = Object.assign({}, containerStyle);
+    getCircleColor = (state) => {
         switch (state) {
             case serviceState.stopped:
-                style.borderColor = palette.accent1Color;
-                break;
+                return 'Red';
             case serviceState.downloading:
             case serviceState.starting:
             case serviceState.upgrading:
-                style.borderColor = palette.accent2Color;
-                break;
+                return 'Orange';
             case serviceState.started:
-                style.borderColor = palette.accent3Color;
-                break;
+                return 'Green';
             default:
-                style.borderColor = palette.textColor;
-                break;
+                return '';
         }
-
-        return style;
-    }
+    };
 
     getIpfsState () {
         const { ipfsStarting, ipfsStatus } = this.props;
@@ -108,74 +79,86 @@ class ServiceStatusBar extends Component {
         }
     }
 
+    handleChange = (value) => {
+        if (value !== 'translate') {
+            this.props.saveGeneralSettings({
+                locale: value
+            });
+        }
+    };
+
     render () {
-        const { toggleGethDetails, toggleIpfsDetails } = this.props;
-        const { palette } = this.context.muiTheme;
-        const iconStyle = {
-            width: '24px',
-            height: '24px',
-            color: palette.textColor,
-            position: 'relative',
-            top: '4px'
-        };
+        const { generalSettings, intl, toggleGethDetails, toggleIpfsDetails, withCircles } = this.props;
         const gethState = this.getGethState();
         const ipfsState = this.getIpfsState();
+        const gethColor = this.getCircleColor(gethState);
+        const ipfsColor = this.getCircleColor(ipfsState);
+        const gethIcon = withCircles ? `geth${gethColor}` : 'geth';
+        const ipfsIcon = withCircles ? `ipfs${ipfsColor}` : 'ipfs';
 
         return (
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={this.getContainerStyle(gethState)}>
+          <div className="service-status-bar">
+            <Tooltip title={this.getTooltip(gethState)}>
               <div
-                data-tip={this.getTooltip(gethState)}
-                style={{ display: 'inline-block', height: '32px' }}
+                className="content-link flex-center service-status-bar__button"
+                onClick={toggleGethDetails}
               >
-                <IconButton
-                  style={buttonStyle}
-                  onClick={toggleGethDetails}
-                  iconStyle={iconStyle}
-                >
-                  <SvgIcon viewBox="0 0 16 16">
-                    <StatusBarEthereum />
-                  </SvgIcon>
-                </IconButton>
+                <Icon className="service-status-bar__geth-icon" type={gethIcon} />
+                {!withCircles && gethColor === 'Red' &&
+                  <div className="service-status-bar__dot" />
+                }
               </div>
-            </div>
-            <div style={this.getContainerStyle(ipfsState)}>
+            </Tooltip>
+            <Tooltip title={this.getTooltip(ipfsState)}>
               <div
-                data-tip={this.getTooltip(ipfsState)}
-                style={{ display: 'inline-block', height: '32px' }}
+                className="content-link flex-center service-status-bar__button"
+                onClick={toggleIpfsDetails}
               >
-                <IconButton
-                  style={buttonStyle}
-                  onClick={toggleIpfsDetails}
-                  iconStyle={iconStyle}
-                >
-                  <SvgIcon viewBox="0 0 16 16">
-                    <StatusBarIpfs />
-                  </SvgIcon>
-                </IconButton>
+                <Icon className="service-status-bar__ipfs-icon" type={ipfsIcon} />
+                {!withCircles && ipfsColor === 'Red' &&
+                  <div className="service-status-bar__dot" />
+                }
               </div>
-            </div>
+            </Tooltip>
+            {withCircles &&
+              <Select
+                className="service-status-bar__select"
+                dropdownClassName="service-status-bar__select-dropdown"
+                onChange={this.handleChange}
+                size="small"
+                value={generalSettings.get('locale')}
+              >
+                <Option value="en">{intl.formatMessage(settingsMessages.english)}</Option>
+                <Option value="es">{intl.formatMessage(settingsMessages.spanish)}</Option>
+                <Option className="flex-center-y service-status-bar__translate-option" value="translate">
+                  <a className="unstyled-link" href="https://crowdin.com/project/akasha" >
+                    {intl.formatMessage(generalMessages.translate)}
+                  </a>
+                  <Icon className="service-status-bar__link-icon" type="link" />
+                </Option>
+              </Select>
+            }
           </div>
         );
     }
 }
 
-ServiceStatusBar.contextTypes = {
-    muiTheme: PropTypes.shape()
-};
-
 ServiceStatusBar.propTypes = {
+    generalSettings: PropTypes.shape().isRequired,
     gethStarting: PropTypes.bool,
     gethStatus: PropTypes.shape().isRequired,
     intl: PropTypes.shape().isRequired,
     ipfsStarting: PropTypes.bool,
     ipfsStatus: PropTypes.shape().isRequired,
+    saveGeneralSettings: PropTypes.func.isRequired,
     toggleGethDetails: PropTypes.func.isRequired,
     toggleIpfsDetails: PropTypes.func.isRequired,
+    withCircles: PropTypes.bool
 };
 
 function mapStateToProps (state) {
     return {
+        generalSettings: selectGeneralSettings(state),
         gethStarting: state.externalProcState.getIn(['geth', 'flags', 'gethStarting']),
         gethStatus: state.externalProcState.getIn(['geth', 'status']),
         ipfsStarting: state.externalProcState.getIn(['ipfs', 'flags', 'ipfsStarting']),
@@ -187,6 +170,8 @@ export { ServiceStatusBar };
 export default connect(
     mapStateToProps,
     {
+        appSettingsToggle,
+        saveGeneralSettings,
         toggleGethDetails: toggleGethDetailsModal,
         toggleIpfsDetails: toggleIpfsDetailsModal
     },

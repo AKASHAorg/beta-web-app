@@ -1,0 +1,44 @@
+.profile-edit {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 20;
+    padding-left: 64px;
+    display: flex;
+    flex-direction: row;
+
+    &__title {
+        padding: 20px 20px 40px 24px;
+        display: flex;
+        border-bottom: 1px inset @light-background;
+        justify-content: space-between;
+        color: @heading-color;
+        font-size: 15px;
+
+        &_with-border {
+            border-bottom: 1px inset @light-border;
+        }
+    }
+
+    &__wrapper {
+        width: 510px;
+        display: flex;
+        flex-direction: column;
+        background: @light-background;
+    }
+
+    &__grey-background {
+        min-height: 100px;
+        width: 100%;
+        height: 100%;
+        background: @opacity-bg-color;
+        opacity: @opacity-bg;
+    }
+
+    &__close-icon {
+        width: 16px;
+        height: 16px;
+    }
+}

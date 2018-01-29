@@ -1,16 +1,64 @@
-import auth from '../auth/Auth';
 import IpfsEntry from './ipfs';
-import { uniq } from 'ramda';
+import { decodeHash } from '../ipfs/helpers';
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-const execute = Promise.coroutine(function* (data) {
+import schema from '../utils/jsonschema';
+import entriesCache from '../notifications/entries';
+import GethConnector from '@akashaproject/geth-connector/lib/GethConnector';
+const publish = {
+    'id': '/publish',
+    'type': 'object',
+    'properties': {
+        'content': {
+            'type': 'object'
+        },
+        'tags': {
+            'type': 'array',
+            'items': {
+                'type': 'string'
+            },
+            'uniqueItems': true,
+            'minItems': 1
+        },
+        'entryType': {
+            'type': 'number'
+        },
+        'token': {
+            'type': 'string'
+        }
+    },
+    'required': ['content', 'tags', 'entryType', 'token']
+};
+const execute = Promise.coroutine(function* (data, cb) {
+    const v = new schema.Validator();
+    v.validate(data, publish, { throwError: true });
     let ipfsEntry = new IpfsEntry();
-    data.tags = uniq(data.tags);
-    const hash = yield ipfsEntry.create(data.content, data.tags);
-    const txData = yield contracts.instance.entries.publish(hash, data.tags, data.gas);
-    const tx = yield auth.signData(txData, data.token);
+    const ipfsHash = yield ipfsEntry.create(data.content, data.tags, data.entryType);
+    const decodedHash = decodeHash(ipfsHash);
+    let publishMethod;
+    switch (data.entryType) {
+        case 0:
+            publishMethod = contracts.instance.Entries.publishArticle;
+            break;
+        case 1:
+            publishMethod = contracts.instance.Entries.publishLink;
+            break;
+        case 2:
+            publishMethod = contracts.instance.Entries.publishMedia;
+            break;
+        default:
+            publishMethod = contracts.instance.Entries.publishOther;
+    }
+    const txData = publishMethod.request(...decodedHash, data.tags, { gas: 2000000 });
     ipfsEntry = null;
-    return { tx };
+    delete data.content;
+    delete data.tags;
+    const transaction = yield contracts.send(txData, data.token, cb);
+    const fetched = yield contracts
+        .fromEvent(contracts.instance.Entries.Publish, { author: GethConnector.getInstance().web3.eth.defaultAccount }, transaction.receipt.blockNumber, 1, {});
+    const entryId = (fetched.results.length) ? fetched.results[0].args.entryId : null;
+    yield entriesCache.push(entryId);
+    return { tx: transaction.tx, receipt: transaction.receipt, entryId };
 });
-export default { execute, name: 'publish' };
+export default { execute, name: 'publish', hasStream: true };
 //# sourceMappingURL=publish-entry.js.map

@@ -1,21 +1,26 @@
-import { apply, call, fork, put, select, takeEvery } from 'redux-saga/effects';
-import * as reduxSaga from 'redux-saga';
+import { call, fork, put, select, takeEvery } from 'redux-saga/effects';
+import * as actionActions from '../actions/action-actions';
 import * as appActions from '../actions/app-actions';
 import * as eProcActions from '../actions/external-process-actions';
-import * as transactionActions from '../actions/transaction-actions';
-import { selectLoggedAkashaId } from '../selectors';
+import * as profileActions from '../actions/profile-actions';
+import { selectLoggedEthAddress } from '../selectors';
 import { createActionChannels } from './helpers';
+import * as actionSaga from './action-saga';
 import * as commentsSaga from './comments-saga';
+import * as draftSaga from './draft-saga';
 import * as dashboardSaga from './dashboard-saga';
 import * as entrySaga from './entry-saga';
 import * as externalProcSaga from './external-process-saga';
+import * as highlightSaga from './highlight-saga';
 import * as licenseSaga from './license-saga';
+import * as listSaga from './list-saga';
 import * as profileSaga from './profile-saga';
-import * as publisherSaga from './publisher-saga';
+import * as searchSaga from './search-saga';
 import * as settingsSaga from './settings-saga';
 import * as tagSaga from './tag-saga';
 import * as tempProfileSaga from './temp-profile-saga';
 import * as transactionSaga from './transaction-saga';
+import * as utilsSaga from './utils-saga';
 import * as types from '../constants';
 
 function* registerListeners () {
@@ -24,8 +29,10 @@ function* registerListeners () {
     yield fork(entrySaga.registerEntryListeners);
     yield fork(externalProcSaga.registerEProcListeners);
     yield fork(profileSaga.registerProfileListeners);
+    yield fork(searchSaga.registerSearchListeners);
     yield fork(tagSaga.registerTagListeners);
     yield fork(transactionSaga.registerTransactionListeners);
+    yield fork(utilsSaga.registerUtilsListeners);
 }
 
 function* launchActions () {
@@ -47,12 +54,19 @@ function* launchHomeActions () {
     yield call(profileSaga.profileGetLogged);
     yield fork(dashboardSaga.dashboardGetActive);
     yield fork(dashboardSaga.dashboardGetAll);
-    yield fork(dashboardSaga.dashboardGetColumns);
-    yield fork(tagSaga.tagGetMargins);
-    if (yield select(selectLoggedAkashaId)) {
-        yield put(transactionActions.transactionGetMined());
-        yield put(transactionActions.transactionGetPending());
+    yield fork(highlightSaga.highlightGetAll);
+    yield fork(listSaga.listGetAll);
+    yield fork(settingsSaga.userSettingsRequest);
+    const loggedEthAddress = yield select(selectLoggedEthAddress);
+    if (loggedEthAddress) {
+        yield put(actionActions.actionGetPending());
+        yield put(profileActions.profileFollowingsIterator({
+            ethAddress: loggedEthAddress,
+            allFollowings: true,
+            limit: 1000
+        }));
     }
+    yield put(profileActions.profileManaBurned());
 }
 
 function* bootstrapApp () {
@@ -74,17 +88,22 @@ function* watchBootstrapHome () {
 export default function* rootSaga () {
     createActionChannels();
     yield fork(registerListeners);
+    yield fork(actionSaga.watchActionActions);
     yield fork(commentsSaga.watchCommentsActions);
     yield fork(dashboardSaga.watchDashboardActions);
+    yield fork(draftSaga.watchDraftActions);
     yield fork(entrySaga.watchEntryActions);
     yield fork(externalProcSaga.watchEProcActions);
+    yield fork(highlightSaga.watchHighlightActions);
     yield fork(licenseSaga.watchLicenseActions);
+    yield fork(listSaga.watchListActions);
     yield fork(profileSaga.watchProfileActions);
-    yield fork(publisherSaga.watchPublishActions);
+    yield fork(searchSaga.watchSearchActions);
     yield fork(settingsSaga.watchSettingsActions);
     yield fork(tagSaga.watchTagActions);
     yield fork(tempProfileSaga.watchTempProfileActions);
     yield fork(transactionSaga.watchTransactionActions);
+    yield fork(utilsSaga.watchUtilsActions);
     yield fork(bootstrapApp);
     yield fork(watchBootstrapHome);
 }

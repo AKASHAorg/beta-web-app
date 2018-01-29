@@ -26,7 +26,9 @@ export const regenWeb3 = () => {
     web3Regen.personal = Promise.promisifyAll(web3Regen.personal);
     web3Regen.net = Promise.promisifyAll(web3Regen.net);
     web3Regen.version = Promise.promisifyAll(web3Regen.version);
-    contracts.init(web3Regen);
+    const contr = contracts.init(web3Regen);
+    // for dev purpose
+    Object.defineProperty(window, 'contracts', { value: contr });
     return web3Regen;
 };
 

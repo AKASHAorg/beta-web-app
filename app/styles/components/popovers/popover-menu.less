@@ -1,0 +1,27 @@
+.popover-menu {
+    .ant-popover-inner-content {
+        padding: 4px;
+    }
+
+    &__item {
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 4px;
+        color: @heading-color;
+        cursor: pointer;
+        &:hover {
+            background-color: @background;
+        }
+
+        &_disabled {
+            color: @text-color-secondary;
+        }
+    }
+
+    &__icon {
+        width: 20px;
+        font-size: 18px;
+        margin-right: 5px;
+    }
+}

@@ -1,28 +1,28 @@
 import * as Promise from 'bluebird';
-import contracts from '../../contracts/index';
-import getEntry from './get-entry';
+import schema from '../utils/jsonschema';
+import { fetchFromPublish } from './helpers';
+import { profileAddress } from '../profile/helpers';
+const entryProfileIterator = {
+    'id': '/entryProfileIterator',
+    'type': 'object',
+    'properties': {
+        'limit': { 'type': 'number' },
+        'toBlock': { 'type': 'number' },
+        'akashaId': { 'type': 'string' },
+        'ethAddress': { 'type': 'string', 'format': 'address' },
+        'reversed': { 'type': 'boolean' }
+    },
+    'required': ['toBlock']
+};
 const execute = Promise.coroutine(function* (data) {
-    let currentId = (data.start) ? data.start : yield contracts.instance.entries.getProfileEntryFirst(data.akashaId);
-    if (currentId === '0') {
-        return { collection: [], akashaId: data.akashaId };
+    const v = new schema.Validator();
+    v.validate(data, entryProfileIterator, { throwError: true });
+    const address = yield profileAddress(data);
+    const maxResults = data.limit || 5;
+    if (!address) {
+        return { collection: [], lastBlock: 0 };
     }
-    const maxResults = (data.limit) ? data.limit : 5;
-    const fetchCalls = [];
-    let counter = 0;
-    if (!data.start) {
-        fetchCalls.push(getEntry.execute({ entryId: currentId }));
-        counter = 1;
-    }
-    while (counter < maxResults) {
-        currentId = yield contracts.instance.entries.getProfileEntryNext(data.akashaId, currentId);
-        if (currentId === '0') {
-            break;
-        }
-        fetchCalls.push(getEntry.execute({ entryId: currentId }));
-        counter++;
-    }
-    const results = yield Promise.all(fetchCalls);
-    return { collection: results, akashaId: data.akashaId, limit: maxResults };
+    return fetchFromPublish(Object.assign({}, data, { limit: maxResults, args: { author: address }, reversed: data.reversed || false }));
 });
 export default { execute, name: 'entryProfileIterator' };
 //# sourceMappingURL=entry-profile-iterator.js.map

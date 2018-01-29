@@ -1,0 +1,28 @@
+.eth-wallet {
+    padding-top: 24px;
+    height: 100%;
+
+    &__header {
+        color: @text-color;
+        padding: 0px 24px 24px;
+    }
+
+    &__balance {
+        font-size: 32px;
+        margin-right: 12px;
+        color: @heading-color;
+    }
+
+    &__sent-icon {
+        stroke: @error-color !important;
+        margin-right: 6px;
+    }
+
+    .ant-tabs {
+        height: ~'calc(100% - 94px)';
+    }
+
+    .ant-tabs-tab {
+        width: 50%;
+    }
+}

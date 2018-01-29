@@ -1,5 +1,5 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
-import { bootstrap } from '../app';
+import { bootstrap } from '../app/';
 import initModules from './init-modules';
 import { channel, ipfsApi, regenWeb3, web3Api } from './services';
 import web3Helper from './modules/helpers/web3-helper';

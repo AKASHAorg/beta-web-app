@@ -1,0 +1,16 @@
+.secondary-sidebar {
+    position: fixed;
+    left: (@sidebar-width + @secondary-sidebar-width) * -1;
+    top: 0;
+    bottom: 0;
+    width: @secondary-sidebar-width;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px @light-border solid;
+    transition: left 0.218s @ease-in-out;
+    z-index: 3;
+
+    &_open {
+        left: @sidebar-width;
+    }
+}

@@ -1,14 +1,14 @@
 import BaseService from './base-service';
-import { channel } from 'services';
+
+const Channel = global.Channel;
 
 
 class CommentService extends BaseService {
-
     getEntryComments = ({ entryId, start, limit, reverse, onSuccess, onError }) =>
         this.openChannel({
-            clientManager: channel.instance.client.comments.manager,
-            serverChannel: channel.instance.server.comments.commentsIterator,
-            clientChannel: channel.instance.client.comments.commentsIterator,
+            clientManager: Channel.client.comments.manager,
+            serverChannel: Channel.server.comments.commentsIterator,
+            clientChannel: Channel.client.comments.commentsIterator,
             listenerCb: this.createListener(onError, onSuccess)
         }, () => {
             const payload = {
@@ -17,21 +17,21 @@ class CommentService extends BaseService {
             if (start) {
                 payload.start = start;
             }
-            channel.instance.server.comments.commentsIterator.send(payload);
+            Channel.server.comments.commentsIterator.send(payload);
         });
     // a separate listener should be used here!
     getNewEntryComments = ({ entryId, start, limit, reverse, onSuccess, onError }) => {
         this.openChannel({
-            clientManager: channel.instance.client.comments.manager,
-            serverChannel: channel.instance.server.comments.commentsIterator,
-            clientChannel: channel.instance.client.comments.commentsIterator,
+            clientManager: Channel.client.comments.manager,
+            serverChannel: Channel.server.comments.commentsIterator,
+            clientChannel: Channel.client.comments.commentsIterator,
             listenerCb: this.createListener(onError, onSuccess)
         }, () => {
-            channel.instance.server.comments.commentsIterator.send({ entryId, start, limit, reverse });
+            Channel.server.comments.commentsIterator.send({ entryId, start, limit, reverse });
         });
-        // channel.instance.client.comments.manager.once((ev, res) => {
+        // Channel.client.comments.manager.once((ev, res) => {
         //     // if (res.error) return onError(res.error);
-        //     channel.instance.client.comments.commentsIterator.once((evnt, resp) => {
+        //     Channel.client.comments.commentsIterator.once((evnt, resp) => {
         //         if (resp.error) return onError(resp.error);
         //         return onSuccess(resp.data);
         //     });
@@ -41,27 +41,27 @@ class CommentService extends BaseService {
         //     if (start) {
         //         payload.start = start;
         //     }
-        //     channel.instance.server.comments.commentsIterator.send(payload);
+        //     Channel.server.comments.commentsIterator.send(payload);
         // });
-        // channel.instance.server.comments.commentsIterator.enable();
+        // Channel.server.comments.commentsIterator.enable();
     }
 
     getCommentsCount = ({ entryId, onSuccess, onError }) =>
         this.openChannel({
-            clientManager: channel.instance.client.comments.manager,
-            serverChannel: channel.instance.server.comments.commentsCount,
-            clientChannel: channel.instance.client.comments.commentsCount,
+            clientManager: Channel.client.comments.manager,
+            serverChannel: Channel.server.comments.commentsCount,
+            clientChannel: Channel.client.comments.commentsCount,
             listenerCb: this.createListener(onError, onSuccess)
         }, () => {
-            channel.instance.server.comments.commentsCount.send({ entryId });
+            Channel.server.comments.commentsCount.send({ entryId });
         });
 
     publishComment = ({ onSuccess, onError, ...payload }) => {
         this.registerListener(
-            channel.instance.client.comments.comment,
+            Channel.client.comments.comment,
             this.createListener(onError, onSuccess)
         );
-        channel.instance.server.comments.comment.send(payload);
+        Channel.server.comments.comment.send(payload);
     }
 }
 export { CommentService };

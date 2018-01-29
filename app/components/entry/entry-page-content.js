@@ -1,38 +1,43 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { MegadraftEditor, editorStateFromRaw, DraftJS, createTypeStrategy } from 'megadraft';
-import Link from 'megadraft/lib/components/Link';
-import { IconButton, SvgIcon } from 'material-ui';
-import { MentionDecorators, TagChip } from '../../shared-components';
-import readOnlyImagePlugin from '../../shared-components/EntryEditor/plugins/readOnlyImage/read-only-image-plugin';
+import DraftJS from 'draft-js';
+import { Tooltip, Icon } from 'antd';
 import { AllRightsReserved, CreativeCommonsBY, CreativeCommonsCC, CreativeCommonsNCEU,
     CreativeCommonsNCJP, CreativeCommonsNC, CreativeCommonsND, CreativeCommonsREMIX,
     CreativeCommonsSHARE, CreativeCommonsZERO, CreativeCommonsPD,
     CreativeCommonsSA } from '../svg';
-import styles from './entry-page-content.scss';
+import { SelectableEditor, TagPopover, WebsiteInfoCard } from '../';
+import { entryMessages } from '../../locale-data/messages/entry-messages';
 
-const { CompositeDecorator, EditorState } = DraftJS;
+const { EditorState } = DraftJS;
 
 class EntryPageContent extends Component {
-    componentWillMount () {
-        const decorators = new CompositeDecorator([MentionDecorators.nonEditableDecorator, {
-            strategy: createTypeStrategy('LINK'),
-            component: Link
-        }]);
-        this.editorState = EditorState.createEmpty(decorators);
+    constructor (props) {
+        super(props);
+        this.editorState = EditorState.createEmpty();
     }
 
     shouldComponentUpdate (nextProps) {
-        if (!nextProps.entry.equals(this.props.entry)) {
+        if (!nextProps.entry.equals(this.props.entry) ||
+            nextProps.commentEditor !== this.props
+        ) {
             return true;
         }
         return false;
     }
 
-    navigateToTag = (ev, tagName) => {
-        const { history } = this.props;
-        history.push(`/tag/${tagName}`);
+    getPopupContainer = () => this.props.containerRef || document.body;
+
+    highlightSave = (text) => {
+        const { entry, highlightSave, latestVersion } = this.props;
+        highlightSave({
+            content: text,
+            entryId: entry.get('entryId'),
+            entryTitle: entry.getIn(['content', 'title']),
+            entryVersion: latestVersion,
+            publisher: entry.getIn(['author', 'ethAddress'])
+        });
     };
 
     renderLicenseIcons = () => {
@@ -59,71 +64,90 @@ class EntryPageContent extends Component {
         };
 
         return (
-          <div style={{ display: 'inline-flex' }}>
+          <div className="entry-page-content__license-wrapper">
             {licence.description.map((descr) => { // eslint-disable-line consistent-return, array-callback-return, max-len
                 if (descr.icon && licenseIcons[descr.icon] !== undefined) {
                     const viewBox = descr.icon === 'CCBY' || descr.icon === 'copyright-1' ?
                         '0 0 20 20' :
                         '0 0 18 18';
                     return (
-                      <div key={descr.icon} data-tip={descr.text} >
-                        <IconButton
-                          style={{ padding: '6px', width: '30px', height: '30px' }}
-                          iconStyle={{ width: '18px', height: '18px' }}
-                        >
-                          <SvgIcon viewBox={viewBox}>
-                            {React.createElement(licenseIcons[descr.icon])}
-                          </SvgIcon>
-                        </IconButton>
-                      </div>
+                      <Tooltip
+                        getPopupContainer={this.getPopupContainer}
+                        key={descr.icon}
+                        title={descr.text}
+                      >
+                        <svg className="entry-page-content__license-icon" viewBox={viewBox}>
+                          {React.createElement(licenseIcons[descr.icon])}
+                        </svg>
+                      </Tooltip>
                     );
                 }
             })}
           </div>
         );
     };
-
+    // when user clicks a link in an entry
+    _handleOutsideNavigation = (url) => {
+        const { toggleOutsideNavigation } = this.props;
+        toggleOutsideNavigation(url);
+    }
     render () {
-        const { entry, licenses } = this.props;
-        const newEditorState = editorStateFromRaw(entry.getIn(['content', 'draft']));
-        const editorState = EditorState.push(this.editorState, newEditorState.getCurrentContent());
+        const { baseUrl, commentEditor, containerRef, entry, licenses, intl, fullSizeImageAdd } = this.props;
         const license = licenses.get(entry.content.licence.id);
-        const licenseLabel = license.parent ?
-            licenses.get(license.parent).label :
-            license.label;
+        let licenseLabel = intl.formatMessage(entryMessages.cannotRetrieveLicense);
+        if (license) {
+            if (license.parent) {
+                licenseLabel = licenses.get(license.parent).label;
+            } else {
+                licenseLabel = license.label;
+            }
+        }
         return (
-          <div>
-            <div className={`${styles.content_inner} row`} >
-              <div className="col-xs-12">
-                <h1 className={styles.entry_title}>
-                  {entry.getIn(['content', 'title'])}
-                </h1>
-              </div>
-              <div className={`${styles.entry_content} col-xs-12`} >
-                <MegadraftEditor
-                  readOnly
-                  editorState={editorState}
-                  onChange={() => {}}
-                  plugins={[readOnlyImagePlugin]}
+          <div className="entry-page-content">
+            <div>
+              <h1 className="entry-page-content__title">
+                {entry.getIn(['content', 'entryType']) === 0 && entry.getIn(['content', 'title'])}
+              </h1>
+              {entry.content.entryType === 1 &&
+                <WebsiteInfoCard
+                  cardInfo={entry.content.cardInfo}
+                  baseUrl={baseUrl}
+                  hasCard={
+                      !!entry.content.cardInfo.title ||
+                      !!entry.content.cardInfo.description
+                  }
+                  isEdit={false}
+                  infoExtracted
+                  onClick={this._handleOutsideNavigation}
+                />
+              }
+              <div className="entry-page-content__content">
+                <SelectableEditor
+                  baseUrl={baseUrl}
+                  draft={entry.getIn(['content', 'draft'])}
+                  highlightSave={this.highlightSave}
+                  startComment={commentEditor && commentEditor.insertHighlight}
+                  onOutsideNavigation={this._handleOutsideNavigation}
+                  fullSizeImageAdd={fullSizeImageAdd}
                 />
               </div>
             </div>
-            <div
-              className={styles.entry_infos}
-              style={{ display: 'flex', alignItems: 'center', padding: '8px 0' }}
-            >
+            <div className="flex-center-y entry-page-content__info">
+              {!license &&
+                <Icon type="exclamation-circle-o" className="entry-page-content__licence-error-icon" />
+              }
               <span style={{ paddingRight: '10px' }}>
                 {licenseLabel}
               </span>
               {this.renderLicenseIcons()}
             </div>
-            <div className={styles.entry_infos}>
-              <div className={styles.entry_tags}>
+            <div className="entry-page-content__info">
+              <div>
                 {entry.getIn(['content', 'tags']).map(tag => (
-                  <TagChip
+                  <TagPopover
+                    containerRef={containerRef}
                     key={tag}
                     tag={tag}
-                    onTagClick={this.navigateToTag}
                   />
                 ))}
               </div>
@@ -134,9 +158,16 @@ class EntryPageContent extends Component {
 }
 
 EntryPageContent.propTypes = {
+    baseUrl: PropTypes.string.isRequired,
+    commentEditor: PropTypes.shape(),
+    containerRef: PropTypes.shape(),
     entry: PropTypes.shape(),
-    history: PropTypes.shape(),
-    licenses: PropTypes.shape()
+    fullSizeImageAdd: PropTypes.func,
+    highlightSave: PropTypes.func.isRequired,
+    intl: PropTypes.shape(),
+    toggleOutsideNavigation: PropTypes.func,
+    latestVersion: PropTypes.number,
+    licenses: PropTypes.shape(),
 };
 
 export default withRouter(EntryPageContent);

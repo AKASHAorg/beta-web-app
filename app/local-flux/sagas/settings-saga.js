@@ -1,13 +1,15 @@
-import { all, apply, call, fork, put, take } from 'redux-saga/effects';
-import * as settingsService from '../services/settings-service';
+import { all, apply, call, fork, put, select, take } from 'redux-saga/effects';
 import * as actions from '../actions/settings-actions';
 import * as appActions from '../actions/app-actions';
 import * as types from '../constants';
+import { selectLoggedEthAddress } from '../selectors';
+import * as settingsService from '../services/settings-service';
 
 export function* generalSettingsRequest () {
     yield put(actions.generalSettingsRequest());
     try {
         const resp = yield apply(settingsService, settingsService.generalSettingsRequest);
+        localStorage.setItem('theme', resp.darkTheme ? '1' : '0');
         yield put(actions.generalSettingsSuccess(resp));
     } catch (error) {
         yield put(actions.generalSettingsError({ message: error.toString() }));
@@ -40,10 +42,11 @@ export function* getSettings () {
     yield fork(ipfsSettingsRequest);
 }
 
-export function* saveGeneralSettings (payload) {
+export function* saveGeneralSettings ({ type, ...payload }) {
     try {
         const resp = yield apply(settingsService, settingsService.generalSettingsSave, [payload]);
         yield put(actions.saveGeneralSettingsSuccess(resp));
+        localStorage.setItem('theme', payload.darkTheme ? '1' : '0');
     } catch (error) {
         yield put(actions.saveGeneralSettingsError({ message: error.toString() }));
     }
@@ -55,7 +58,8 @@ export function* gethSaveSettings (payload, showNotification) {
         yield put(actions.gethSaveSettingsSuccess(resp));
         if (showNotification) {
             yield put(appActions.showNotification({
-                id: 'saveGethSettingsSuccess'
+                id: 'saveGethSettingsSuccess',
+                duration: 4,
             }));
         }
     } catch (error) {
@@ -70,7 +74,8 @@ export function* ipfsSaveSettings (payload, showNotification) {
         yield put(actions.ipfsSaveSettingsSuccess(resp));
         if (showNotification) {
             yield put(appActions.showNotification({
-                id: 'saveIpfsSettingsSuccess'
+                id: 'saveIpfsSettingsSuccess',
+                duration: 4,
             }));
         }
     } catch (error) {
@@ -86,21 +91,25 @@ function* saveConfiguration (action) {
     yield call(saveGeneralSettings, { configurationSaved: true });
 }
 
-function* userSettingsRequest (akashaId) {
+export function* userSettingsRequest (ethAddress) {
     try {
-        const resp = yield apply(settingsService, settingsService.userSettingsRequest, [akashaId]);
+        if (!ethAddress) {
+            ethAddress = yield select(selectLoggedEthAddress);
+        }
+        const resp = yield apply(settingsService, settingsService.userSettingsRequest, [ethAddress]);
         yield put(actions.userSettingsSuccess(resp));
     } catch (error) {
         yield put(actions.userSettingsError({ message: error.toString() }));
     }
 }
 
-function* userSettingsSave (akashaId, payload) {
+function* userSettingsSave (ethAddress, payload) {
     try {
         const resp = yield apply(
-            settingsService, settingsService.userSettingsSave, [akashaId, payload]
+            settingsService, settingsService.userSettingsSave, [ethAddress, payload]
         );
         yield put(actions.userSettingsSaveSuccess(resp));
+        // yield put(appActions.showNotification({ id: 'userSettingsSaveSuccess' }));
     } catch (error) {
         yield put(actions.userSettingsSaveError(error));
     }
@@ -139,14 +148,14 @@ function* watchSaveConfiguration () {
 function* watchUserSettingsRequest () {
     while (true) {
         const action = yield take(types.USER_SETTINGS_REQUEST);
-        yield fork(userSettingsRequest, action.akashaId);
+        yield fork(userSettingsRequest, action.ethAddress);
     }
 }
 
 function* watchUserSettingsSave () {
     while (true) {
         const action = yield take(types.USER_SETTINGS_SAVE);
-        yield fork(userSettingsSave, action.akashaId, action.payload);
+        yield fork(userSettingsSave, action.ethAddress, action.payload);
     }
 }
 

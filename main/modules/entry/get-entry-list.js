@@ -1,11 +1,28 @@
 import * as Promise from 'bluebird';
-import getEntry from './get-entry';
-const execute = Promise.coroutine(function* (data) {
-    const pool = data.map((entryObj) => {
-        return getEntry.execute(entryObj);
-    });
-    const resolved = yield Promise.all(pool);
-    return { collection: resolved };
+import getEntry, { getEntry as getEntrySchema } from './get-entry';
+import schema from '../utils/jsonschema';
+export const getEntryList = {
+    'id': '/getEntryList',
+    'type': 'array',
+    'items': {
+        '$ref': '/getEntry'
+    },
+    'uniqueItems': true,
+    'minItems': 1
+};
+const execute = Promise.coroutine(function* (data, cb) {
+    const v = new schema.Validator();
+    v.addSchema(getEntrySchema, '/getEntry');
+    v.validate(data, getEntryList, { throwError: true });
+    for (let entryObj of data) {
+        getEntry.execute(entryObj).then((result) => cb('', {
+            data: result,
+            entryId: entryObj.entryId,
+            ethAddress: entryObj.ethAddress,
+            akashaId: entryObj.akashaId
+        }));
+    }
+    return {};
 });
-export default { execute, name: 'getEntryList' };
+export default { execute, name: 'getEntryList', hasStream: true };
 //# sourceMappingURL=get-entry-list.js.map

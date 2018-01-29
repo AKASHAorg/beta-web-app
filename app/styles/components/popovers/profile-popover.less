@@ -1,0 +1,122 @@
+.profile-popover {
+    width: 250px;
+
+    .ant-popover-inner-content {
+        padding: 4px;
+    }
+
+    &__content {
+        padding: 8px 12px;
+    }
+
+    &__send-tip-form {
+        padding: 8px 12px;        
+    }
+
+    &__header {
+        display: flex;
+        height: 32px;
+    }
+
+    &__avatar-wrapper {
+        flex: 0 0 auto;
+        margin-right: 10px;
+    }
+
+    &__header-text-wrapper {
+        flex: 1 1 auto;
+        max-width: 126px;
+
+        &_own-profile {
+            max-width: 146px;
+        }
+    }
+
+    &__name-wrapper {
+        font-size: 13px;
+        font-weight: 600;
+        color: @heading-color;
+        height: 17px;
+    }
+
+    &__akasha-id {
+        font-size: 12px;
+        cursor: default;
+    }
+
+    &__tip-icon-wrapper {
+        flex: 0 0 auto;
+        margin-left: 5px;
+    }
+
+    &__tip-icon_disabled {
+        stroke: @text-color-secondary !important;
+    }
+
+    &__tip-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    &__details {
+        font-size: 13px;
+        margin: 16px 0px;
+    }
+
+    &__counter-text {
+        margin-right: 15px;
+        cursor: default;
+    }
+
+    &__about {
+        max-height: 150px;
+        margin-top: 16px;
+        overflow-y: auto;
+    }
+
+    &__about-inner {
+        display: inline-block;
+        line-height: 13px;
+        word-break: break-word;
+    }
+
+    &__counters-wrapper {
+        display: flex;
+        justify-content: flex-start;
+        font-size: 11px;
+        font-weight: 400;
+        text-transform: uppercase;
+        margin: 16px 0px;
+    }
+
+    &__counter {
+        font-size: 13px;
+        line-height: 1;
+        font-weight: 500;
+        color: @heading-color;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin: 16px 0px 8px;
+    }
+
+    &__button {
+        font-weight: 400;
+        font-size: 13px;
+        width: ~'calc(50% - 8px)';            
+    }
+
+    &__icon {
+        margin-right: 5px;
+        width: 12px;
+        height: 12px;
+    }
+
+    &__karma-icon {
+        stroke: initial !important;
+        fill: @text-color;
+    }
+}

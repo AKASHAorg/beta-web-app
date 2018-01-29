@@ -1,21 +1,36 @@
 import * as Promise from 'bluebird';
-import contracts  from '../../contracts/index';
+import contracts from '../../contracts/index';
+import { encodeHash } from '../ipfs/helpers';
 import { getCommentContent } from './ipfs';
-import { SHORT_WAIT_TIME } from '../../config/settings';
-import getProfile from '../profile/profile-data';
+import resolve from '../registry/resolve-ethaddress';
+import { unpad } from 'ethereumjs-util';
+
 /**
  * Get comment data for an entry
  * @type {Function}
  */
-const execute = Promise.coroutine(function*(data: { entryId: string, commentId: string }) {
-    const ethData = yield contracts.instance.comments.getComment(data.entryId, data.commentId);
-    const profile = yield getProfile.execute({ profile: ethData.profile })
-        .timeout(SHORT_WAIT_TIME)
-        .then((d) => d).catch((e) => null);
+const execute = Promise.coroutine(function* (data: { entryId: string, commentId: string, noResolve?: boolean }) {
+    const [
+        parent, ethAddress, deleted,
+        publishDate, fn, digestSize, hash
+    ] = yield contracts.instance.Comments.getComment(data.entryId, data.commentId);
+    const ipfsHash = encodeHash(fn, digestSize, hash);
+    const author = yield resolve.execute({ ethAddress: ethAddress });
+    const content = data.noResolve ? { ipfsHash } : yield getCommentContent(ipfsHash);
+    const [_totalVotes, _score, _endPeriod, , ] = yield contracts.instance.Votes.getRecord(data.commentId);
 
-    const content = yield getCommentContent(ethData.ipfsHash);
-    ethData.profile = profile;
-    return { data: Object.assign(ethData, content), entryId: data.entryId, commentId: data.commentId };
+    return Object.assign(
+        {},
+        content,
+        {
+            parent: (!!unpad(parent)) ? parent : null,
+            author,
+            deleted,
+            totalVotes: _totalVotes.toNumber(),
+            score: _score.toNumber(),
+            endPeriod: _endPeriod.toNumber(),
+            publishDate: publishDate.toNumber()
+        });
 });
 
 export default { execute, name: 'getComment' };

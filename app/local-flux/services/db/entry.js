@@ -1,12 +1,12 @@
 import Dexie from 'dexie';
 import draftSchema from './schema/draft';
 
-const dbName = 'entries-akasha-alpha-' + process.env.NODE_ENV;
+const dbName = `entries-akasha-${process.env.AKASHA_VERSION}-${process.env.NODE_ENV}`;
 const entriesDB = new Dexie(dbName);
 entriesDB.version(1).stores({
-    drafts: '++id,akashaId',
+    drafts: '++id,ethAddress',
     entries: '&ipfsHash',
-    savedEntries: '&akashaId'
+    savedEntries: '&ethAddress'
 });
 
 entriesDB.drafts.mapToClass(draftSchema);

@@ -1,20 +1,29 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import { CardActions, FlatButton, IconButton, SvgIcon } from 'material-ui';
-import { EntryVotesPanel } from '../../shared-components';
-import { EntryBookmarkOn, EntryBookmarkOff, EntryDownvote, EntryUpvote,
-    ToolbarEthereum } from '../svg';
-import { entryAddClaimAction, entryAddDownvoteAction,
-    entryAddUpvoteAction } from '../../local-flux/actions/entry-actions';
-import { selectEntryBalance, selectEntryCanClaim, selectEntryVote,
-    selectProfile } from '../../local-flux/selectors';
-import { entryMessages } from '../../locale-data/messages';
+import { Spin, Tooltip } from 'antd';
+import classNames from 'classnames';
+import * as actionTypes from '../../constants/action-types';
+import { Icon, ListPopover, ShareLinkModal, VotesModal, VotePopover } from '../';
+import { actionAdd } from '../../local-flux/actions/action-actions';
+import { listAdd, listDelete, listSearch, listToggleEntry } from '../../local-flux/actions/list-actions';
+import { selectBlockNumber, selectEntryBalance, selectEntryCanClaim, selectEntryCanClaimVote, selectEntryVote,
+    selectLists, selectListsAll, selectListSearch, selectLoggedEthAddress, selectPendingClaim,
+    selectPendingClaimVote, selectPendingVote, selectProfile } from '../../local-flux/selectors';
+import { entryMessages, generalMessages } from '../../locale-data/messages';
+import { balanceToNumber } from '../../utils/number-formatter';
+import { addPrefix } from '../../utils/url-utils';
 
 class EntryPageAction extends Component {
     state = {
         showVotes: false
+    };
+
+    isActive = () => {
+        const { entry } = this.props;
+        return entry.endPeriod && entry.endPeriod * 1000 > Date.now();
     };
 
     openVotesPanel = () => {
@@ -29,41 +38,19 @@ class EntryPageAction extends Component {
         });
     };
 
-    handleUpvote = () => {
-        const { entry, publisher } = this.props;
+    handleVote = ({ type, weight }) => {
+        const { entry, loggedEthAddress } = this.props;
         const payload = {
-            publisherAkashaId: publisher && publisher.get('akashaId'),
+            entryId: entry.entryId,
             entryTitle: entry.content.title,
-            entryId: entry.entryId
+            ethAddress: entry.author.ethAddress,
+            weight
         };
-        this.props.entryAddUpvoteAction(payload);
+        this.props.actionAdd(loggedEthAddress, type, payload);
     };
-
-    handleDownvote = () => {
-        const { entry, publisher } = this.props;
-        const payload = {
-            publisherAkashaId: publisher && publisher.get('akashaId'),
-            entryTitle: entry.content.title,
-            entryId: entry.entryId
-        };
-        this.props.entryAddDownvoteAction(payload);
-    };
-
-    // handleBookmark = () => {
-    //     const { entry, entryActions, loggedProfile, savedEntries } = this.props;
-    //     const loggedAkashaId = loggedProfile.get('akashaId');
-    //     const isSaved = !!savedEntries.find(id => id === entry.entryId);
-
-    //     if (isSaved) {
-    //         entryActions.deleteEntry(loggedAkashaId, entry.entryId);
-    //         entryActions.moreSavedEntriesList(1);
-    //     } else {
-    //         entryActions.saveEntry(loggedAkashaId, entry.entryId);
-    //     }
-    // };
 
     handleClaim = () => {
-        const { canClaim, entry } = this.props;
+        const { canClaim, entry, loggedEthAddress } = this.props;
         if (!canClaim) {
             return;
         }
@@ -71,193 +58,378 @@ class EntryPageAction extends Component {
             entryTitle: entry.content.title,
             entryId: entry.entryId
         };
-        this.props.entryAddClaimAction(payload);
+        this.props.actionAdd(loggedEthAddress, actionTypes.claim, payload);
     };
 
-    render () { // eslint-disable-line complexity
-        const { balance, canClaim, canClaimPending, claimPending, entry, fetchingEntryBalance,
-            intl, isOwnEntry, isSaved, votePending, voteWeight } = this.props;
-        const { palette } = this.context.muiTheme;
-        const upvoteIconColor = voteWeight > 0 ? palette.accent3Color : '';
-        const downvoteIconColor = voteWeight < 0 ? palette.accent1Color : '';
-        const voteButtonsDisabled = !entry.active || voteWeight !== 0 || votePending;
-        const showBalance = isOwnEntry && (!canClaimPending || canClaim !== undefined)
-            && (!fetchingEntryBalance || balance !== undefined);
-        const existingVoteStyle = {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            fontSize: '12px',
+    handleClaimVote = () => {
+        const { canClaimVote, entry, loggedEthAddress } = this.props;
+        if (!canClaimVote) {
+            return;
+        }
+        const payload = {
+            entryTitle: entry.content.title,
+            entryId: entry.entryId
         };
+        this.props.actionAdd(loggedEthAddress, actionTypes.claimVote, payload);
+    };
+
+    renderShareIcon = () => {
+        const { entry } = this.props;
+        const url = addPrefix(`/${entry.author.ethAddress || '0x0'}/${entry.entryId}`);
+
         return (
-          <CardActions className="col-xs-12" style={{ padding: '18px 8px 0px' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }} >
-              <div style={{ position: 'relative' }}>
-                <div
-                  data-tip={entry.get('active') ?
-                      intl.formatMessage(entryMessages.upvote) :
-                      intl.formatMessage(entryMessages.votingExpired)
-                  }
-                >
-                  <IconButton
-                    onTouchTap={this.handleUpvote}
-                    iconStyle={{ width: '24px', height: '24px' }}
-                    disabled={voteButtonsDisabled}
-                  >
-                    <SvgIcon viewBox="0 0 20 20" >
-                      <EntryUpvote fill={upvoteIconColor} />
-                    </SvgIcon>
-                  </IconButton>
-                </div>
-                {voteWeight > 0 &&
-                  <div
-                    style={Object.assign({}, existingVoteStyle, { color: palette.accent3Color })}
-                  >
-                    +{voteWeight}
-                  </div>
-                }
+          <ShareLinkModal url={url} />
+        );
+    }
+
+    renderVotesModal = () => {
+        const { blockNr, entry } = this.props;
+        return (
+          <VotesModal
+            closeVotesPanel={this.closeVotesPanel}
+            content={entry}
+            contentTitle={entry.content.title}
+            blockNr={blockNr}
+          />
+        );
+    };
+
+    renderOwnEntryActions = () => {
+        const { canClaim, claimPending, containerRef, entry, entryBalance, intl, isFullEntry,
+            lists, listsAll, listSearchKeyword } = this.props;
+        const balance = entryBalance && balanceToNumber(entryBalance.get('totalKarma'));
+        const isClaimed = entryBalance && entryBalance.get('claimed');
+        const endPeriod = new Date(entry.get('endPeriod') * 1000);
+        const claimDisabled = !canClaim || !balance;
+        const infoClass = classNames('entry-actions__info', {
+            'entry-actions__info_full': isFullEntry
+        });
+        const infoTextClass = classNames('entry-actions__info-text', {
+            'entry-actions__info-text_can-claim': !claimDisabled,
+            'entry-actions__info-text_cannot-claim': claimDisabled && !this.isActive() && !isClaimed,
+        });
+        const collectClass = classNames('entry-actions__collect-button', {
+            'content-link': !claimDisabled && !claimPending,
+            'entry-actions__collect-button_disabled': claimDisabled || claimPending
+        });
+        return (
+          <div className="flex-center-y entry-actions entry-actions_own-entry">
+            <div className={infoClass}>
+              <div className={infoTextClass}>
+                <span className="content-link" onClick={this.openVotesPanel}>
+                  {entry.score} {intl.formatMessage(entryMessages.score)}
+                </span>
+                <span className="entry-actions__separator">|</span>
+                {balance} {intl.formatMessage(generalMessages.essence)}
               </div>
-              <div style={{ fontSize: '18px', padding: '0 15px', letterSpacing: '2px' }}>
-                <FlatButton
-                  label={entry.score}
-                  onClick={this.openVotesPanel}
-                  style={{ minWidth: '10px', borderRadius: '6px' }}
-                />
-              </div>
-              <div style={{ position: 'relative' }}>
-                <div data-tip={entry.get('active') ? 'Downvote' : 'Voting period has ended'}>
-                  <IconButton
-                    onTouchTap={this.handleDownvote}
-                    iconStyle={{ width: '24px', height: '24px' }}
-                    disabled={voteButtonsDisabled}
-                  >
-                    <SvgIcon viewBox="0 0 20 20">
-                      <EntryDownvote fill={downvoteIconColor} />
-                    </SvgIcon>
-                  </IconButton>
-                </div>
-                {voteWeight < 0 &&
-                  <div
-                    style={Object.assign({}, existingVoteStyle, { color: palette.accent1Color })}
-                  >
-                    {voteWeight}
-                  </div>
+              <div>
+                {isClaimed &&
+                  <span className="entry-actions__collected">
+                    {intl.formatMessage(entryMessages.collected)}
+                  </span>
                 }
-              </div>
-              <div style={{ flex: '1 1 auto', textAlign: 'right' }}>
-                {!isOwnEntry &&
-                  <div data-tip="Bookmark" style={{ display: 'inline-block' }}>
-                    <IconButton iconStyle={{ width: '24px', height: '24px' }}>
-                      <SvgIcon viewBox="0 0 20 20">
-                        {isSaved ?
-                          <EntryBookmarkOn /> :
-                          <EntryBookmarkOff />
-                        }
-                      </SvgIcon>
-                    </IconButton>
-                  </div>
-                }
-                {showBalance &&
-                  <div
-                    style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
-                  >
-                    {!entry.active &&
-                      <div
-                        data-tip={!canClaim ?
-                            intl.formatMessage(entryMessages.alreadyClaimed) :
-                            intl.formatMessage(entryMessages.claim)
+                {!this.isActive() && !isClaimed &&
+                  <div className="flex-center-y">
+                    {claimPending && <Spin size="small" style={{ marginRight: '5px' }} />}
+                    <span
+                      className={collectClass}
+                      onClick={!claimDisabled && !claimPending ? this.handleClaim : undefined}
+                    >
+                      {intl.formatMessage(entryMessages.collectEssence)}
+                    </span>
+                    {claimDisabled &&
+                      <Tooltip
+                        getPopupContainer={() => containerRef || document.body}
+                        title={balance ?
+                            intl.formatMessage(entryMessages.cannotClaimEntry) :
+                            intl.formatMessage(entryMessages.nothingToCollect)
                         }
                       >
-                        <IconButton
-                          onTouchTap={this.handleClaim}
-                          iconStyle={{
-                              width: '24px',
-                              height: '24px',
-                              fill: !canClaim ? palette.accent3Color : 'currentColor'
-                          }}
-                          disabled={claimPending}
-                        >
-                          <SvgIcon viewBox="0 0 16 16">
-                            <ToolbarEthereum />
-                          </SvgIcon>
-                        </IconButton>
-                      </div>
-                    }
-                    {balance !== 'claimed' &&
-                      <div style={{ fontSize: '16px', paddingRight: '5px' }}>
-                        {balance} AETH
-                      </div>
+                        <Icon
+                          className="question-circle-icon entry-actions__info-icon"
+                          type="questionCircle"
+                        />
+                      </Tooltip>
                     }
                   </div>
+                }
+                {this.isActive() &&
+                  <span className="entry-actions__collect-in">
+                    {intl.formatMessage(entryMessages.collectEssence)}
+                    {' '}
+                    {intl.formatRelative(endPeriod)}
+                  </span>
                 }
               </div>
             </div>
-            {this.state.showVotes &&
-              <EntryVotesPanel
-                closeVotesPanel={this.closeVotesPanel}
+            <div className="flex-center-y entry-actions__actions">
+              {!isFullEntry &&
+                <div className="content-link entry-actions__comments">
+                  <Link
+                    className="flex-center-y unstyled-link"
+                    to={{
+                        pathname: `/${entry.getIn(['author', 'ethAddress']) || '0x0'}/${entry.get('entryId')}`,
+                        state: { overlay: true }
+                    }}
+                  >
+                    <span className="entry-actions__comments-counter">
+                      {entry.get('commentsCount')}
+                    </span>
+                    <Icon className="entry-actions__comment-icon" type="commentLarge" />
+                  </Link>
+                </div>
+              }
+              <ListPopover
+                authorEthAddress={entry.author.ethAddress}
+                containerRef={containerRef}
                 entryId={entry.entryId}
-                entryTitle={entry.content.title}
+                entryType={entry.getIn(['content', 'entryType'])}
+                listAdd={this.props.listAdd}
+                listDelete={this.props.listDelete}
+                lists={lists}
+                listsAll={listsAll}
+                listSearch={this.props.listSearch}
+                listToggleEntry={this.props.listToggleEntry}
+                search={listSearchKeyword}
               />
+              {this.renderShareIcon()}
+            </div>
+            {this.state.showVotes && this.renderVotesModal()}
+          </div>
+        );
+    };
+
+    renderCollectEntryVote = () => {
+        const { canClaimVote, claimVotePending, containerRef, entry, intl, isFullEntry, vote } = this.props;
+        const balance = vote && balanceToNumber(vote.get('essence'));
+        const isVoteClaimed = vote && vote.get('claimed');
+        const endPeriod = new Date(entry.get('endPeriod') * 1000);
+        const claimDisabled = !canClaimVote || !balance;
+        const infoClass = classNames('entry-actions__info', {
+            'entry-actions__info_full': isFullEntry
+        });
+        const infoTextClass = classNames('entry-actions__info-text', {
+            'entry-actions__info-text_can-claim': !claimDisabled,
+            'entry-actions__info-text_cannot-claim': claimDisabled && !this.isActive() && !isVoteClaimed,
+        });
+        const collectClass = classNames('entry-actions__collect-button', {
+            'content-link': !claimDisabled && !claimVotePending,
+            'entry-actions__collect-button_disabled': claimDisabled || claimVotePending
+        });
+        return (
+          <div className={infoClass}>
+            <div className={infoTextClass}>
+              {balance} {intl.formatMessage(generalMessages.essence)}
+            </div>
+            <div>
+              {isVoteClaimed &&
+                <span className="entry-actions__collected">
+                  {intl.formatMessage(entryMessages.collected)}
+                </span>
+              }
+              {!this.isActive() && !isVoteClaimed &&
+                <div>
+                  {claimVotePending && <Spin size="small" style={{ marginRight: '5px' }} />}
+                  <span
+                    className={collectClass}
+                    onClick={!claimDisabled && !claimVotePending ? this.handleClaimVote : undefined}
+                  >
+                    {intl.formatMessage(entryMessages.collectEssence)}
+                  </span>
+                  {claimDisabled &&
+                    <Tooltip
+                      getPopupContainer={() => containerRef || document.body}
+                      title={balance ?
+                          intl.formatMessage(entryMessages.cannotClaimVote) :
+                          intl.formatMessage(entryMessages.nothingToCollect)
+                      }
+                    >
+                      <Icon className="question-circle-icon entry-actions__info-icon" type="questionCircle" />
+                    </Tooltip>
+                  }
+                </div>
+              }
+              {this.isActive() &&
+                <span className="entry-actions__collect-in">
+                  {intl.formatMessage(entryMessages.collectEssence)}
+                  {' '}
+                  {intl.formatRelative(endPeriod)}
+                </span>
+              }
+            </div>
+          </div>
+        );
+    };
+
+    render () {
+        const { containerRef, entry, intl, isFullEntry, isOwnEntry, lists,
+            listsAll, listSearchKeyword, votePending, vote } = this.props;
+        if (isOwnEntry) {
+            return this.renderOwnEntryActions();
+        }
+        const iconClassName = 'entry-actions__vote-icon';
+        const voteWeight = vote && vote.get('vote');
+        const voteProps = {
+            containerRef, iconClassName, isOwnEntity: isOwnEntry, votePending, vote: voteWeight
+        };
+        const upvoteRatio = entry.get('upvoteRatio');
+        let upvotePercent = 0;
+        let downvotePercent = 0;
+
+        if (upvoteRatio && parseFloat(upvoteRatio, 10) >= 0) {
+            upvotePercent = 100 * upvoteRatio;
+            downvotePercent = 100 - upvotePercent;
+        }
+
+        const votePercentTooltip = intl.formatMessage(entryMessages.votePercentage, {
+            downvote: downvotePercent && downvotePercent.toFixed(0),
+            upvote: upvotePercent && upvotePercent.toFixed(0)
+        });
+
+        return (
+          <div className="entry-actions">
+            <div className="flex-center-y">
+              <div>
+                <div className="flex-center-y">
+                  <div className="flex-center entry-actions__vote-wrapper">
+                    <VotePopover
+                      onSubmit={this.handleVote}
+                      type={actionTypes.entryUpvote}
+                      {...voteProps}
+                    />
+                  </div>
+                  <div className="flex-center entry-actions__score">
+                    <span className="content-link" onClick={this.openVotesPanel}>
+                      {entry.score}
+                    </span>
+                  </div>
+                  <div className="flex-center entry-actions__vote-wrapper">
+                    <VotePopover
+                      onSubmit={this.handleVote}
+                      type={actionTypes.entryDownvote}
+                      {...voteProps}
+                    />
+                  </div>
+                </div>
+                {isFullEntry &&
+                <Tooltip placement="left" title={votePercentTooltip}>
+                  <div className={
+                    `flex-center-y
+                    entry-actions__vote-bar
+                    entry-actions__vote-bar${(upvotePercent || downvotePercent) ? '' : '_disabled'}`}
+                  >
+                    <div className="entry-actions__upvote-bar" style={{ width: `${upvotePercent}%` }} />
+                    <div className="entry-actions__downvote-bar" style={{ width: `${downvotePercent}%` }} />
+                  </div>
+                </Tooltip>
+                }
+              </div>
+              <div className="entry-actions__right-actions">
+                {!isFullEntry &&
+                  <div className="content-link entry-actions__comments">
+                    <Link
+                      className="unstyled-link"
+                      to={{
+                          pathname: `/${entry.getIn(['author', 'ethAddress']) || '0x0'}/${entry.get('entryId')}`,
+                          state: { overlay: true }
+                      }}
+                    >
+                      <div className="content-link flex-center-y">
+                        <span className="entry-actions__comments-counter">
+                          {entry.get('commentsCount')}
+                        </span>
+                        <Icon className="entry-actions__comment-icon" type="commentLarge" />
+                      </div>
+                    </Link>
+                    </div>
+                  }
+                <ListPopover
+                  authorEthAddress={entry.author.ethAddress}
+                  containerRef={containerRef}
+                  entryId={entry.entryId}
+                  entryType={entry.content.entryType}
+                  listAdd={this.props.listAdd}
+                  listDelete={this.props.listDelete}
+                  lists={lists}
+                  listsAll={listsAll}
+                  listSearch={this.props.listSearch}
+                  listToggleEntry={this.props.listToggleEntry}
+                  search={listSearchKeyword}
+                />
+                {this.renderShareIcon()}
+              </div>
+            </div>
+            {vote && vote.get('vote') !== '0' && this.renderCollectEntryVote()}
+            {vote && vote.get('vote') === '0' && !this.isActive() &&
+              <div className="entry-actions__info">
+                <span className="entry-actions__info-text">
+                  {intl.formatMessage(entryMessages.votingPeriod)}
+                  <Tooltip title={intl.formatMessage(entryMessages.votingPeriodDisclaimer)}>
+                    <Icon className="question-circle-icon entry-actions__info-icon" type="questionCircle" />
+                  </Tooltip>
+                </span>
+              </div>
             }
-          </CardActions>
+            {this.state.showVotes && this.renderVotesModal()}
+          </div>
         );
     }
 }
 
-EntryPageAction.contextTypes = {
-    muiTheme: PropTypes.shape()
-};
-
-EntryPageAction.defaultProps = {
-    voteWeight: 0
-};
-
 EntryPageAction.propTypes = {
-    balance: PropTypes.string,
+    actionAdd: PropTypes.func.isRequired,
+    author: PropTypes.shape(),
+    blockNr: PropTypes.number,
     canClaim: PropTypes.bool,
-    canClaimPending: PropTypes.bool,
+    canClaimVote: PropTypes.bool,
     claimPending: PropTypes.bool,
+    claimVotePending: PropTypes.bool,
+    containerRef: PropTypes.shape(),
     entry: PropTypes.shape().isRequired,
-    entryAddClaimAction: PropTypes.func.isRequired,
-    entryAddDownvoteAction: PropTypes.func.isRequired,
-    entryAddUpvoteAction: PropTypes.func.isRequired,
-    fetchingEntryBalance: PropTypes.bool,
-    intl: PropTypes.shape(),
+    entryBalance: PropTypes.shape(),
+    intl: PropTypes.shape().isRequired,
+    isFullEntry: PropTypes.bool,
     isOwnEntry: PropTypes.bool,
-    isSaved: PropTypes.bool,
-    publisher: PropTypes.shape(),
+    listAdd: PropTypes.func.isRequired,
+    listsAll: PropTypes.shape().isRequired,
+    listDelete: PropTypes.func.isRequired,
+    lists: PropTypes.shape().isRequired,
+    listSearch: PropTypes.func.isRequired,
+    listSearchKeyword: PropTypes.string,
+    listToggleEntry: PropTypes.func.isRequired,
+    loggedEthAddress: PropTypes.string,
     votePending: PropTypes.bool,
-    voteWeight: PropTypes.number,
+    vote: PropTypes.shape(),
 };
 
 function mapStateToProps (state, ownProps) {
     const entry = ownProps.entry;
-    const claimPending = state.entryState.getIn(['flags', 'claimPending', entry.get('entryId')]);
-    const votePending = state.entryState.getIn(['flags', 'votePending', entry.get('entryId')]);
-    const loggedProfile = state.profileState.getIn(['loggedProfile', 'profile']);
+    const loggedEthAddress = selectLoggedEthAddress(state);
     return {
-        balance: selectEntryBalance(state, entry.get('entryId')),
+        author: selectProfile(state, entry.getIn(['author', 'ethAddress'])),
+        blockNr: selectBlockNumber(state),
         canClaim: selectEntryCanClaim(state, entry.get('entryId')),
-        canClaimPending: state.entryState.getIn(['flags', 'canClaimPending']),
-        claimPending,
-        fetchingEntryBalance: state.entryState.getIn(['flags', 'fetchingEntryBalance']),
-        isOwnEntry: loggedProfile === entry.getIn(['entryEth', 'publisher']),
-        isSaved: !!state.entryState
-            .get('savedEntries')
-            .find(entr => entr.get('entryId') === entry.get('entryId')),
-        publisher: selectProfile(state, entry.getIn(['entryEth', 'publisher'])),
-        votePending,
-        voteWeight: selectEntryVote(state, entry.get('entryId'))
+        canClaimVote: selectEntryCanClaimVote(state, entry.get('entryId')),
+        claimPending: selectPendingClaim(state, entry.get('entryId')),
+        claimVotePending: selectPendingClaimVote(state, entry.get('entryId')),
+        entryBalance: selectEntryBalance(state, entry.get('entryId')),
+        isOwnEntry: loggedEthAddress === entry.getIn(['author', 'ethAddress']),
+        lists: selectLists(state),
+        listsAll: selectListsAll(state),
+        listSearchKeyword: selectListSearch(state),
+        loggedEthAddress,
+        votePending: selectPendingVote(state, entry.get('entryId')),
+        vote: selectEntryVote(state, entry.get('entryId'))
     };
 }
 
 export default connect(
     mapStateToProps,
     {
-        entryAddClaimAction,
-        entryAddDownvoteAction,
-        entryAddUpvoteAction
+        actionAdd,
+        listAdd,
+        listDelete,
+        listSearch,
+        listToggleEntry,
     }
 )(injectIntl(EntryPageAction));

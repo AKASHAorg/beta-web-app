@@ -21,16 +21,6 @@ import ToolbarProfile from './ToolbarProfile';
 import ToolbarSettings from './ToolbarSettings';
 import ToolbarVotes from './ToolbarVotes';
 import ToolbarWallet from './ToolbarWallet';
-import ProfileIcon from './IconProfile';
-import AddEntryIcon from './IconAddEntry';
-import EntriesIcon from './IconEntries';
-import SearchIcon from './IconSearch';
-import StreamsIcon from './IconStreams';
-import PortalsIcon from './IconPortals';
-import ChatIcon from './IconChat';
-import CommunityIcon from './IconCommunity';
-import PeopleIcon from './IconPeople';
-import LogoIcon from './IconLogo';
 import StatusBarEthereum from './StatusBarEthereum';
 import StatusBarIpfs from './StatusBarIpfs';
 import ImageSizeLarge from './ImageSizeLarge';
@@ -63,11 +53,9 @@ import UserDonate from './user-donate';
 import UserMore from './user-more';
 
 export {
-    AvatarPlaceholder, ColumnLatest, ColumnProfile, ColumnStream, ColumnTag, ProfileIcon,
-    AddEntryIcon, EntriesIcon, SearchIcon, StreamsIcon, PortalsIcon,
-    CommunityIcon, PeopleIcon, ChatIcon, LogoIcon, MenuAddEntry, MenuAkashaLogo, MenuChat,
-    MenuCommunities, MenuEntries, MenuEthereum, MenuPeople, MenuPortals,
-    MenuSearch, MenuStreams, MenuUser, ToolbarComments, ToolbarEthereum,
+    AvatarPlaceholder, ColumnLatest, ColumnProfile, ColumnStream, ColumnTag,
+    MenuAddEntry, MenuAkashaLogo, MenuChat, MenuCommunities, MenuEntries, MenuEthereum,
+    MenuPeople, MenuPortals, MenuSearch, MenuStreams, MenuUser, ToolbarComments, ToolbarEthereum,
     ToolbarLogout, ToolbarProfile, ToolbarSettings, ToolbarVotes, ToolbarWallet,
     StatusBarEthereum, StatusBarIpfs, ImageSizeLarge, ImageSizeMedium,
     ImageSizeSmall, ImageSizeXL, ImageSizeXS, ImageSizeXXL, AddImage, AllRightsReserved,

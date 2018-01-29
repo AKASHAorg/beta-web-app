@@ -1,8 +1,25 @@
 import { List, Map, Record } from 'immutable';
+import { CardInfo } from './draft-record';
+
+export const EntryAuthor = Record({
+    akashaId: null,
+    ethAddress: null,
+});
+
+export const EntryBalance = Record({
+    claimed: null,
+    endPeriod: null,
+    entryId: null,
+    score: null,
+    totalKarma: null,
+    totalVotes: null
+});
 
 export const EntryContent = Record({
+    cardInfo: CardInfo(),
     draft: {},
     excerpt: null,
+    entryType: null,
     featuredImage: null,
     licence: {},
     tags: [],
@@ -11,35 +28,33 @@ export const EntryContent = Record({
     wordCount: null
 });
 
-export const EntryEth = Record({
-    blockNr: null,
-    ipfsHash: null,
-    publisher: null,
-    unixStamp: null
+export const EntryVote = Record({
+    claimed: false,
+    essence: null,
+    vote: null,
 });
 
 export const EntryRecord = Record({
-    active: null,
+    author: new EntryAuthor(),
     baseUrl: '',
     commentsCount: 0,
     content: EntryContent(),
-    entryEth: EntryEth(),
+    endPeriod: null,
     entryId: null,
+    ipfsHash: null,
+    publishDate: null,
     score: null,
-});
-
-const EntriesStream = Record({
-    akashaId: null,
-    profiles: new List(),
-    tags: new List()
+    totalKarma: null,
+    totalVotes: null,
+    versionsInfo: new Map(),
+    upvoteRatio: null,
 });
 
 const Flags = Record({
-    claimPending: new Map(),
     fetchingEntryBalance: false,
     fetchingFullEntry: false,
-    isActivePending: false,
-    votePending: new Map(),
+    pendingEntries: new Map(),
+    resolvingFullEntryHash: false,
 });
 
 export const EntryPageOverlay = Record({
@@ -47,40 +62,24 @@ export const EntryPageOverlay = Record({
     version: null
 });
 
-// export const EntryState = Record({
-//     published: new List(),
-//     licences: new List(),
-//     errors: new List(),
-//     flags: new Map({
-//         votePending: new List(),
-//         claimPending: new List()
-//     }),
-//     fetchingEntriesCount: false,
-//     entriesStream: new EntriesStream(),
-//     entries: new List(),
-//     fullEntry: null,
-//     fullEntryLatestVersion: null,
-//     lastAllStreamBlock: null,
-//     savedEntries: new List(),
-//     moreAllStreamEntries: false,
-//     moreProfileEntries: false,
-//     moreSavedEntries: false,
-//     moreSearchEntries: false,
-//     moreTagEntries: false,
-//     tagEntriesCount: new Map(),
-//     entriesCount: 0, // entries published by a logged profile
-//     voteCostByWeight: new Map()
-// });
+export const ProfileEntries = Record({
+    entryIds: new List(),
+    fetchingEntries: false,
+    fetchingMoreEntries: false,
+    lastBlock: null,
+    lastIndex: null,
+    moreEntries: false
+});
 
 export const EntryState = Record({
     balance: new Map(),
     byId: new Map(),
     canClaim: new Map(),
-    published: new List(),
+    canClaimVote: new Map(),
+    entriesCount: 0, // entries published by a logged profile
+    entryPageOverlay: new EntryPageOverlay(),
     flags: new Flags(),
     fetchingEntriesCount: false,
-    entriesStream: new EntriesStream(),
-    entryPageOverlay: new EntryPageOverlay(),
     fullEntry: null,
     fullEntryLatestVersion: null,
     savedEntries: new List(),
@@ -90,8 +89,9 @@ export const EntryState = Record({
     moreSearchEntries: false,
     moreTagEntries: false,
     newestEntries: new List(),
+    profileEntries: new Map(),
+    published: new List(),
     tagEntriesCount: new Map(),
-    entriesCount: 0, // entries published by a logged profile
     voteCostByWeight: new Map(),
     votes: new Map(),
 });

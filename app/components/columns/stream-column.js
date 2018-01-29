@@ -2,22 +2,60 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { ColumnHeader } from '../';
-import { ColumnStream } from '../svg';
-import { EntryListContainer } from '../../shared-components';
+import classNames from 'classnames';
+import Waypoint from 'react-waypoint';
+import { ColumnHeader, EntryList } from '../index';
 import { dashboardMessages, entryMessages } from '../../locale-data/messages';
+import { dashboardResetColumnEntries } from '../../local-flux/actions/dashboard-actions';
 import { entryMoreStreamIterator,
     entryStreamIterator } from '../../local-flux/actions/entry-actions';
 import { selectColumnEntries } from '../../local-flux/selectors';
 
-class StreamColumn extends Component {
+const DELAY = 60000;
 
-    componentDidMount () {
-        const { column } = this.props;
-        if (!column.get('entries').size) {
-            this.props.entryStreamIterator(column.get('id'));
+class StreamColumn extends Component {
+    firstCallDone = false;
+    interval = null;
+    timeout = null;
+
+    componentWillReceiveProps (nextProps) {
+        if (nextProps.column.get('hasNewEntries') && this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
         }
     }
+
+    componentWillUnmount () {
+        const { column } = this.props;
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+        this.props.dashboardResetColumnEntries(column.get('id'));
+    }
+
+    firstLoad = () => {
+        if (!this.firstCallDone) {
+            this.entryIterator();
+            this.firstCallDone = true;
+        }
+    };
+
+    setPollingInterval = () => {
+        this.interval = setInterval(() => {
+            this.props.entryStreamIterator(this.props.column.get('id'), true);
+        }, DELAY);
+    };
+
+    entryIterator = () => {
+        this.props.entryStreamIterator(this.props.column.get('id'));
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.timeout = setTimeout(this.setPollingInterval, DELAY);
+    };
 
     entryMoreStreamIterator = () => {
         const { column } = this.props;
@@ -25,24 +63,28 @@ class StreamColumn extends Component {
     }
 
     render () {
-        const { column, entries, intl, profiles } = this.props;
+        const { column, entriesList, intl } = this.props;
+        const className = classNames('column', { column_large: column.get('large') });
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className={className}>
             <ColumnHeader
-              columnId={column.get('id')}
-              icon={<ColumnStream />}
+              column={column}
+              iconType="entries"
+              onRefresh={this.entryIterator}
               readOnly
               title={intl.formatMessage(dashboardMessages.columnStream)}
             />
-            <EntryListContainer
-              entries={entries}
+            <Waypoint onEnter={this.firstLoad} horizontal />
+            <EntryList
+              contextId={column.get('id')}
+              entries={entriesList}
               fetchingEntries={column.getIn(['flags', 'fetchingEntries'])}
               fetchingMoreEntries={column.getIn(['flags', 'fetchingMoreEntries'])}
               fetchMoreEntries={this.entryMoreStreamIterator}
+              large={column.get('large')}
               moreEntries={column.getIn(['flags', 'moreEntries'])}
-              placeholderMessage={intl.formatMessage(entryMessages.noNewEntries)}
-              profiles={profiles}
+              placeholderMessage={intl.formatMessage(entryMessages.noEntries)}
             />
           </div>
         );
@@ -51,23 +93,23 @@ class StreamColumn extends Component {
 
 StreamColumn.propTypes = {
     column: PropTypes.shape().isRequired,
-    entries: PropTypes.shape().isRequired,
+    dashboardResetColumnEntries: PropTypes.func.isRequired,
+    entriesList: PropTypes.shape().isRequired,
     entryMoreStreamIterator: PropTypes.func.isRequired,
     entryStreamIterator: PropTypes.func.isRequired,
     intl: PropTypes.shape().isRequired,
-    profiles: PropTypes.shape().isRequired,
 };
 
 function mapStateToProps (state, ownProps) {
     return {
-        entries: selectColumnEntries(state, ownProps.column.get('id')),
-        profiles: state.profileState.get('byId'),
+        entriesList: selectColumnEntries(state, ownProps.column.get('id')),
     };
 }
 
 export default connect(
     mapStateToProps,
     {
+        dashboardResetColumnEntries,
         entryMoreStreamIterator,
         entryStreamIterator,
     }

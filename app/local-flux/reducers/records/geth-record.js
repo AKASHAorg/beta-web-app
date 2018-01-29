@@ -1,16 +1,13 @@
 import { Record, OrderedSet } from 'immutable';
 
-const GethStatus = Record({
+export const GethStatus = Record({
     api: false,
-    shouldLogout: false,
-    akashaKey: null,
-    ethKey: null,
-    networkID: null,
     blockNr: null,
     downloading: null,
     ipc: null,
     message: null,
     process: false,
+    progress: null,
     started: null,
     starting: null,
     stopped: null,
@@ -18,7 +15,7 @@ const GethStatus = Record({
     version: null,
 });
 
-const GethSyncStatus = Record({
+export const GethSyncStatus = Record({
     currentBlock: null,
     highestBlock: null,
     knownStates: null,
@@ -34,7 +31,7 @@ const GethFlags = Record({
     gethStarting: false,
 });
 
-const GethRecord = Record({
+export const GethRecord = Record({
     flags: new GethFlags(),
     lastLogTimestamp: null,
     logs: new OrderedSet(),
@@ -49,5 +46,3 @@ const GethRecord = Record({
     syncActionId: 0,
     syncStatus: new GethSyncStatus(),
 });
-
-export { GethRecord, GethStatus, GethSyncStatus, GethFlags };

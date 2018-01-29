@@ -136,7 +136,9 @@ export default merge(baseConfig, {
          * development checks
          */
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development')
+            'process.env.NODE_ENV': JSON.stringify('development'),
+            'process.env.DARK_THEME': JSON.stringify(process.env.DARK_THEME),
+            'process.env.AKASHA_VERSION': JSON.stringify('beta#0')
         }),
         // turn debug mode on.
         new webpack.LoaderOptionsPlugin({
@@ -148,9 +150,7 @@ export default merge(baseConfig, {
         hot: true,
         inline: false,
         historyApiFallback: true,
-        contentBase: path.join(__dirname, 'build'),
-        https: true,
-        host: 'localhost',
+        contentBase: path.join(__dirname, 'dist'),
         publicPath
     },
 });

@@ -1,11 +1,26 @@
-const actionTypes = {
-    claim: 'claim',
-    comment: 'comment',
-    downvote: 'downvote',
-    follow: 'follow',
-    sendTip: 'sendTip',
-    unfollow: 'unfollow',
-    upvote: 'upvote'
-};
-
-export default actionTypes;
+export const batch = 'batch';
+export const bondAeth = 'bondAeth';
+export const claim = 'claim';
+export const claimVote = 'claimVote';
+export const comment = 'comment';
+export const commentDownvote = 'commentDownvote';
+export const commentUpvote = 'commentUpvote';
+export const cycleAeth = 'cycleAeth';
+export const draftPublish = 'draftPublish';
+export const draftPublishUpdate = 'draftPublishUpdate';
+export const entryDownvote = 'entryDownvote';
+export const entryUpvote = 'entryUpvote';
+export const faucet = 'faucet';
+export const follow = 'follow';
+export const freeAeth = 'freeAeth';
+export const profileRegister = 'profileRegister';
+export const profileUpdate = 'profileUpdate';
+// this is a mocked action type used for received AETH events
+export const receiveAeth = 'receiveAeth';
+export const sendTip = 'sendTip';
+export const tagCreate = 'tagCreate';
+export const toggleDonations = 'toggleDonations';
+export const transferAeth = 'transferAeth';
+export const transferEth = 'transferEth';
+export const transformEssence = 'transformEssence';
+export const unfollow = 'unfollow';

@@ -5,15 +5,17 @@ import { ErrorModel } from './models';
 import * as types from '../constants';
 
 const initialState = new ErrorModel();
-const newError = (error) => {
+const newError = (state, error) => {
     const err = new ErrorRecord(error);
-    return err.set('id', err.hashCode());
+    const lastErr = state.get('byId').last();
+    const id = lastErr ? lastErr.get('id') + 1 : 1;
+    return err.set('id', id);
 };
 const addNewError = (state, { error }) => {
-    const err = newError(error);
+    const err = newError(state, error);
     const extra = err.fatal ?
         { fatalErrors: state.get('fatalErrors').push(err.id) } :
-        { nonFatalErrors: state.get('nonFatalErrors').push(err.id) };
+        null;
 
     return state.merge({
         allIds: state.get('allIds').push(err.id),
@@ -24,15 +26,23 @@ const addNewError = (state, { error }) => {
 
 const errorState = createReducer(initialState, {
     [types.BACKUP_KEYS_ERROR]: addNewError,
+    [types.COMMENTS_DOWNVOTE_ERROR]: addNewError,
+    [types.COMMENTS_PUBLISH_ERROR]: addNewError,
+    [types.COMMENTS_UPVOTE_ERROR]: addNewError,
     [types.DASHBOARD_ADD_COLUMN_ERROR]: addNewError,
     [types.DASHBOARD_ADD_ERROR]: addNewError,
     [types.DASHBOARD_DELETE_COLUMN_ERROR]: addNewError,
     [types.DASHBOARD_GET_ACTIVE_ERROR]: addNewError,
     [types.DASHBOARD_GET_ALL_ERROR]: addNewError,
-    [types.DASHBOARD_GET_COLUMNS_ERROR]: addNewError,
     [types.DASHBOARD_SET_ACTIVE_ERROR]: addNewError,
     [types.DASHBOARD_UPDATE_COLUMN_ERROR]: addNewError,
+    [types.DRAFT_CREATE_ERROR]: addNewError,
+    [types.DRAFT_UPDATE_ERROR]: addNewError,
+    [types.ENTRIES_GET_AS_DRAFTS_ERROR]: addNewError,
+    [types.DRAFT_PUBLISH_ERROR]: addNewError,
+    [types.DRAFT_PUBLISH_UPDATE_ERROR]: addNewError,
     [types.ENTRY_CLAIM_ERROR]: addNewError,
+    [types.ENTRY_CLAIM_VOTE_ERROR]: addNewError,
     [types.ENTRY_DOWNVOTE_ERROR]: addNewError,
     [types.ENTRY_GET_FULL_ERROR]: addNewError,
     [types.ENTRY_UPVOTE_ERROR]: addNewError,
@@ -43,13 +53,16 @@ const errorState = createReducer(initialState, {
         });
     },
     [types.ERROR_DELETE_NON_FATAL]: (state, { id }) => {
-        const index = state.get('nonFatalErrors').findIndex(err => err.id === id);
+        const index = state.get('nonFatalErrors').findIndex(err => err === id);
         return state.merge({
             nonFatalErrors: state.get('nonFatalErrors').delete(index)
         });
     },
+    [types.ERROR_DISPLAY]: (state, { err }) =>
+        state.merge({
+            nonFatalErrors: state.get('nonFatalErrors').push(err.id)
+        }),
     [types.SHOW_REPORT_MODAL]: (state, { data }) => {
-        console.log(data);
         return state.merge({
             reportError: new Map(data.error)
         });
@@ -76,10 +89,20 @@ const errorState = createReducer(initialState, {
     [types.IPFS_SETTINGS_ERROR]: addNewError,
     [types.IPFS_START_ERROR]: addNewError,
     [types.IPFS_STOP_ERROR]: addNewError,
+    [types.PROFILE_BOND_AETH_ERROR]: addNewError,
+    [types.PROFILE_CYCLE_AETH_ERROR]: addNewError,
+    [types.PROFILE_FREE_AETH_ERROR]: addNewError,
     [types.PROFILE_GET_LIST_ERROR]: addNewError,
     [types.PROFILE_GET_LOCAL_ERROR]: addNewError,
+    [types.PROFILE_TOGGLE_DONATIONS_ERROR]: addNewError,
+    [types.PROFILE_TRANSFER_AETH_ERROR]: addNewError,
+    [types.PROFILE_TRANSFER_ETH_ERROR]: addNewError,
+    [types.PROFILE_TRANSFORM_ESSENCE_ERROR]: addNewError,
+    [types.PROFILE_UPDATE_ERROR]: addNewError,
     [types.PUBLISH_PROFILE_ERROR]: addNewError,
     [types.REQUEST_FUND_FROM_FAUCET_ERROR]: addNewError,
+    [types.SEARCH_QUERY_ERROR]: addNewError,
+    [types.SEARCH_MORE_QUERY_ERROR]: addNewError,
     // an error occured when saving temp profile to IndexedDb
     [types.TEMP_PROFILE_CREATE_ERROR]: addNewError,
     // error deleting temp profile from indexedDB.

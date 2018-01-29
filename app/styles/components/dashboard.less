@@ -1,0 +1,42 @@
+.dashboard {
+    display: flex;
+    padding: 20px 20px 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: auto;
+    background-color: @light-background;
+    
+    &__column {
+        flex: 0 0 auto;
+        border-radius: 4px;
+        margin-right: 12px;
+        background-color: @background;
+    }
+
+    &__empty-placeholder {
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        cursor: default;
+    }
+
+    &__empty-placeholder-img {
+        height: 285px;
+        width: 792px;
+        background-size: contain !important;
+        background: url('../../images/placeholders/NoBoards-EmptyState-LightTheme.png') top center no-repeat;
+
+        &_dark {
+            background: url('../../images/placeholders/NoBoards-EmptyState-DarkTheme.png') top center no-repeat;            
+        }
+    }
+
+    &__placeholder-text {
+        margin-top: 32px;
+    }
+
+    &__create-button {
+        margin-left: 5px;
+        color: @primary-color;
+    }
+}

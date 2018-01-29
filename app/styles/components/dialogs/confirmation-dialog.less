@@ -1,0 +1,53 @@
+.confirmation {
+    &__no-funds {
+        button.ant-btn:not(.ant-btn-primary) {
+            display: none;
+        }
+    }
+    &__title {
+        font-size: 15px;
+        color: @heading-color;
+        font-weight: 500;
+    }
+
+    .ant-modal-header {
+        border-bottom: none;
+    }
+
+    .ant-modal-footer {
+        border-top: none;
+    }
+
+    .ant-modal-body {
+        padding: 0px 24px 24px;
+    }
+
+    .remember-passphrase {
+        margin-bottom: 0px;
+    }
+
+    &__login-form {
+        .ant-form-item {
+            margin-bottom: 0px;
+        }
+        .ant-form-explain {
+            position: absolute;
+            bottom: 0px;
+        }
+        .input-error {
+            font-size: 12px;
+        }
+    }
+}
+.no-mana {
+    &__bg {
+        background: url('../../../images/first-login-modal/tutorial-step3.png') top center no-repeat;
+        background-size: cover;
+        min-height: 250px;
+    }
+    &__text {
+        margin-top: 12px;
+        margin-left: 16px;
+        margin-bottom: 0;
+    }
+}

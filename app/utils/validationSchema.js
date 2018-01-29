@@ -1,6 +1,7 @@
-import Joi from 'joi';
-import XRegExp from 'xregexp/src/index';
+import * as Joi from 'joi-browser';
+import XRegExp from 'xregexp';
 import { formMessages, validationMessages } from '../locale-data/messages';
+import { aboutMeMaxChars } from '../constants/iterator-limits';
 
 const nameRegExp = XRegExp('^(?:[\\pL]+(?:[\\pL\\p{Common}])*?)+$');
 /**
@@ -19,119 +20,75 @@ const nameRegExp = XRegExp('^(?:[\\pL]+(?:[\\pL\\p{Common}])*?)+$');
 export const getProfileSchema = (intl, options) => {
     const baseSchema = Joi.object().keys({
         firstName: Joi
-           .string()
-           .required()
-           .min(2)
-           .max(32)
-           .regex(nameRegExp)
-           .label(intl.formatMessage(formMessages.firstName))
-           .options({
-               language: {
-                   any: {
-                       required: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                       empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`
-                   },
-                   string: {
-                       min: `{{key}} ${intl.formatMessage(validationMessages.min, { min: 2 })}`,
-                       max: `{{key}} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
-                       regex: {
-                           base: `{{key}} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
-                       }
-                   }
-               }
-           }),
-        lastName: Joi
-           .string()
-           .max(32)
-           .regex(nameRegExp)
-           .allow('')
-           .label(intl.formatMessage(formMessages.lastName))
-           .options({
-               language: {
-                   string: {
-                       max: `{{key}} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
-                       regex: {
-                           base: `{{key}} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
-                       }
-                   }
-               }
-           }),
-        about: Joi
             .string()
-            .allow(''),
-        links: Joi
-            .array()
-            .items(
-                Joi.object().keys({
-                    id: Joi.number(),
-                    title: Joi
-                        .string()
-                        .max(32)
-                        .trim()
-                        .label('Title')
-                        .options({
-                            language: {
-                                any: {
-                                    empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`
-                                },
-                                string: {
-                                    max: `{{key}} ${intl.formatMessage(validationMessages.max, { max: 32 })}`
-                                }
-                            }
-                        }),
-                    url: Joi.alternatives().try(
-                    Joi
-                        .string()
-                        .label('URL')
-                        .options({
-                            language: {
-                                any: {
-                                    empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                                },
-                                string: {
-                                    uri: `{{key}} ${intl.formatMessage(validationMessages.validAddress)}`
-                                }
-                            }
-                        })
-                    )
-                })
-            ).label('Link').options({
+            .allow('')
+            .min(2)
+            .max(32)
+            .regex(nameRegExp)
+            // .label(intl.formatMessage(formMessages.firstName))
+            .options({
                 language: {
-                    array: {
-                        includesOne: '{{reason}}'
+                    string: {
+                        min: `!!${intl.formatMessage(formMessages.firstName)} ${intl.formatMessage(validationMessages.min, { min: 2 })}`,
+                        max: `!!${intl.formatMessage(formMessages.firstName)} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
+                        regex: {
+                            base: `!!${intl.formatMessage(formMessages.firstName)} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
+                        }
                     }
                 }
             }),
-        crypto: Joi
+        lastName: Joi
+            .string()
+            .max(32)
+            .regex(nameRegExp)
+            .allow('')
+            .label(intl.formatMessage(formMessages.lastName))
+            .options({
+                language: {
+                    string: {
+                        max: `!!${intl.formatMessage(formMessages.lastName)} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
+                        regex: {
+                            base: `!!${intl.formatMessage(formMessages.lastName)} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
+                        }
+                    }
+                }
+            }),
+        about: Joi
+            .string()
+            .max(aboutMeMaxChars)
+            .allow('')
+            .options({
+                language: {
+                    string: {
+                        max: `!!${intl.formatMessage(formMessages.about)} ${intl.formatMessage(validationMessages.max, { max: 195 })}`,
+                        regex: {
+                            base: `!!${intl.formatMessage(formMessages.about)} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
+                        }
+                    }
+                }
+            }),
+        links: Joi
             .array()
             .items(
-                Joi
-                    .object()
-                    .keys({
-                        id: Joi.number(),
-                        name: Joi
-                            .string()
-                            .label('Name')
-                            .options({
-                                language: {
-                                    any: {
-                                        empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                                    }
+                Joi.object({}).keys({
+                    id: Joi.number(),
+                    url: Joi
+                        .string()
+                        .label('URL')
+                        .uri()
+                        .options({
+                            language: {
+                                any: {
+                                    empty: `!!URL ${intl.formatMessage(validationMessages.required)}`,
+                                },
+                                string: {
+                                    uri: `!!URL ${intl.formatMessage(validationMessages.validAddress)}`
                                 }
-                            }),
-                        address: Joi
-                            .string()
-                            .label('Address')
-                            .options({
-                                language: {
-                                    any: {
-                                        empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                                    }
-                                }
-                            })
-                    })
+                            }
+                        })
+                })
             )
-            .options({
+            .label('Link').options({
                 language: {
                     array: {
                         includesOne: '{{reason}}'
@@ -148,50 +105,21 @@ export const getProfileSchema = (intl, options) => {
                 .lowercase()
                 .min(2)
                 .max(32)
-                .label(intl.formatMessage(formMessages.akashaId))
+                // .label(intl.formatMessage(formMessages.akashaId))
                 .options({
                     language: {
                         any: {
-                            required: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                            empty: `{{key}} ${intl.formatMessage(validationMessages.required)}`
+                            required: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.required)}`,
+                            empty: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.required)}`
                         },
                         string: {
-                            required: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                            min: `{{key}} ${intl.formatMessage(validationMessages.min, { min: 2 })}`,
-                            max: `{{key}} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
-                            lowercase: `{{key}} ${intl.formatMessage(validationMessages.lowercase)}`,
+                            required: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.required)}`,
+                            min: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.min, { min: 2 })}`,
+                            max: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.max, { max: 32 })}`,
+                            lowercase: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.lowercase)}`,
                             regex: {
-                                base: `{{key}} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
+                                base: `!!${intl.formatMessage(formMessages.akashaId)} ${intl.formatMessage(validationMessages.invalidCharacters)}`,
                             }
-                        }
-                    }
-                }),
-            password: Joi
-                .string()
-                .required()
-                .min(8)
-                .label(intl.formatMessage(formMessages.passphrase))
-                .options({
-                    language: {
-                        any: {
-                            required: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                        },
-                        string: {
-                            min: `{{key}} ${intl.formatMessage(validationMessages.min, { min: 2 })}`,
-                        }
-                    }
-                }),
-            password2: Joi
-                .string()
-                .min(8)
-                .required()
-                .valid(Joi.ref('password'))
-                .label(intl.formatMessage(formMessages.passphraseVerify))
-                .options({
-                    language: {
-                        any: {
-                            required: `{{key}} ${intl.formatMessage(validationMessages.required)}`,
-                            allowOnly: `{{key}} ${intl.formatMessage(validationMessages.passphraseNotMatching)}`
                         }
                     }
                 })

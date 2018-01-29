@@ -1,27 +1,33 @@
 import { connect } from 'react-redux';
 import { EntryPage } from '../components';
-import { commentsAddPublishAction, commentsCheckNew, commentsClean, commentsIterator,
-    commentsLoadNew, commentsMoreIterator } from '../local-flux/actions/comments-actions';
-import { entryCleanFull, entryGetFull,
-    entryGetLatestVersion } from '../local-flux/actions/entry-actions';
-import { selectLoggedProfileData, selectPendingComments } from '../local-flux/selectors';
+import { actionAdd } from '../local-flux/actions/action-actions';
+import { commentsCheckNew, commentsClean, commentsIterator, commentsLoadNew,
+    commentsMoreIterator } from '../local-flux/actions/comments-actions';
+import { entryCleanFull, entryGetFull, entryGetLatestVersion,
+    entryResolveIpfsHash } from '../local-flux/actions/entry-actions';
+import { highlightSave } from '../local-flux/actions/highlight-actions';
+import { toggleOutsideNavigation, fullSizeImageAdd } from '../local-flux/actions/app-actions';
+import { selectBaseUrl, selectLoggedProfileData, selectPendingComments } from '../local-flux/selectors';
 
 function mapStateToProps (state) {
     const entry = state.entryState.get('fullEntry');
     return {
+        baseUrl: selectBaseUrl(state),
         entry,
         fetchingFullEntry: state.entryState.getIn(['flags', 'fetchingFullEntry']),
+        latestVersion: state.entryState.get('fullEntryLatestVersion'),
         licenses: state.licenseState.get('byId'),
         loggedProfileData: selectLoggedProfileData(state),
-        newComments: state.commentsState.get('newComments'),
+        newComments: state.commentsState.getIn(['newComments', 'comments']),
         pendingComments: selectPendingComments(state, entry && entry.get('entryId')),
+        resolvingIpfsHash: state.entryState.getIn(['flags', 'resolvingFullEntryHash'])
     };
 }
 
 export default connect(
     mapStateToProps,
     {
-        commentsAddPublishAction,
+        actionAdd,
         commentsCheckNew,
         commentsClean,
         commentsIterator,
@@ -29,6 +35,10 @@ export default connect(
         commentsMoreIterator,
         entryCleanFull,
         entryGetFull,
-        entryGetLatestVersion
+        entryGetLatestVersion,
+        entryResolveIpfsHash,
+        fullSizeImageAdd,
+        highlightSave,
+        toggleOutsideNavigation,
     }
 )(EntryPage);

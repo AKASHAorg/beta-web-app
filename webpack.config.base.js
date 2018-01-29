@@ -4,9 +4,14 @@ import webpack from 'webpack';
 export default {
     module: {
         rules: [{
-            test: /\.jsx?$/,
-            use: 'babel-loader',
-            exclude: /node_modules/
+            test: /\.js?$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/,
+            options: {
+                plugins: [
+                    ['import', { libraryName: 'antd', style: true }]
+                ]
+            }
         }]
     },
 

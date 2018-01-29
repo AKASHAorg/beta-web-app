@@ -1,0 +1,100 @@
+.aeth-wallet {
+    padding-top: 24px;
+    height: 100%;
+
+    &__header {
+        color: @heading-color;
+        padding: 0px 24px 24px;
+    }
+
+    &__balance-label {
+        color: @text-color;
+    }
+
+    &__balance {
+        font-size: 32px;
+        margin-right: 12px;
+    }
+
+    &__chart-area {
+        display: flex;
+    }
+
+    &__chart-wrapper {
+        height: 120px;
+        width: 120px;
+        margin: 0px 48px 32px;
+        flex: 0 0 auto;
+    }
+
+    &__chart-legend {
+        flex: 1 1 auto;
+        font-size: 13px;
+    }
+
+    &__legend-row {
+        display: flex;
+        margin-bottom: 6px;
+    }
+
+    &__legend-box {
+        width: 20px;
+        height: 20px;
+        margin-top: 6px;
+        margin-right: 12px;
+        border-radius: 2px;
+
+        &_transferable {
+            background-color: #06d2dc;
+        }
+
+        &_manafied {
+            background-color: #b400ff;
+        }
+
+        &_cycling {
+            background-color: #039eda;
+        }
+    }
+
+    &__legend-label {
+        color: @heading-color;
+    }
+
+    &__sent-icon {
+        stroke: @error-color !important;
+        margin-right: 6px;
+    }
+
+    &__received-icon {
+        stroke: @success-color !important;
+        margin-right: 6px;
+    }
+
+    &__transformed-icon {
+        stroke: @heading-color !important;
+        margin-right: 8px;
+        height: 14px;
+        width: 14px;
+    }
+
+    &__cycling-count {
+        display: inline-block;
+        margin-left: 6px;
+        background-color: @dark;
+        color: @text-color-dark;
+        height: 16px;
+        padding: 4px;
+        border-radius: 2px;
+        font-size: 11px;
+        cursor: default;
+    }
+
+    .ant-tabs {
+        height: ~'calc(100% - 246px)';
+    }
+
+    .ant-tabs-tab {
+        width: 25%;
+    }
+}

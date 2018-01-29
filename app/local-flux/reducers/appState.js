@@ -1,218 +1,129 @@
-import { fromJS, List, Map } from 'immutable';
-import { AppRecord, NotificationRecord, PendingActionRecord } from './records';
+import { List, Map } from 'immutable';
+import { AppRecord, NotificationRecord, PreviewRecord } from './records';
 import * as types from '../constants';
-import * as appTypes from '../constants/AppConstants';
-import actionTypes from '../../constants/action-types';
 import { createReducer } from './create-reducer';
 
 const initialState = new AppRecord();
-let id = 0;
 
 const appState = createReducer(initialState, {
-
-    [appTypes.SHOW_NOTIFICATION]: (state, { notification }) => state.merge({
-        notifications: state.get('notifications').push(new NotificationRecord(notification))
-    }),
-
-    [appTypes.HIDE_NOTIFICATION]: (state, { notification }) => {
-        const indexToRemove = state.get('notifications').findIndex(notific =>
-            notific.id === notification.id);
-
-        return state.merge({
-            notifications: state.get('notifications').delete(indexToRemove)
-        });
-    },
-
-    [appTypes.PUBLISH_ENTITY]: (state, { data }) => {
-        console.log(data, 'the data');
-        return state.merge({
-            pendingActions: state.get('pendingActions').push(new PendingActionRecord(data))
-        });
-    },
-
-    [appTypes.SHOW_TERMS]: state =>
-        state.merge({
-            showTerms: true
-        }),
-
-    [appTypes.HIDE_TERMS]: state =>
-        state.merge({
-            showTerms: false
-        }),
-
-    [appTypes.TOGGLE_GETH_DETAILS_MODAL]: state =>
-        state.set('showGethDetailsModal', !state.get('showGethDetailsModal')),
-
-    [appTypes.TOGGLE_IPFS_DETAILS_MODAL]: state =>
-        state.set('showIpfsDetailsModal', !state.get('showIpfsDetailsModal')),
-
-// ********************* NEW REDUCERS ******************************
-
     [types.APP_READY]: state =>
         state.set('appReady', true),
 
     [types.BOOTSTRAP_HOME_SUCCESS]: state =>
         state.set('homeReady', true),
 
-    [types.COMMENTS_ADD_PUBLISH_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            gas: 2000000,
-            messageId: 'publishComment',
-            payload: fromJS(payload),
-            status: 'checkAuth',
-            titleId: 'publishCommentTitle',
-            type: actionTypes.comment
-        }));
+    [types.FULL_SIZE_IMAGE_ADD]: (state, { data }) => state.set('fullSizeImages', new Map(data)),
+
+    [types.FULL_SIZE_IMAGE_DELETE]: state => state.set('fullSizeImages', new Map()),
+
+    [types.HIDE_NOTIFICATION]: (state, { notification }) => {
+        const indexToRemove = state.get('displayedNotifications').findIndex(displayId =>
+            displayId === notification.displayId);
+        return state.merge({
+            displayedNotifications: state.get('displayedNotifications').delete(indexToRemove)
+        });
     },
 
-    [types.DELETE_PENDING_ACTION]: (state, { actionId }) =>
-        state.set('pendingActions', state.get('pendingActions').delete(actionId)),
+    [types.HIDE_PREVIEW]: state => state.set('showPreview', null),
 
-    [types.ENTRY_ADD_CLAIM_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            type: actionTypes.claim,
-            payload: fromJS(payload),
-            gas: 2000000,
-            titleId: 'claimTitle',
-            messageId: 'claim',
-            status: 'checkAuth'
-        }));
-    },
+    [types.HIDE_TERMS]: state => state.set('showTerms', false),
 
-    [types.ENTRY_ADD_DOWNVOTE_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            type: actionTypes.downvote,
-            payload: fromJS(payload),
-            gas: 2000000,
-            status: 'needWeightConfirmation'
-        }));
-    },
+    [types.HIDE_TRANSACTIONS_LOG]: state => state.set('showTransactionsLog', false),
 
-    [types.ENTRY_ADD_UPVOTE_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            type: actionTypes.upvote,
-            payload: fromJS(payload),
-            gas: 2000000,
-            status: 'needWeightConfirmation'
-        }));
-    },
-    [types.HIDE_AUTH_DIALOG]: state =>
-        state.set('showAuthDialog', null),
-
-    [types.HIDE_LOGIN_DIALOG]: state =>
-        state.set('showLoginDialog', null),
-
-    [types.HIDE_PUBLISH_CONFIRM_DIALOG]: state =>
-        state.set('publishConfirmDialog', null),
-
-    [types.HIDE_REPORT_MODAL]: state =>
-        state.set('showReportModal', false),
-
-    [types.HIDE_TRANSFER_CONFIRM_DIALOG]: state =>
-        state.set('transferConfirmDialog', null),
-
-    [types.HIDE_WEIGHT_CONFIRM_DIALOG]: state =>
-        state.set('weightConfirmDialog', null),
-
-    [types.PROFILE_ADD_FOLLOW_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            gas: 2000000,
-            messageId: 'followProfile',
-            payload: fromJS(payload),
-            status: 'checkAuth',
-            titleId: 'followProfileTitle',
-            type: actionTypes.follow,
-        }));
-    },
-
-    [types.PROFILE_ADD_TIP_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            gas: 2000000,
-            messageId: 'sendTip',
-            payload: fromJS(payload),
-            status: 'needTransferConfirmation',
-            titleId: 'sendTipTitle',
-            type: actionTypes.sendTip,
-        }));
-    },
-
-    [types.PROFILE_ADD_UNFOLLOW_ACTION]: (state, { payload }) => {
-        id += 1;
-        return state.setIn(['pendingActions', id], new PendingActionRecord({
-            id,
-            gas: 2000000,
-            messageId: 'unfollowProfile',
-            payload: fromJS(payload),
-            status: 'checkAuth',
-            titleId: 'unfollowProfileTitle',
-            type: actionTypes.unfollow,
-        }));
-    },
-
-    [types.PROFILE_LOGIN_SUCCESS]: (state) => {
-        const action = state.get('pendingActions').find(act =>
-            act.get('status') === 'checkAuth');
-        if (action) {
-            return state.merge({
-                pendingActions: state
-                    .get('pendingActions')
-                    .setIn([action.get('id'), 'status'], 'readyToPublish'),
-                showAuthDialog: null
-            });
+    [types.NAV_COUNTER_INCREMENT]: (state, { navType }) => {
+        if (navType === 'back') {
+            return state.set('navigationBackCounter', state.get('navigationBackCounter') + 1);
+        } else if (navType === 'forward') {
+            return state.set('navigationForwardCounter', state.get('navigationForwardCounter') + 1);
         }
-        return state.set('showAuthDialog', null);
+        return state;
     },
+
+    [types.NAV_COUNTER_DECREMENT]: (state, { navType }) => {
+        if (navType === 'back') {
+            return state.set('navigationBackCounter', state.get('navigationBackCounter') - 1);
+        } else if (navType === 'forward') {
+            return state.set('navigationForwardCounter', state.get('navigationForwardCounter') - 1);
+        }
+        return state;
+    },
+
+    [types.NAV_FORWARD_COUNTER_RESET]: state =>
+        state.set('navigationForwardCounter', 0),
+
+    [types.NAV_BACK_COUNTER_RESET]: state =>
+        state.set('navigationBackCounter', -1),
+
+    [types.NOTIFICATION_DISPLAY]: (state, { notification }) => state.merge({
+        displayedNotifications: state.get('displayedNotifications').push(notification.get('displayId'))
+    }),
 
     [types.PROFILE_LOGOUT]: state =>
         state.merge({
             notifications: new List(),
-            pendingActions: new Map()
         }),
 
-    [types.RESET_HOME_READY]: state =>
-        state.set('homeReady', false),
+    [types.PROFILE_LOGOUT_SUCCESS]: state =>
+        state.merge({
+            homeReady: false,
+            showWallet: null
+        }),
 
-    [types.SHOW_AUTH_DIALOG]: (state, { actionId }) =>
-        state.set('showAuthDialog', actionId),
+    [types.SECONDARY_SIDEBAR_TOGGLE]: (state, { forceToggle }) => {
+        if (typeof forceToggle === 'boolean') {
+            return state.set('showSecondarySidebar', forceToggle);
+        }
+        return state.set('showSecondarySidebar', !state.get('showSecondarySidebar'));
+    },
+    [types.PROFILE_EDIT_TOGGLE]: state =>
+        state.set('showProfileEditor', !state.get('showProfileEditor')),
 
-    [types.SHOW_LOGIN_DIALOG]: (state, { akashaId }) =>
-        state.set('showLoginDialog', akashaId),
-
-    [types.SHOW_PUBLISH_CONFIRM_DIALOG]: (state, { actionId }) =>
-        state.set('publishConfirmDialog', actionId),
-
-    [types.SHOW_REPORT_MODAL]: state =>
-        state.set('showReportModal', true),
-
-    [types.SHOW_TRANSFER_CONFIRM_DIALOG]: (state, { actionId }) =>
-        state.set('transferConfirmDialog', actionId),
-
-    [types.SHOW_WEIGHT_CONFIRM_DIALOG]: (state, { actionId }) =>
-        state.set('weightConfirmDialog', actionId),
-    [types.SHOW_DIALOG]: (state, { dialogType, data }) => {
-        console.log(dialogType, data);
-        return state.set(dialogType, data);
+    [types.SHOW_NOTIFICATION]: (state, { notification }) => {
+        const lastNotification = state.get('notifications').last();
+        notification.displayId = lastNotification ? lastNotification.get('displayId') + 1 : 1;
+        return state.merge({
+            notifications: state.get('notifications').push(new NotificationRecord(notification))
+        });
     },
 
-    [types.SHOW_DIALOG]: (state, { dialogType, data }) =>
-        state.set(dialogType, data),
+    [types.SHOW_PREVIEW]: (state, { columnType, value }) =>
+        state.set('showPreview', new PreviewRecord({ columnType, value })),
 
-    [types.UPDATE_ACTION]: (state, { actionId, updates }) => {
-        const newAction = state.getIn(['pendingActions', actionId]).mergeDeep(updates);
-        return state.setIn(['pendingActions', actionId], newAction);
-    },
+    [types.SHOW_TERMS]: state => state.set('showTerms', true),
+
+    [types.SHOW_TRANSACTIONS_LOG]: state => state.set('showTransactionsLog', true),
+
+    [types.TOGGLE_AETH_WALLET]: state =>
+        state.set('showWallet', state.get('showWallet') === 'AETH' ? null : 'AETH'),
+
+    [types.TOGGLE_ETH_WALLET]: state =>
+        state.set('showWallet', state.get('showWallet') === 'ETH' ? null : 'ETH'),
+
+    [types.TOGGLE_LIGHT_SYNC_MODE]: (state, { lightSync }) =>
+        state.set('isLightSync', lightSync),
+
+    [types.TOGGLE_GETH_DETAILS_MODAL]: state =>
+        state.set('showGethDetailsModal', !state.get('showGethDetailsModal')),
+
+    [types.TOGGLE_IPFS_DETAILS_MODAL]: state =>
+        state.set('showIpfsDetailsModal', !state.get('showIpfsDetailsModal')),
+
+    [types.TOGGLE_NAVIGATION_MODAL]: state =>
+        state.set('showNavigationModal', !state.get('showNavigationModal')),
+
+    [types.TOGGLE_OUTSIDE_NAVIGATION_MODAL]: (state, { url }) =>
+        state.mergeIn(['outsideNavigation'], {
+            isVisible: !!url,
+            url,
+        }),
+    '@@router/LOCATION_CHANGE': (state, { payload }) => {
+        const { pathname } = payload;
+        const whitelistRoutes = ['/dashboard', '/draft', '/profileoverview'];
+        if (pathname && whitelistRoutes.some(route => pathname.startsWith(route))) {
+            return state.set('showSecondarySidebar', true);
+        }
+        return state.set('showSecondarySidebar', false);
+    }
 });
 
 export default appState;

@@ -1,5 +1,5 @@
-import XRegExp from 'xregexp/src/index';
-
+import XRegExp from 'xregexp';
+import { isEmpty } from 'ramda';
 /* eslint-disable no-bitwise */
 export const genId = () => {
     const chars = '0123456789abcdef'.split('');
@@ -40,11 +40,31 @@ export const calculateReadingTime = (wordCount = 0, options = {}) => {
     };
 };
 
+export const getDisplayAddress = (ethAddress) => {
+    if (!ethAddress || !ethAddress.length === 42 || !ethAddress.startsWith('0x')) {
+        console.error(`${ethAddress} is not a valid address`);
+        return '';
+    }
+    return `${ethAddress.slice(0, 6)}...${ethAddress.slice(38)}`;
+};
+
+export const getDisplayName = ({ akashaId, ethAddress, long }) => {
+    if (akashaId) {
+        return `@${akashaId}`;
+    }
+    if (long) {
+        return ethAddress;
+    }
+    return getDisplayAddress(ethAddress);
+};
+
 export const getWordCount = (content) => {
     const plainText = content.getPlainText('');
     const matchWords = plainText.match(/[^~`!¡@#$%^&*()_\-+={}\[\]|\\:;"'<,>.?¿\/\s]+/g);
     return matchWords ? matchWords.length : 0;
 };
+
+export const isEthAddress = value => value && value.length === 42 && value.startsWith('0x');
 
 export const validateTag = (tagName) => {
     const tag = tagName ? tagName.trim().toLowerCase() : '';
@@ -93,4 +113,29 @@ export function getUrl (url) {
         return url;
     }
     return `http://${url}`;
+}
+
+export function extractExcerpt (data) {
+    const { blocks } = data;
+    if (!blocks) {
+        console.error('no blocks not found inside content param');
+        return null;
+    }
+    if (blocks.length === 0) {
+        return null;
+    }
+    let extractedText = '';
+    for (let i = 0; i < blocks.length; i++) {
+        if (
+            blocks[i].type === 'unstyled' &&
+            blocks[i].text &&
+            !isEmpty(blocks[i].text)
+        ) {
+            extractedText += blocks[i].text;
+            if (extractedText.length > 120) {
+                break;
+            }
+        }
+    }
+    return extractedText.substr(0, 120);
 }

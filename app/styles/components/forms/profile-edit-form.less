@@ -1,0 +1,93 @@
+.profile-edit-form {
+    &__avatar-title {
+        font-size: 11px;
+        color: @text-color;
+        margin-bottom: 5px;
+    }
+
+    &__bg-image {
+        padding: 20px 0px;
+    }
+
+    &__bg-image-title {
+        font-size: 11px;
+        color: @text-color;
+        margin-bottom: 5px;
+    }
+
+    &__bg-image-wrap {
+        height: 160px;
+        width: 320px;
+        overflow: hidden;     
+    }
+
+    &__char-count-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    &__char-count {
+        margin-left: 5px;
+    }
+
+    &__pad {
+        height:  ~"calc(100% - 133px)";
+        padding-right: 4px;
+    }
+    &__wrap {
+        height:100%;
+    }
+
+    &__form-wrapper {
+        height:  100%;
+        padding: 20px 24px;   
+        overflow-y: auto;
+
+        .ant-form-item-label {
+            padding-bottom: 3px;
+        }
+        .ant-form-item-label label {
+            color: @text-color;
+            font-size: 11px;
+        }
+    }
+
+    &__buttons-wrapper {
+        padding: 20px;
+        border-top: 1px outset @light-border;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    &__save-btn {
+        padding-right: 10px;
+    }
+
+    &__terms {
+        margin: 5px 0;
+    }
+    
+    &__textarea {
+        resize: none;
+    }
+
+    &__add-links-btn {
+        margin-bottom: 20px;
+        .ant-btn {
+            font-size: 12px;
+            padding: 0;
+        }
+    }
+
+    &__link {
+        padding-top: 10px;
+        color: @text-color;
+        font-size: 11px;
+        .ant-form-item {
+            margin-bottom: 23px;
+        }
+        .ant-form-item-with-help {
+            margin-bottom: 0;
+        }
+    }
+}

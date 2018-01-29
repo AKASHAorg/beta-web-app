@@ -1,7 +1,4 @@
-// import BaseService from './base-service';
 import profileDB from './db/profile';
-
-// const Channel = global.Channel;
 
 /**
  * Create a temporary profile in indexedDB
@@ -12,23 +9,23 @@ import profileDB from './db/profile';
  */
 export const createTempProfile = profileData =>
     profileDB.tempProfile
-        .where('akashaId')
-        .equals(profileData.akashaId)
+        .where('ethAddress')
+        .equals(profileData.ethAddress)
         .first()
         .then((profile) => {
             if (profile) {
-                return Promise.resolve(profile);
+                profileDB.tempProfile.delete(profileData.ethAddress);
             }
             return profileDB.tempProfile.add({
                 ...profileData
             })
-            .then(akashaId =>
+                .then(ethAddress =>
                 // return newly created temp profile
-                profileDB.tempProfile.where('akashaId').equals(akashaId).first()
-            ).catch('ConstraintError', () =>
+                    profileDB.tempProfile.where('ethAddress').equals(ethAddress).first()
+                ).catch('ConstraintError', () =>
                 // key already exists in the object store
-                profileDB.tempProfile.where('akashaId').equals(profileData.akashaId).first()
-            );
+                    profileDB.tempProfile.where('ethAddress').equals(profileData.ethAddress).first()
+                );
         })
         .catch((err) => {
             console.error(err, 'db error!');
@@ -44,8 +41,8 @@ export const createTempProfile = profileData =>
 
 export const updateTempProfile = (tempProfile, status) =>
     profileDB.tempProfile
-        .where('akashaId')
-        .equals(tempProfile.akashaId)
+        .where('ethAddress')
+        .equals(tempProfile.ethAddress)
         .modify((tmpProf) => {
             Object.keys(tempProfile).forEach((key) => {
                 tmpProf[key] = tempProfile[key];
@@ -60,8 +57,8 @@ export const updateTempProfile = (tempProfile, status) =>
         .then((updated) => {
             if (updated) {
                 return profileDB.tempProfile
-                    .where('akashaId')
-                    .equals(tempProfile.akashaId)
+                    .where('ethAddress')
+                    .equals(tempProfile.ethAddress)
                     .first();
             }
             return tempProfile;
@@ -70,21 +67,27 @@ export const updateTempProfile = (tempProfile, status) =>
 /**
  * Delete temporary profile. Called after profile was successfully created
  */
-export const deleteTempProfile = akashaId =>
+export const deleteTempProfile = ethAddress =>
     profileDB.tempProfile
-        .delete(akashaId);
+        .delete(ethAddress)
+        .catch(err => err);
 
 /**
  * Get all available temporary profiles
  * @return promise
  */
-export const getTempProfile = () =>
-    profileDB.tempProfile.toCollection().first().then((profile) => {
-        if (!profile) {
-            return {};
-        }
-        return profile;
-    });
+export const getTempProfile = ethAddress =>
+    profileDB.tempProfile
+        .where('ethAddress')
+        .equals(ethAddress)
+        .first()
+        .then(profile =>
+            profile
+        )
+        .catch((err) => {
+            console.error(err, 'db error!');
+            return err;
+        });
 /**
  * Registry Service.
  * default open channels => ['getCurrentProfile', 'getByAddress']

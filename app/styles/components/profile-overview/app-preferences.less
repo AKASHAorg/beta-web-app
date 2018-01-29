@@ -1,0 +1,93 @@
+.app-preferences {
+    height: 100%;
+    background: @page-bg;
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        padding: 40px 60px;
+    }
+
+    &__title {
+        font-size: 18px;
+        color: @heading-color;
+        padding-bottom: 10px;
+        color: @heading-color;
+    }
+
+    &__description {
+        font-size: 15px;
+        font-weight: 400;
+        padding-bottom: 30px;
+        color: @text-color;
+    }
+
+    &__lang-title {
+        font-size: 14px;
+        font-weight: 500;
+        padding-bottom: 10px;
+        color: @heading-color;
+    }
+
+    &__lang-label {
+        font-size: 11px;
+        padding-bottom: 5px;
+        color: @text-color;
+    }
+
+    &__theme {
+        padding-top: 30px;
+    }
+
+    &__theme-title {
+        font-size: 14px;
+        font-weight: 500;
+        padding-bottom: 10px;
+        color: @heading-color;
+    }
+
+    &__theme-label {
+        font-size: 12px;
+        padding-bottom: 15px;
+        color: @text-color;
+    }
+
+    &__theme-radio-wrap {
+        display: flex;
+        justify-content: space-between;
+        .ant-radio-wrapper {
+            font-size: 14px;
+            color: @heading-color;
+        }
+    }
+
+    &__update {
+        position: absolute;
+        background-color: @light-background;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        height: 60px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 0px 30px;
+        border-top: 1px solid @border-color;
+    }
+
+
+    &__close-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .ant-select-selection-selected-value {
+        color: @heading-color;
+    }
+
+    &__select-dropdown {
+        li.ant-select-dropdown-menu-item {
+            color: @heading-color;
+        }
+    }   
+}

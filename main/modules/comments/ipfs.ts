@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import IpfsConnector  from '@akashaproject/ipfs-js-connector';
+import { IpfsConnector } from '@akashaproject/ipfs-connector';
 import { comments } from '../models/records';
 import { FULL_WAIT_TIME } from '../../config/settings';
 

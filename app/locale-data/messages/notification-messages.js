@@ -1,65 +1,85 @@
 import { defineMessages } from 'react-intl';
 
 const notificationMessages = defineMessages({
+    bondAethSuccess: {
+        id: 'app.notification.bondAethSuccess',
+        description: 'notification to be displayed when bond/manafy AETH transaction was mined',
+        defaultMessage: 'You successfully manafied {amount} AETH'
+    },
+    cycleAethSuccess: {
+        id: 'app.notification.cycleAethSuccess',
+        description: 'notification to be displayed when unlock/cycle AETH transaction was mined',
+        defaultMessage: 'You successfully cycled {amount} AETH'
+    },
+    freeAethSuccess: {
+        id: 'app.notification.freeAethSuccess',
+        description: 'notification to be displayed when collecting cycled AETH transaction was mined',
+        defaultMessage: 'You successfully collected your cycled AETH'
+    },
+    highlightSaveSuccess: {
+        id: 'app.notification.highlightSaveSuccess',
+        description: 'Notification to be displayed when a highlight has been saved',
+        defaultMessage: 'The highlight has been saved!'
+    },
+    highlightSaveSuccessInputPlaceholder: {
+        id: 'app.notification.highlightSaveSuccessInputPlaceholder',
+        description: 'Placeholder for note input after highlight save',
+        defaultMessage: 'Do you want to type a note?'
+    },
     updatingProfile: {
         id: 'app.notification.updatingProfile',
         description: 'Notification to be displayed when update profile transaction is sent',
         defaultMessage: 'Your profile is updating ...'
     },
-    profileUpdateSuccess: {
-        id: 'app.notification.profileUpdateSuccess',
+    updateProfileSuccess: {
+        id: 'app.notification.updateProfileSuccess',
         description: 'Notification to be displayed when update profile transaction was mined',
         defaultMessage: 'Your profile was successfully updated'
     },
     followingProfile: {
         id: 'app.notification.followingProfile',
         description: 'Notification to be displayed when follow transaction is sent',
-        defaultMessage: 'Following @{akashaId} ...'
+        defaultMessage: 'Following {displayName} ...'
     },
     followProfileSuccess: {
         id: 'app.notification.followProfileSuccess',
         description: 'Notification to be displayed when follow transaction was mined',
-        defaultMessage: 'You are now following @{akashaId}'
+        defaultMessage: 'You are now following {displayName}'
+    },
+    transformEssenceSuccess: {
+        id: 'app.notification.transformEssenceSuccess',
+        description: 'notification to be displayed when transform Essence transaction was mined',
+        defaultMessage: 'You successfully transformed {amount} Essence'
     },
     unfollowingProfile: {
         id: 'app.notification.unfollowingProfile',
         description: 'Notification to be displayed when unfollow transaction is sent',
-        defaultMessage: 'Unfollowing @{akashaId} ...'
+        defaultMessage: 'Unfollowing {displayName} ...'
     },
     unfollowProfileSuccess: {
         id: 'app.notification.unfollowProfileSuccess',
         description: 'Notification to be displayed when unfollow transaction was mined',
-        defaultMessage: 'You are not following @{akashaId} anymore'
+        defaultMessage: 'You are not following {displayName} anymore'
     },
-    registeringTag: {
-        id: 'app.notification.registeringTag',
-        description: 'Notification snackbar to display when a tag is registering',
-        defaultMessage: 'Registering "{tagName}" tag.'
+    notEnoughEthers: {
+        id: 'app.notification.notEnoughEthers',
+        description: 'Notification to show when not enough ethers',
+        defaultMessage: 'You don\`t have enough ethers.'
     },
-    tagRegisteredSuccessfully: {
-        id: 'app.notification.tagRegisteredSuccessfully',
-        description: 'Notification to be displayed when a tag was registered',
-        defaultMessage: 'Tag "{tagName}" successfully registered.'
+    notEnoughEthOrMana: {
+        id: 'app.notification.notEnoughEthOrMana',
+        description: 'Notification when not enough eth or mana',
+        defaultMessage: 'You don\`t have enough ethers or mana.'
     },
-    subscribingTag: {
-        id: 'app.notification.subscribingTag',
-        description: 'Notification to be displayed when subscribe tag transaction is sent',
-        defaultMessage: 'Subscribing to "{tagName}" ...'
+    registerProfileSuccess: {
+        id: 'app.notification.registerProfileSuccess',
+        description: 'Notification to be displayed when register profile transaction was mined',
+        defaultMessage: 'Highfives! Profile successfully registered!'
     },
-    tagSubscribedSuccessfully: {
-        id: 'app.notification.tagSubscribedSuccessfully',
-        description: 'Notification to be displayed when a user subscribed to a tag',
-        defaultMessage: 'You successfully subscribed to tag "{tagName}"'
-    },
-    unsubscribingTag: {
-        id: 'app.notification.unsubscribingTag',
-        description: 'Notification to be displayed when unsubscribe tag transaction is sent',
-        defaultMessage: 'Unsubscribing from "{tagName}" ...'
-    },
-    tagUnsubscribedSuccessfully: {
-        id: 'app.notification.tagUnsubscribedSuccessfully',
-        description: 'Notification to be displayed when a user unsubscribed from a tag',
-        defaultMessage: 'You successfully unsubscribed from tag "{tagName}"'
+    publishCommentSuccess: {
+        id: 'app.notification.publishCommentSuccess',
+        description: 'Notification to be displayed when publish comment transaction was mined',
+        defaultMessage: 'You successfully published a comment'
     },
     publishingEntry: {
         id: 'app.notification.publishingEntry',
@@ -74,42 +94,52 @@ const notificationMessages = defineMessages({
     newVersionPublishedSuccessfully: {
         id: 'app.notification.newVersionPublishedSuccessfully',
         description: 'Notification for when a new version was published',
-        defaultMessage: 'Entry updated successfully'
+        defaultMessage: 'Entry "{title}" successfully updated.'
     },
     draftPublishedSuccessfully: {
         id: 'app.notification.draftPublishedSuccessfully',
         description: 'Notification for when draft successfully registered/published',
-        defaultMessage: 'Entry published successfully'
+        defaultMessage: 'Draft "{title}" successfully published.'
     },
-    upvotingEntry: {
-        id: 'app.notification.upvotingEntry',
-        description: 'Notification to be displayed when entry upvote transaction is sent',
-        defaultMessage: 'Upvoting {entryTitle} ...'
+    claimSuccess: {
+        id: 'app.notification.claimSuccess',
+        description: 'Notification to be displayed when collect Essence transaction was mined',
+        defaultMessage: 'You successfully collected Essence for {entryTitle}'
     },
-    upvoteEntrySuccess: {
-        id: 'app.notification.upvoteEntrySuccess',
-        description: 'Notification to be displayed when upvote entry transaction was mined',
-        defaultMessage: 'You successfully upvoted {entryTitle}'
-    },
-    upvoteEntryError: {
-        id: 'app.notification.upvoteEntryError',
-        description: 'Notification to be displayed when upvote entry transaction was mined but was unsuccessfull',
-        defaultMessage: 'Upvoting {entryTitle} has failed'
+    claimVoteSuccess: {
+        id: 'app.notification.claimVoteSuccess',
+        description: 'Notification to be displayed when collect Essence for vote transaction was mined',
+        defaultMessage: 'You successfully collected Essence for {entryTitle}'
     },
     downvotingEntry: {
         id: 'app.notification.downvotingEntry',
         description: 'Notification to be displayed when entry downvote transaction is sent',
         defaultMessage: 'Downvoting {entryTitle} ...'
     },
+    downvoteCommentSuccess: {
+        id: 'app.notification.downvoteCommentSuccess',
+        description: 'Notification to be displayed when downvote comment transaction was mined',
+        defaultMessage: 'You successfully downvoted a comment'
+    },
     downvoteEntrySuccess: {
         id: 'app.notification.downvoteEntrySuccess',
         description: 'Notification to be displayed when downvote entry transaction was mined',
         defaultMessage: 'You successfully downvoted {entryTitle}'
     },
-    downvoteEntryError: {
-        id: 'app.notification.downvoteEntryError',
-        description: 'Notification to be displayed when downvote entry transaction was mined but was unsuccessfull',
-        defaultMessage: 'Downvoting {entryTitle} has failed'
+    upvotingEntry: {
+        id: 'app.notification.upvotingEntry',
+        description: 'Notification to be displayed when entry upvote transaction is sent',
+        defaultMessage: 'Upvoting {entryTitle} ...'
+    },
+    upvoteCommentSuccess: {
+        id: 'app.notification.upvoteCommentSuccess',
+        description: 'Notification to be displayed when upvote comment transaction was mined',
+        defaultMessage: 'You successfully upvoted a comment'
+    },
+    upvoteEntrySuccess: {
+        id: 'app.notification.upvoteEntrySuccess',
+        description: 'Notification to be displayed when upvote entry transaction was mined',
+        defaultMessage: 'You successfully upvoted {entryTitle}'
     },
     publishingComment: {
         id: 'app.notification.publishingComment',
@@ -123,43 +153,18 @@ const notificationMessages = defineMessages({
     },
     claiming: {
         id: 'app.notification.claiming',
-        description: 'Notification to be displayed when claim transaction is sent',
-        defaultMessage: 'Claiming {entryTitle} ...'
-    },
-    claimSuccess: {
-        id: 'app.notification.claimSuccess',
-        description: 'Notification to be displayed when claim transaction was mined',
-        defaultMessage: 'You successfully claimed {entryTitle}'
-    },
-    claimError: {
-        id: 'app.notification.claimError',
-        description: 'Notification to be displayed when claim transaction was mined but was unsuccessfull',
-        defaultMessage: 'Claiming {entryTitle} has failed'
+        description: 'Notification to be displayed when collect transaction is sent',
+        defaultMessage: 'Collecting Essence for {entryTitle} ...'
     },
     draftSavedSuccessfully: {
         id: 'app.notification.draftSavedSuccessfully',
         description: 'notification to show when draft was successfully saved',
         defaultMessage: 'Draft successfully saved!'
     },
-    draftSaveFailed: {
-        id: 'app.notification.draftSaveFailed',
-        description: 'Notification to show when saving draft failed',
-        defaultMessage: 'Failed to save draft!'
-    },
     draftDeletedSuccessfully: {
         id: 'app.notification.draftDeletedSuccessfully',
         description: 'notification to show when draft was successfully deleted',
         defaultMessage: 'Draft successfully deleted!'
-    },
-    draftDeleteFailed: {
-        id: 'app.notification.draftDeleteFailed',
-        description: 'Notification to show when deleting draft failed',
-        defaultMessage: 'Failed to delete draft!'
-    },
-    editorMessage: {
-        id: 'app.notification.editorMessage',
-        description: 'just a placeholder',
-        defaultMessage: '{errorMessage}'
     },
     linkCopiedToClipboard: {
         id: 'app.notification.linkCopiedToClipboard',
@@ -169,42 +174,22 @@ const notificationMessages = defineMessages({
     sendingTip: {
         id: 'app.notification.sendingTip',
         description: 'Notification to be displayed when tip transaction is sent',
-        defaultMessage: 'Sending tip to @{akashaId} ...'
+        defaultMessage: 'Sending tip to {displayName} ...'
     },
     sendTipSuccess: {
         id: 'app.notification.sendTipSuccess',
         description: 'Notification to be displayed when tip transaction was successfully mined',
-        defaultMessage: 'You have successfully tipped @{akashaId}'
-    },
-    sendTipError: {
-        id: 'app.notification.sendTipError',
-        description: 'Notification to be displayed when tip transaction was mined but was unsuccessfull',
-        defaultMessage: 'Tipping @{akashaId} has failed'
+        defaultMessage: 'You have successfully tipped {displayName}'
     },
     notificationsEnabledSuccess: {
         id: 'app.notification.notificationsEnabledSuccess',
         description: 'message to be displayed when notifications were enabled for a specific user',
-        defaultMessage: 'Notifications enabled for @{akashaId}'
-    },
-    notificationsEnabledError: {
-        id: 'app.notification.notificationsEnabledError',
-        description: 'message to be displayed when enabling notifications for a specific user has failed',
-        defaultMessage: 'Enabling notifications for @{akashaId} has failed'
+        defaultMessage: 'Notifications enabled for {displayName}'
     },
     notificationsDisabledSuccess: {
         id: 'app.notification.notificationsDisabledSuccess',
         description: 'message to be displayed when notifications were disabled for a specific user',
-        defaultMessage: 'Notifications disabled for @{akashaId}'
-    },
-    notificationsDisabledError: {
-        id: 'app.notification.notificationsDisabledError',
-        description: 'message to be displayed when disabling notifications for a specific user has failed',
-        defaultMessage: 'Disabling notifications for @{akashaId} has failed'
-    },
-    channelStarred: {
-        id: 'app.notification.channelStarred',
-        description: 'message to be displayed when a chat channel was starred',
-        defaultMessage: '#{channel} was starred'
+        defaultMessage: 'Notifications disabled for {displayName}'
     },
     backupSuccess: {
         id: 'app.notification.backupSuccess',
@@ -214,21 +199,50 @@ const notificationMessages = defineMessages({
     saveGethSettingsSuccess: {
         id: 'app.notification.saveGethSettingsSuccess',
         description: 'Geth settings successfully saved',
-        defaultMessage: `You have successfully saved your settings. You need to restart your geth
+        defaultMessage: `You have successfully saved your settings. You need to restart the geth
                         service for your changes to be applied.`
     },
     saveIpfsSettingsSuccess: {
         id: 'app.notification.saveIpfsSettingsSuccess',
         description: 'IPFS settings successfully saved',
-        defaultMessage: `You have successfully saved your settings. You need to restart your IPFS
+        defaultMessage: `You have successfully saved your settings. You need to restart the IPFS
                         service for your changes to be applied.`
     },
     setIpfsPortsSuccess: {
         id: 'app.notification.setIpfsPortsSuccess',
         description: 'IPFS ports successfully set',
-        defaultMessage: `You have successfully set the IPFS ports. You need to restart your IPFS
+        defaultMessage: `You have successfully set the IPFS ports. You need to restart the IPFS
                         service for your changes to be applied.`
     },
-
+    themeTips: {
+        id: 'app.settings.themeTips',
+        description: 'theme tips',
+        defaultMessage: 'Your theme will change after refreshing the app.'
+    },
+    toggleDonationsSuccess: {
+        id: 'app.notification.toggleDonationsSuccess',
+        description: 'toggle accepting donations/tips transaction was succesfully mined',
+        defaultMessage: 'You succesfully changed your tips settings'
+    },
+    transferAethSuccess: {
+        id: 'app.notification.transferAethSuccess',
+        description: 'transfer AETH transaction was successfully mined',
+        defaultMessage: 'You successfully transfered {tokenAmount} AETH to {displayName}'
+    },
+    transferEthSuccess: {
+        id: 'app.notification.transferEthSuccess',
+        description: 'transfer ETH transaction was successfully mined',
+        defaultMessage: 'You successfully transfered {value} ETH to {displayName}'
+    },
+    userSettingsSaveSuccess: {
+        id: 'app.notification.userSettingsSaveSuccess',
+        description: 'User settings successfully saved',
+        defaultMessage: 'You have successfully saved your personal settings'
+    },
+    faucetRequestSuccess: {
+        id: 'app.notificaiton.faucetRequestSuccess',
+        description: 'message to show when faucet tx successful',
+        defaultMessage: 'You have successfully received test ETH and some AETH'
+    },
 });
 export { notificationMessages };

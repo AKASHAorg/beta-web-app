@@ -1,0 +1,64 @@
+.top-bar-right {
+    display: flex;
+    flex: 0 0 auto;
+    height: 100%;
+    border-left: 1px solid @light-border;
+    padding-left: 12px;
+
+    &__services {
+        flex: 0 0 auto;
+        display: flex;
+    }
+
+    &__divider {
+        margin: 0 10px;
+        width: 2px;
+        background-color: @light-background;
+    }
+
+    &__icon-wrapper {
+        position: relative;
+        flex: 0 0 auto;
+        margin-right: 10px;
+    }
+
+    &__notifications-icon {
+        height: 20px;
+        width: 20px;
+        stroke: @text-color-secondary !important;
+    }
+
+    &__activity-icon {
+        stroke: initial !important;
+        width: 18px;
+        height: 16px;
+        path {
+            fill: @text-color;
+        }
+
+        &_selected path {
+            fill: @heading-color;
+        }
+    }
+
+    &__pending-indicator {
+        position: absolute;
+        top: 12px;
+        right: 0;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: @primary-color;
+        cursor: pointer;
+    }
+
+    &__balance {
+        flex: 0 0 auto;
+        margin-right: 12px;
+        min-width: 60px;
+
+        &_selected {
+            color: @heading-color;
+        }
+    }
+}

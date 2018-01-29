@@ -1,650 +1,63 @@
-import { AppActions, TransactionActions } from './';
-import { ProfileService, AuthService, RegistryService } from '../services';
-import { profileActionCreators } from './action-creators';
-import imageCreator from '../../utils/imageUtils';
 import { action } from './helpers';
 import * as types from '../constants';
 
-let profileActions = null;
+export const profileAethTransfersIterator = () => action(types.PROFILE_AETH_TRANSFERS_ITERATOR);
 
-class ProfileActions {
-    constructor (dispatch) { // eslint-disable-line consistent-return
-        if (profileActions) {
-            return profileActions;
-        }
-        this.appActions = new AppActions(dispatch);
-        this.transactionActions = new TransactionActions(dispatch);
-        this.profileService = new ProfileService();
-        this.authService = new AuthService();
-        // this.registryService = new RegistryService();
-        this.dispatch = dispatch;
-        profileActions = this;
-    }
+export const profileAethTransfersIteratorError = (error) => {
+    error.code = 'PATIE01';
+    error.messageId = 'profileAethTransfersIterator';
+    return action(types.PROFILE_AETH_TRANSFERS_ITERATOR_ERROR, { error });
+};
 
-    login = ({ account, password, rememberTime, akashaId }) => {
-        this.dispatch((dispatch, getState) => {
-            const flags = getState().profileState.get('flags');
-            password = new TextEncoder('utf-8').encode(password);
-            dispatch(profileActionCreators.login({
-                loginRequested: true
-            }));
-            this.authService.login({
-                account,
-                password,
-                rememberTime,
-                akashaId,
-                onSuccess: (data) => {
-                    this.dispatch(profileActionCreators.loginSuccess(data, {
-                        loginRequested: false
-                    }));
-                    this.getCurrentProfile();
-                },
-                onError: error => this.dispatch(profileActionCreators.loginError(error, {
-                    loginRequested: false
-                }))
-            });
-        });
-    };
+export const profileAethTransfersIteratorSuccess = data =>
+    action(types.PROFILE_AETH_TRANSFERS_ITERATOR_SUCCESS, { data });
 
-    logout = (profileKey, flush) => {
-        this.authService.logout({
-            options: {
-                profileKey,
-                flush
-            },
-            onSuccess: data => this.dispatch(profileActionCreators.logoutSuccess(data)),
-            onError: error => this.dispatch(profileActionCreators.logoutError(error))
-        });
-    };
+export const profileAllFollowings = following => action(types.PROFILE_ALL_FOLLOWINGS, { following });
 
-    getLoggedProfile = () => {
-        this.dispatch((dispatch, getState) => {
-            const flags = getState().profileState.get('flags');
-            if (!flags.get('fetchingLoggedProfile')) {
-                dispatch(profileActionCreators.getLoggedProfile({
-                    fetchingLoggedProfile: true
-                }));
-                this.authService.getLoggedProfile({
-                    onSuccess: (data) => {
-                        dispatch(profileActionCreators.getLoggedProfileSuccess(data, {
-                            fetchingLoggedProfile: false
-                        }));
-                        this.getCurrentProfile();
-                    },
-                    onError: error => dispatch(profileActionCreators.getLoggedProfileError(error, {
-                        fetchingLoggedProfile: false
-                    }))
-                });
-            }
-        });
-    };
+export const profileBondAeth = ({ actionId, amount }) =>
+    action(types.PROFILE_BOND_AETH, { actionId, amount });
 
-    getLocalProfiles = () => {
-        this.dispatch((dispatch, getState) => {
-            const flags = getState().profileState.get('flags');
-            if (!flags.get('fetchingLocalProfiles')) {
-                dispatch(profileActionCreators.getLocalProfiles({
-                    fetchingLocalProfiles: true
-                }));
-                this.authService.getLocalIdentities({
-                    onSuccess: (data) => {
-                        this.dispatch(profileActionCreators.getLocalProfilesSuccess(data, {
-                            fetchingLocalProfiles: false,
-                            localProfilesFetched: true
-                        }));
-                    },
-                    onError: err => this.dispatch(profileActionCreators.getLocalProfilesError(err, {
-                        fetchingLocalProfiles: false,
-                        localProfilesFetched: false
-                    }))
-                });
-            }
-        });
-    };
+export const profileBondAethError = (error, amount) => {
+    error.code = 'PBAE01';
+    error.messageId = 'profileBondAeth';
+    error.values = { amount };
+    return action(types.PROFILE_BOND_AETH_ERROR, { error });
+};
 
-    getCurrentProfile = () => {
-        this.dispatch((dispatch, getState) => {
-            const flags = getState().profileState.get('flags');
-            if (!flags.get('fetchingCurrentProfile') && !flags.get('currentProfileFetched')) {
-                dispatch(profileActionCreators.getCurrentProfile({
-                    fetchingCurrentProfile: true
-                }));
-                this.registryService.getCurrentProfile({
-                    onSuccess: data =>
-                        dispatch(profileActionCreators.getCurrentProfileSuccess(data, {
-                            fetchingCurrentProfile: false,
-                            currentProfileFetched: true
-                        })),
-                    onError: err => dispatch(profileActionCreators.getCurrentProfileError(err, {
-                        fetchingCurrentProfile: false
-                    }))
-                });
-            }
-        });
-    };
-
-    clearLocalProfiles = () =>
-        this.dispatch(profileActionCreators.clearLocalProfilesSuccess());
-
-    clearOtherProfiles = () =>
-        this.dispatch(profileActionCreators.clearOtherProfiles());
-
-    /**
-     * profiles = [{key: string, profile: string}]
-     */
-    getProfileData = (profiles, full = false) => {
-        this.dispatch(profileActionCreators.getProfileData({
-            fetchingProfileData: true
-        }));
-        profiles.forEach((profileObject) => {
-            this.profileService.getProfileData({
-                options: {
-                    profile: profileObject.profile,
-                    full
-                },
-                onSuccess: (data) => {
-                    if (data.avatar) {
-                        data.avatar = imageCreator(data.avatar, data.baseUrl);
-                    }
-                    this.dispatch(profileActionCreators.getProfileDataSuccess(data, {
-                        fetchingProfileData: false
-                    }));
-                },
-                onError: (err) => {
-                    this.dispatch(profileActionCreators.getProfileDataError(err, {
-                        fetchingProfileData: false
-                    }));
-                }
-            });
-        });
-    };
-
-    updateProfileData = (updatedProfile, gas) => {
-        const { firstName, lastName, avatar, about, links,
-            backgroundImage } = updatedProfile.toJS();
-        const ipfs = { firstName, lastName, about, avatar };
-
-        if (links) {
-            ipfs.links = links;
-        }
-
-        if (backgroundImage) {
-            ipfs.backgroundImage = backgroundImage.length ? backgroundImage[0] : backgroundImage;
-        }
-        this.dispatch(profileActionCreators.updateProfileData({
-            updatingProfile: true
-        }));
-        this.dispatch((dispatch, getState) => {
-            const loggedProfile = getState().profileState.get('loggedProfile');
-            this.profileService.updateProfileData({
-                token: loggedProfile.get('token'),
-                ipfs,
-                gas,
-                onSuccess: (data) => {
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'updateProfile'
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'updatingProfile',
-                        values: {},
-                        duration: 3000
-                    });
-                },
-                onError: error =>
-                    dispatch(profileActionCreators.updateProfileDataError(error, {
-                        updatingProfile: false
-                    }))
-            });
-        });
-    };
-
-    getProfileList = (profiles) => {
-        this.dispatch(profileActionCreators.getProfileList({
-            fetchingProfileList: true
-        }));
-        this.profileService.getProfileList({
-            profiles,
-            onSuccess: (data) => {
-                data.collection.forEach((item) => {
-                    if (item.avatar) {
-                        item.avatar = imageCreator(item.avatar, item.baseUrl);
-                    }
-                });
-                this.dispatch(profileActionCreators.getProfileListSuccess(data, {
-                    fetchingProfileList: false
-                }));
-            },
-            onError: error =>
-                this.dispatch(profileActionCreators.getProfileListError(error, {
-                    fetchingProfileList: false
-                }))
-        });
-    }
-
-    updateProfileDataSuccess = () => {
-        this.dispatch(profileActionCreators.updateProfileDataSuccess({
-            updatingProfile: false
-        }));
-        this.appActions.showNotification({
-            id: 'profileUpdateSuccess',
-            values: { }
-        });
-    };
-
-    getProfileBalance = unit =>
-        this.dispatch((dispatch, getState) => {
-            const profileKey = getState().profileState.getIn(['loggedProfile', 'account']);
-            this.profileService.getProfileBalance({
-                options: {
-                    etherBase: profileKey,
-                    unit
-                },
-                onSuccess: data =>
-                    this.dispatch(profileActionCreators.getProfileBalanceSuccess(data)),
-                onError: error =>
-                    this.dispatch(profileActionCreators.getProfileBalanceError(error))
-            });
-        });
-
-    clearLoggedProfile = () => {
-        this.authService.deleteLoggedProfile({
-            onSuccess: () => this.dispatch(profileActionCreators.deleteLoggedProfileSuccess()),
-            onError: error => this.dispatch(profileActionCreators.deleteLoggedProfileError(error))
-        });
-    };
-
-    clearErrors = () => {
-        this.dispatch(profileActionCreators.clearErrors());
-    };
-    clearLoginErrors = () => {
-        this.dispatch(profileActionCreators.clearLoginErrors());
-    };
-    resetFlags = () => {
-        this.dispatch(profileActionCreators.resetFlags());
-    };
-    // this method is only called to check if there is a logged profile
-    // it does not dispatch anything and is useless as an action
-    //
-    checkLoggedProfile = (cb) => {
-        this.dispatch((dispatch, getState) => {
-            const loggedProfile = getState().profileState.get('loggedProfile');
-            if (loggedProfile.get('account')) {
-                return cb(null, true);
-            }
-            return this.authService.getLoggedProfile({
-                onSuccess: (data) => {
-                    if (data && data.account !== '') {
-                        return cb(null, true);
-                    }
-                    return cb(null, false);
-                },
-                onError: err => cb(err, false)
-            });
-        });
-    };
-
-    hideNotification = notification =>
-        this.dispatch(profileActionCreators.hideNotification(notification));
-
-    getFollowersCount = (akashaId) => {
-        this.dispatch(profileActionCreators.getFollowersCount());
-        this.profileService.getFollowersCount({
-            akashaId,
-            onError: error =>
-                this.dispatch(profileActionCreators.getFollowersCountError(error)),
-            onSuccess: data =>
-                this.dispatch(
-                    profileActionCreators.getFollowersCountSuccess(data.akashaId, data.count)
-                )
-        });
-    };
-
-    getFollowingCount = (akashaId) => {
-        this.dispatch(profileActionCreators.getFollowingCount());
-        this.profileService.getFollowingCount({
-            akashaId,
-            onError: error =>
-                this.dispatch(profileActionCreators.getFollowingCountError(error)),
-            onSuccess: data =>
-                this.dispatch(
-                    profileActionCreators.getFollowingCountSuccess(data.akashaId, data.count)
-                )
-        });
-    };
-
-    followersIterator = (akashaId, start, limit) => {
-        this.dispatch(profileActionCreators.followersIterator({
-            fetchingFollowers: true
-        }));
-        this.profileService.followersIterator({
-            akashaId,
-            start,
-            limit,
-            onError: error =>
-                this.dispatch(profileActionCreators.followersIteratorError(error, {
-                    fetchingFollowers: false
-                })),
-            onSuccess: (data) => {
-                const akashaIds = [];
-                data.collection.forEach((item) => {
-                    if (item.profile) {
-                        akashaIds.push({ akashaId: item.profile.akashaId });
-                        if (item.profile.avatar) {
-                            item.profile.avatar =
-                                imageCreator(item.profile.avatar, item.profile.baseUrl);
-                        }
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(profileActionCreators.followersIteratorSuccess(data, {
-                    fetchingFollowers: false
-                }));
-            }
-        });
-    };
-
-    moreFollowersIterator = (akashaId, start, limit) => {
-        this.dispatch(profileActionCreators.moreFollowersIterator({
-            fetchingMoreFollowers: true
-        }));
-        this.profileService.moreFollowersIterator({
-            akashaId,
-            start,
-            limit,
-            onError: error =>
-                this.dispatch(profileActionCreators.moreFollowersIteratorError(error, {
-                    fetchingMoreFollowers: false
-                })),
-            onSuccess: (data) => {
-                const akashaIds = [];
-                data.collection.forEach((item) => {
-                    if (item.profile) {
-                        akashaIds.push({ akashaId: item.profile.akashaId });
-                        if (item.profile.avatar) {
-                            item.profile.avatar =
-                                imageCreator(item.profile.avatar, item.profile.baseUrl);
-                        }
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(profileActionCreators.moreFollowersIteratorSuccess(data, {
-                    fetchingMoreFollowers: false
-                }));
-            }
-        });
-    };
-
-    followingIterator = (akashaId, start, limit) => {
-        this.dispatch(profileActionCreators.followingIterator({
-            fetchingFollowing: true
-        }));
-        this.profileService.followingIterator({
-            akashaId,
-            start,
-            limit,
-            onError: error =>
-                this.dispatch(profileActionCreators.followingIteratorError(error, {
-                    fetchingFollowing: false
-                })),
-            onSuccess: (data) => {
-                const akashaIds = [];
-                data.collection.forEach((item) => {
-                    if (item.profile) {
-                        akashaIds.push({ akashaId: item.profile.akashaId });
-                        if (item.profile.avatar) {
-                            item.profile.avatar =
-                                imageCreator(item.profile.avatar, item.profile.baseUrl);
-                        }
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(profileActionCreators.followingIteratorSuccess(data, {
-                    fetchingFollowing: false
-                }));
-            }
-        });
-    };
-
-    moreFollowingIterator = (akashaId, start, limit) => {
-        this.dispatch(profileActionCreators.moreFollowingIterator({
-            fetchingMoreFollowing: true
-        }));
-        this.profileService.moreFollowingIterator({
-            akashaId,
-            start,
-            limit,
-            onError: error =>
-                this.dispatch(profileActionCreators.moreFollowingIteratorError(error, {
-                    fetchingMoreFollowing: false
-                })),
-            onSuccess: (data) => {
-                const akashaIds = [];
-                data.collection.forEach((item) => {
-                    if (item.profile) {
-                        akashaIds.push({ akashaId: item.profile.akashaId });
-                        if (item.profile.avatar) {
-                            item.profile.avatar =
-                                imageCreator(item.profile.avatar, item.profile.baseUrl);
-                        }
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(profileActionCreators.moreFollowingIteratorSuccess(data, {
-                    fetchingMoreFollowing: false
-                }));
-            }
-        });
-    };
-    getFollowingsList = (akashaId) => {
-        this.profileService.getFollowingsList({
-            akashaId,
-            onSuccess: data => this.dispatch(profileActionCreators.getFollowingsListSuccess(data)),
-            onError: error => this.dispatch(profileActionCreators.getFollowingsListError(error))
-        });
-    }
-    addUpdateProfileDataAction = (profileData) => {
-        this.appActions.addPendingAction({
-            type: 'updateProfile',
-            payload: { profileData },
-            titleId: 'updateProfileTitle',
-            messageId: 'updateProfile',
-            gas: 2000000,
-            status: 'checkAuth'
-        });
-    }
-
-    addFollowProfileAction = (akashaId, profile) => {
-        this.appActions.addPendingAction({
-            type: 'followProfile',
-            payload: { akashaId, profile },
-            titleId: 'followProfileTitle',
-            messageId: 'followProfile',
-            gas: 2000000,
-            status: 'checkAuth'
-        });
-    };
-
-    addUnfollowProfileAction = (akashaId, profile) => {
-        this.appActions.addPendingAction({
-            type: 'unfollowProfile',
-            payload: { akashaId, profile },
-            titleId: 'unfollowProfileTitle',
-            messageId: 'unfollowProfile',
-            gas: 2000000,
-            status: 'checkAuth'
-        });
-    };
-
-    addSendTipAction = (payload) => {
-        this.appActions.addPendingAction({
-            type: 'sendTip',
-            payload,
-            titleId: 'sendTipTitle',
-            messageId: 'sendTip',
-            gas: 2000000,
-            status: 'needTransferConfirmation'
-        });
-    };
-
-    followProfile = (akashaId, gas, profile) =>
-        this.dispatch((dispatch, getState) => {
-            const loggedProfile = getState().profileState.get('loggedProfile');
-            const flagOn = { akashaId, value: true };
-            const flagOff = { akashaId, value: false };
-            this.dispatch(profileActionCreators.followProfile({ followPending: flagOn }));
-            this.profileService.follow({
-                token: loggedProfile.get('token'),
-                akashaId,
-                gas,
-                onSuccess: (data) => {
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'followProfile',
-                        akashaId: data.akashaId,
-                        followedProfile: profile
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'followingProfile',
-                        values: { akashaId: data.akashaId },
-                        duration: 3000
-                    });
-                },
-                onError: error =>
-                    dispatch(profileActionCreators.followProfileError(error, {
-                        followPending: flagOff
-                    }))
-            });
-        });
-
-    followProfileSuccess = (akashaId, profile) => {
-        this.dispatch(profileActionCreators.followProfileSuccess(profile, {
-            followPending: { akashaId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: 'followProfileSuccess',
-            values: { akashaId }
-        });
-    };
-
-    unfollowProfile = (akashaId, gas, profile) =>
-        this.dispatch((dispatch, getState) => {
-            const loggedProfile = getState().profileState.get('loggedProfile');
-            const flagOn = { akashaId, value: true };
-            const flagOff = { akashaId, value: false };
-            this.dispatch(profileActionCreators.unfollowProfile({ followPending: flagOn }));
-            this.profileService.unfollow({
-                token: loggedProfile.get('token'),
-                akashaId,
-                gas,
-                onSuccess: (data) => {
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'unfollowProfile',
-                        akashaId: data.akashaId,
-                        unfollowedProfile: profile
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'unfollowingProfile',
-                        values: { akashaId: data.akashaId },
-                        duration: 3000
-                    });
-                },
-                onError: error =>
-                    dispatch(profileActionCreators.unfollowProfileError(error, flagOff))
-            });
-        });
-
-    unfollowProfileSuccess = (akashaId, profile) => {
-        this.dispatch(profileActionCreators.unfollowProfileSuccess(profile, {
-            followPending: { akashaId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: 'unfollowProfileSuccess',
-            values: { akashaId }
-        });
-    };
-
-    isFollower = (akashaId, following) => {
-        this.dispatch(profileActionCreators.isFollower({
-            isFollowerPending: true
-        }));
-        this.profileService.isFollower({
-            akashaId,
-            following,
-            onSuccess: data =>
-                this.dispatch(profileActionCreators.isFollowerSuccess(data, {
-                    isFollowerPending: false
-                })),
-            onError: error =>
-                this.dispatch(profileActionCreators.isFollowerError(error, {
-                    isFollowerPending: false
-                }))
-        });
-    };
-
-    sendTip = (akashaId, receiver, value, gas) =>
-        this.dispatch((dispatch, getState) => {
-            const loggedProfile = getState().profileState.get('loggedProfile');
-            const flagOn = { akashaId, value: true };
-            const flagOff = { akashaId, value: false };
-            this.dispatch(profileActionCreators.sendTip({ sendingTip: flagOn }));
-            this.profileService.sendTip({
-                token: loggedProfile.get('token'),
-                akashaId,
-                receiver,
-                value,
-                gas,
-                onSuccess: (data) => {
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'sendTip',
-                        akashaId: data.akashaId,
-                        gas
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'sendingTip',
-                        values: { akashaId: data.akashaId },
-                        duration: 3000
-                    });
-                },
-                onError: error =>
-                    dispatch(profileActionCreators.sendTipError(error, flagOff))
-            });
-        });
-
-    sendTipSuccess = (akashaId, minedSuccessfully) => {
-        this.dispatch(profileActionCreators.sendTipSuccess({
-            sendingTip: { akashaId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: minedSuccessfully ? 'sendTipSuccess' : 'sendTipError',
-            values: { akashaId }
-        });
-    };
-
-    clearFollowers = akashaId =>
-        this.dispatch(profileActionCreators.clearFollowers(akashaId));
-
-    clearFollowing = akashaId =>
-        this.dispatch(profileActionCreators.clearFollowing(akashaId));
-}
-
-export { ProfileActions };
-
-export const profileAddFollowAction = payload =>
-    action(types.PROFILE_ADD_FOLLOW_ACTION, { payload });
-export const profileAddTipAction = payload =>
-    action(types.PROFILE_ADD_TIP_ACTION, { payload });
-export const profileAddUnfollowAction = payload =>
-    action(types.PROFILE_ADD_UNFOLLOW_ACTION, { payload });
-
+export const profileBondAethSuccess = data => action(types.PROFILE_BOND_AETH_SUCCESS, { data });
 export const profileClearLocal = () => action(types.PROFILE_CLEAR_LOCAL);
 export const profileClearLoginErrors = () => action(types.PROFILE_CLEAR_LOGIN_ERRORS);
+export const profileCreateEthAddress = ({ passphrase, passphrase1 }) =>
+    action(types.PROFILE_CREATE_ETH_ADDRESS, { passphrase, passphrase1 });
+
+export const profileCreateEthAddressError = (error) => {
+    error.code = 'PCEAE01';
+    error.messageId = 'profileCreateEthAddress';
+    return action(types.PROFILE_CREATE_ETH_ADDRESS_ERROR, { error });
+};
+
+export const profileCreateEthAddressSuccess = data =>
+    action(types.PROFILE_CREATE_ETH_ADDRESS_SUCCESS, { data });
+export const profileCycleAeth = ({ actionId, amount }) =>
+    action(types.PROFILE_CYCLE_AETH, { actionId, amount });
+
+export const profileCycleAethError = (error, amount) => {
+    error.code = 'PCAE01';
+    error.messageId = 'profileCycleAeth';
+    error.values = { amount };
+    return action(types.PROFILE_CYCLE_AETH_ERROR, { error });
+};
+
+export const profileCycleAethSuccess = data => action(types.PROFILE_CYCLE_AETH_SUCCESS, { data });
+export const profileCyclingStates = () => action(types.PROFILE_CYCLING_STATES);
+
+export const profileCyclingStatesError = (error) => {
+    error.code = 'PCSE01';
+    error.messageId = 'profileCyclingStates';
+    return action(types.PROFILE_CYCLING_STATES_ERROR, { error });
+};
+
+export const profileCyclingStatesSuccess = data => action(types.PROFILE_CYCLING_STATES_SUCCESS, { data });
 export const profileDeleteLogged = () => action(types.PROFILE_DELETE_LOGGED);
 
 export const profileDeleteLoggedError = (error) => {
@@ -654,8 +67,25 @@ export const profileDeleteLoggedError = (error) => {
 };
 
 export const profileDeleteLoggedSuccess = () => action(types.PROFILE_DELETE_LOGGED_SUCCESS);
-export const profileFollow = (akashaId, gas, profile) =>
-    action(types.PROFILE_FOLLOW, { akashaId, gas, profile });
+export const profileExists = akashaId => action(types.PROFILE_EXISTS, { akashaId });
+
+export const profileExistsError = (error, request) => {
+    error.code = 'PEE01';
+    error.messageId = 'profileExists';
+    return action(types.PROFILE_EXISTS_ERROR, { error, request });
+};
+
+export const profileExistsSuccess = data => action(types.PROFILE_EXISTS_SUCCESS, { data });
+
+export const profileFaucet = ({ actionId, ethAddress, withNotification }) =>
+    action(types.PROFILE_FAUCET, { actionId, ethAddress, withNotification });
+export const profileFaucetError = (error, request) =>
+    action(types.PROFILE_FAUCET_ERROR, { error, request });
+export const profileFaucetSuccess = (data, request) =>
+    action(types.PROFILE_FAUCET_SUCCESS, { data, request });
+
+export const profileFollow = ({ actionId, ethAddress }) =>
+    action(types.PROFILE_FOLLOW, { actionId, ethAddress });
 
 export const profileFollowError = (error, request) => {
     error.code = 'PFE01';
@@ -663,8 +93,8 @@ export const profileFollowError = (error, request) => {
     return action(types.PROFILE_FOLLOW_ERROR, { error, request });
 };
 
-export const profileFollowersIterator = akashaId =>
-    action(types.PROFILE_FOLLOWERS_ITERATOR, { akashaId });
+export const profileFollowersIterator = ({ context, ethAddress }) =>
+    action(types.PROFILE_FOLLOWERS_ITERATOR, { context, ethAddress });
 
 export const profileFollowersIteratorError = (error, request) => {
     error.code = 'PFIE01';
@@ -672,10 +102,10 @@ export const profileFollowersIteratorError = (error, request) => {
     return action(types.PROFILE_FOLLOWERS_ITERATOR_ERROR, { error, request });
 };
 
-export const profileFollowersIteratorSuccess = data =>
-    action(types.PROFILE_FOLLOWERS_ITERATOR_SUCCESS, { data });
-export const profileFollowingsIterator = akashaId =>
-    action(types.PROFILE_FOLLOWINGS_ITERATOR, { akashaId });
+export const profileFollowersIteratorSuccess = (data, request) =>
+    action(types.PROFILE_FOLLOWERS_ITERATOR_SUCCESS, { data, request });
+export const profileFollowingsIterator = ({ context, ethAddress, limit, allFollowings }) =>
+    action(types.PROFILE_FOLLOWINGS_ITERATOR, { context, ethAddress, limit, allFollowings });
 
 export const profileFollowingsIteratorError = (error, request) => {
     error.code = 'PFIE02';
@@ -683,9 +113,19 @@ export const profileFollowingsIteratorError = (error, request) => {
     return action(types.PROFILE_FOLLOWINGS_ITERATOR_ERROR, { error, request });
 };
 
-export const profileFollowingsIteratorSuccess = data =>
-    action(types.PROFILE_FOLLOWINGS_ITERATOR_SUCCESS, { data });
+export const profileFollowingsIteratorSuccess = (data, request) =>
+    action(types.PROFILE_FOLLOWINGS_ITERATOR_SUCCESS, { data, request });
 export const profileFollowSuccess = data => action(types.PROFILE_FOLLOW_SUCCESS, { data });
+export const profileFreeAeth = ({ actionId, amount }) =>
+    action(types.PROFILE_FREE_AETH, { actionId, amount });
+
+export const profileFreeAethError = (error) => {
+    error.code = 'PFAE01';
+    error.messageId = 'profileFreeAeth';
+    return action(types.PROFILE_FREE_AETH_ERROR, { error });
+};
+
+export const profileFreeAethSuccess = data => action(types.PROFILE_FREE_AETH_SUCCESS, { data });
 export const profileGetBalance = () => action(types.PROFILE_GET_BALANCE);
 
 export const profileGetBalanceError = (error) => {
@@ -695,27 +135,36 @@ export const profileGetBalanceError = (error) => {
 };
 
 export const profileGetBalanceSuccess = data => action(types.PROFILE_GET_BALANCE_SUCCESS, { data });
+export const profileGetByAddress = ethAddress => action(types.PROFILE_GET_BY_ADDRESS, { ethAddress });
 
-export const profileGetCurrent = () => action(types.PROFILE_GET_CURRENT);
-
-export const profileGetCurrentError = (error) => {
-    error.code = 'PGCE01';
-    error.messageId = 'profileGetCurrent';
-    return action(types.PROFILE_GET_CURRENT_ERROR, { error });
+export const profileGetByAddressError = (error, request) => {
+    error.code = 'PGBAE01';
+    error.messageId = 'profileGetByAddress';
+    return action(types.PROFILE_GET_BY_ADDRESS_ERROR, { error, request });
 };
 
-export const profileGetCurrentSuccess = data => action(types.PROFILE_GET_CURRENT_SUCCESS, { data });
-export const profileGetData = (profile, full) => action(types.PROFILE_GET_DATA, { profile, full });
+export const profileGetByAddressSuccess = data => action(types.PROFILE_GET_BY_ADDRESS_SUCCESS, { data });
+export const profileGetData = ({ akashaId, context, ethAddress, full }) =>
+    action(types.PROFILE_GET_DATA, { akashaId, context, ethAddress, full });
 
-export const profileGetDataError = (error) => {
+export const profileGetDataError = (error, request) => {
     error.code = 'PGDE01';
     error.messageId = 'profileGetData';
-    return action(types.PROFILE_GET_DATA_ERROR, { error });
+    return action(types.PROFILE_GET_DATA_ERROR, { error, request });
 };
 
-export const profileGetDataSuccess = data => action(types.PROFILE_GET_DATA_SUCCESS, { data });
-export const profileGetList = profileAddresses =>
-    action(types.PROFILE_GET_LIST, { profileAddresses });
+export const profileGetDataSuccess = (data, request) =>
+    action(types.PROFILE_GET_DATA_SUCCESS, { data, request });
+
+export const profileGetEntrySyncBlockError = (error) => {
+    error.code = 'PGESBE01';
+    return action(types.PROFILE_GET_ENTRY_SYNC_BLOCK_ERROR, { error });
+};
+
+export const profileGetEntrySyncBlockSuccess = block =>
+    action(types.PROFILE_GET_ENTRY_SYNC_BLOCK_SUCCESS, { block });
+export const profileGetList = ethAddresses =>
+    action(types.PROFILE_GET_LIST, { ethAddresses });
 
 export const profileGetListError = (error) => {
     error.code = 'PGLE02';
@@ -724,24 +173,32 @@ export const profileGetListError = (error) => {
 };
 
 export const profileGetListSuccess = data => action(types.PROFILE_GET_LIST_SUCCESS, { data });
-export const profileGetLocal = () => action(types.PROFILE_GET_LOCAL);
+export const profileGetLocal = polling => action(types.PROFILE_GET_LOCAL, { polling });
 
-export const profileGetLocalError = (error) => {
+export const profileGetLocalError = (error, request) => {
     error.code = 'PGLE01';
     error.messageId = 'profileGetLocal';
-    return action(types.PROFILE_GET_LOCAL_ERROR, { error });
+    return action(types.PROFILE_GET_LOCAL_ERROR, { error, request });
 };
 
-export const profileGetLocalSuccess = data => action(types.PROFILE_GET_LOCAL_SUCCESS, { data });
+export const profileGetLocalSuccess = (data, request) =>
+    action(types.PROFILE_GET_LOCAL_SUCCESS, { data, request });
 export const profileGetLogged = () => action(types.PROFILE_GET_LOGGED);
 
 export const profileGetLoggedError = (error) => {
-    error.code = 'PGLE02';
+    error.code = 'PGLE03';
     error.messageId = 'profileGetLogged';
     return action(types.PROFILE_GET_LOGGED_ERROR, { error });
 };
 
 export const profileGetLoggedSuccess = data => action(types.PROFILE_GET_LOGGED_SUCCESS, { data });
+
+export const profileGetPublishingCost = data => action(types.PROFILE_GET_PUBLISHING_COST, { data });
+export const profileGetPublishingCostSuccess = data =>
+    action(types.PROFILE_GET_PUBLISHING_COST_SUCCESS, { data });
+export const profileGetPublishingCostError = error =>
+    action(types.PROFILE_GET_PUBLISHING_COST_ERROR, { error });
+
 export const profileIsFollower = followings => action(types.PROFILE_IS_FOLLOWER, { followings });
 
 export const profileIsFollowerError = (error, request) => {
@@ -752,6 +209,16 @@ export const profileIsFollowerError = (error, request) => {
 
 export const profileIsFollowerSuccess = data =>
     action(types.PROFILE_IS_FOLLOWER_SUCCESS, { data });
+
+export const profileKarmaRanking = () => action(types.PROFILE_KARMA_RANKING);
+export const profileKarmaRankingError = (error) => {
+    error.code = 'PKRE01';
+    // error.messageId = 'profileKarmaRankingError';
+    return action(types.PROFILE_KARMA_RANKING_ERROR);
+};
+export const profileKarmaRankingSuccess = data => action(types.PROFILE_KARMA_RANKING_SUCCESS, { data });
+export const profileKarmaRankingLoadMore = data => action(types.PROFILE_KARMA_RANKING_LOAD_MORE, { data });
+
 export const profileLogin = data => action(types.PROFILE_LOGIN, { data });
 
 export const profileLoginError = (error) => {
@@ -770,8 +237,17 @@ export const profileLogoutError = (error) => {
 };
 
 export const profileLogoutSuccess = () => action(types.PROFILE_LOGOUT_SUCCESS);
-export const profileMoreFollowersIterator = akashaId =>
-    action(types.PROFILE_MORE_FOLLOWERS_ITERATOR, { akashaId });
+export const profileManaBurned = () => action(types.PROFILE_MANA_BURNED);
+
+export const profileManaBurnedError = (error) => {
+    error.code = 'PMBE01';
+    error.messageId = 'profileManaBurned';
+    return action(types.PROFILE_MANA_BURNED_ERROR, { error });
+};
+
+export const profileManaBurnedSuccess = data => action(types.PROFILE_MANA_BURNED_SUCCESS, { data });
+export const profileMoreFollowersIterator = ({ context, ethAddress }) =>
+    action(types.PROFILE_MORE_FOLLOWERS_ITERATOR, { context, ethAddress });
 
 export const profileMoreFollowersIteratorError = (error, request) => {
     error.code = 'PMFIE01';
@@ -779,10 +255,10 @@ export const profileMoreFollowersIteratorError = (error, request) => {
     return action(types.PROFILE_MORE_FOLLOWERS_ITERATOR_ERROR, { error, request });
 };
 
-export const profileMoreFollowersIteratorSuccess = data =>
-    action(types.PROFILE_MORE_FOLLOWERS_ITERATOR_SUCCESS, { data });
-export const profileMoreFollowingsIterator = akashaId =>
-    action(types.PROFILE_MORE_FOLLOWINGS_ITERATOR, { akashaId });
+export const profileMoreFollowersIteratorSuccess = (data, request) =>
+    action(types.PROFILE_MORE_FOLLOWERS_ITERATOR_SUCCESS, { data, request });
+export const profileMoreFollowingsIterator = ({ context, ethAddress }) =>
+    action(types.PROFILE_MORE_FOLLOWINGS_ITERATOR, { context, ethAddress });
 
 export const profileMoreFollowingsIteratorError = (error, request) => {
     error.code = 'PMFIE02';
@@ -790,8 +266,51 @@ export const profileMoreFollowingsIteratorError = (error, request) => {
     return action(types.PROFILE_MORE_FOLLOWINGS_ITERATOR_ERROR, { error, request });
 };
 
-export const profileMoreFollowingsIteratorSuccess = data =>
-    action(types.PROFILE_MORE_FOLLOWINGS_ITERATOR_SUCCESS, { data });
+export const profileMoreFollowingsIteratorSuccess = (data, request) =>
+    action(types.PROFILE_MORE_FOLLOWINGS_ITERATOR_SUCCESS, { data, request });
+
+export const profileRegister = ({
+    actionId, akashaId, address, about, avatar, backgroundImage,
+    donationsEnabled, firstName, lastName, links, ethAddress
+}) =>
+    action(types.PROFILE_REGISTER, {
+        actionId,
+        akashaId,
+        address,
+        about,
+        avatar,
+        backgroundImage,
+        donationsEnabled,
+        firstName,
+        lastName,
+        links,
+        ethAddress
+    });
+
+export const profileRegisterError = (error, request) => {
+    error.code = 'PRE01';
+    error.messageId = 'profileRegister';
+    return action(types.PROFILE_REGISTER_ERROR, { error, request });
+};
+
+export const profileRegisterSuccess = (data, request) =>
+    action(types.PROFILE_REGISTER_SUCCESS, { data, request });
+
+export const profileResetColumns = ethAddress => action(types.PROFILE_RESET_COLUMNS, { ethAddress });
+export const profileResetEssenceEvents = () => action(types.PROFILE_RESET_ESSENCE_EVENTS);
+export const profileResetFaucet = () => action(types.PROFILE_RESET_FAUCET);
+
+export const profileResolveIpfsHash = (ipfsHash, columnId, akashaIds) =>
+    action(types.PROFILE_RESOLVE_IPFS_HASH, { ipfsHash, columnId, akashaIds });
+
+export const profileResolveIpfsHashError = (error, request) => {
+    error.code = 'PRIHE01';
+    error.messageId = 'profileResolveIpfsHash';
+    return action(types.PROFILE_RESOLVE_IPFS_HASH_ERROR, { error, request });
+};
+
+export const profileResolveIpfsHashSuccess = (data, request) =>
+    action(types.PROFILE_RESOLVE_IPFS_HASH_SUCCESS, { data, request });
 
 export const profileSaveLoggedError = (error) => {
     error.code = 'PSLE01';
@@ -799,8 +318,8 @@ export const profileSaveLoggedError = (error) => {
     return action(types.PROFILE_SAVE_LOGGED_ERROR, { error });
 };
 
-export const profileSendTip = (akashaId, receiver, value, gas) =>
-    action(types.PROFILE_SEND_TIP, { akashaId, receiver, value, gas });
+export const profileSendTip = ({ actionId, akashaId, ethAddress, message, receiver, value, tokenAmount }) =>
+    action(types.PROFILE_SEND_TIP, { actionId, akashaId, ethAddress, message, receiver, value, tokenAmount });
 
 export const profileSendTipError = (error, request) => {
     error.code = 'PSTE01';
@@ -809,8 +328,59 @@ export const profileSendTipError = (error, request) => {
 };
 
 export const profileSendTipSuccess = data => action(types.PROFILE_SEND_TIP_SUCCESS, { data });
-export const profileUnfollow = (akashaId, gas, profile) =>
-    action(types.PROFILE_UNFOLLOW, { akashaId, gas, profile });
+
+export const profileToggleInterest = (interest, interestType) =>
+    action(types.PROFILE_TOGGLE_INTEREST, { interest, interestType });
+
+export const profileToggleDonations = ({ actionId, status }) =>
+    action(types.PROFILE_TOGGLE_DONATIONS, { actionId, status });
+
+export const profileToggleDonationsError = (error, request) => {
+    error.code = 'PTDE01';
+    error.messageId = 'profileToggleDonations';
+    error.values = { status: request.status };
+    return action(types.PROFILE_TOGGLE_DONATIONS_ERROR, { error });
+};
+
+export const profileToggleDonationsSuccess = data =>
+    action(types.PROFILE_TOGGLE_DONATIONS_SUCCESS, { data });
+
+export const profileTransferAeth = ({ actionId, akashaId, ethAddress, tokenAmount }) =>
+    action(types.PROFILE_TRANSFER_AETH, { actionId, akashaId, ethAddress, tokenAmount });
+
+export const profileTransferAethError = (error, request) => {
+    error.code = 'PTAE01';
+    error.messageId = 'profileTransferAeth';
+    error.values = { tokenAmount: request.tokenAmount };
+    return action(types.PROFILE_TRANSFER_AETH_ERROR, { error });
+};
+
+export const profileTransferAethSuccess = data => action(types.PROFILE_TRANSFER_AETH_SUCCESS, { data });
+export const profileTransferEth = ({ actionId, akashaId, ethAddress, value }) =>
+    action(types.PROFILE_TRANSFER_ETH, { actionId, akashaId, ethAddress, value });
+
+export const profileTransferEthError = (error, request) => {
+    error.code = 'PTEE01';
+    error.messageId = 'profileTransferEth';
+    error.values = { value: request.value };
+    return action(types.PROFILE_TRANSFER_ETH_ERROR, { error });
+};
+
+export const profileTransferEthSuccess = data => action(types.PROFILE_TRANSFER_ETH_SUCCESS, { data });
+export const profileTransformEssence = ({ actionId, amount }) =>
+    action(types.PROFILE_TRANSFORM_ESSENCE, { actionId, amount });
+
+export const profileTransformEssenceError = (error, amount) => {
+    error.code = 'PTEE02';
+    error.messageId = 'profileTransformEssence';
+    error.values = { amount };
+    return action(types.PROFILE_TRANSFORM_ESSENCE_ERROR, { error });
+};
+
+export const profileTransformEssenceSuccess = data =>
+    action(types.PROFILE_TRANSFORM_ESSENCE_SUCCESS, { data });
+export const profileUnfollow = ({ actionId, ethAddress }) =>
+    action(types.PROFILE_UNFOLLOW, { actionId, ethAddress });
 
 export const profileUnfollowError = (error, request) => {
     error.code = 'PUE01';
@@ -820,8 +390,30 @@ export const profileUnfollowError = (error, request) => {
 
 export const profileUnfollowSuccess = data => action(types.PROFILE_UNFOLLOW_SUCCESS, { data });
 
+export const profileUpdate = ({ actionId, about, avatar, backgroundImage, firstName, lastName, links }) =>
+    action(types.PROFILE_UPDATE, { actionId, about, avatar, backgroundImage, firstName, lastName, links });
+
+export const profileUpdateError = (error, request) => {
+    error.code = 'PUE01';
+    error.messageId = 'profileUpdate';
+    return action(types.PROFILE_UPDATE_ERROR, { error, request });
+};
+
+export const profileUpdateSuccess = (data, request) =>
+    action(types.PROFILE_UPDATE_SUCCESS, { data, request });
+
+
 export const profileUpdateLoggedError = (error) => {
     error.code = 'PULE01';
     error.messageId = 'profileUpdateLogged';
     return action(types.PROFILE_UPDATE_LOGGED_ERROR, { error });
 };
+
+export const profileEssenceIterator = () =>
+    action(types.PROFILE_ESSENCE_ITERATOR);
+
+export const profileEssenceIteratorSuccess = (data, request) =>
+    action(types.PROFILE_ESSENCE_ITERATOR_SUCCESS, { data, request });
+
+export const profileEssenceIteratorError = (error, request) =>
+    action(types.PROFILE_ESSENCE_ITERATOR_ERROR, { error, request });

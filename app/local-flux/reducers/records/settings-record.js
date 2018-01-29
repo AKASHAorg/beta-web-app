@@ -1,57 +1,69 @@
 import { Record } from 'immutable';
+import { License } from './license-record';
 
-const GethSettings = Record({
+export const GethSettings = Record({
     autodag: null,
-    cache: null,
+    cache: '',
     datadir: null,
     fast: null,
     ipcpath: null,
     mine: null,
     minerthreads: null,
-    networkid: null
+    networkid: null,
+    syncmode: 'fast',
 });
 
-const PortsRecord = Record({
+export const PortsRecord = Record({
     apiPort: null,
     gatewayPort: null,
     swarmPort: null
 });
 
-const IpfsSettings = Record({
+export const IpfsSettings = Record({
     ports: new PortsRecord(),
     storagePath: null,
+});
+
+export const HiddenContent = Record({
+    checked: true,
+    value: -30
 });
 
 const Notifications = Record({
     muted: []
 });
 
-const PasswordPreference = Record({
+export const PasswordPreference = Record({
     remember: false,
     time: null
 });
 
-const UserSettings = Record({
-    akashaId: null,
+export const UserSettings = Record({
+    ethAddress: null,
     lastBlockNr: null,
     latestMention: null,
-    defaultLicence: null,
+    defaultLicense: License(),
+    hideCommentContent: new HiddenContent(),
+    hideEntryContent: new HiddenContent(),
     notifications: new Notifications(),
     passwordPreference: new PasswordPreference()
 });
 
-const GeneralSettings = Record({
+export const GeneralSettings = Record({
     theme: 'light',
-    configurationSaved: false
+    configurationSaved: false,
+    darkTheme: false,
+    locale: 'en'
 });
 
 const Flags = Record({
     generalSettingsPending: false,
     savingGethSettings: false,
-    savingIpfsSettings: false
+    savingIpfsSettings: false,
+    savingUserSettings: false
 });
 
-const SettingsRecord = Record({
+export const SettingsRecord = Record({
     geth: new GethSettings(),
     defaultGethSettings: new GethSettings(),
     ipfs: new IpfsSettings(),
@@ -60,6 +72,3 @@ const SettingsRecord = Record({
     userSettings: new UserSettings(),
     general: new GeneralSettings(),
 });
-
-export default SettingsRecord;
-export { GeneralSettings, GethSettings, IpfsSettings, PasswordPreference, PortsRecord, UserSettings };

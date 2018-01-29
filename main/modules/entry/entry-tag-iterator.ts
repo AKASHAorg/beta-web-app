@@ -1,34 +1,30 @@
 import * as Promise from 'bluebird';
-import contracts from '../../contracts/index';
-import getEntry from './get-entry';
+import schema from '../utils/jsonschema';
+import { fetchFromTagIndex } from './helpers';
+
+const entryTagIterator = {
+    'id': '/entryTagIterator',
+    'type': 'object',
+    'properties': {
+        'limit': { 'type': 'number' },
+        'toBlock': { 'type': 'number' },
+        'tagName': { 'type': 'string', 'minLength': 1, 'maxLength': 32 },
+        'reversed': {'type': 'boolean'}
+    },
+    'required': ['toBlock', 'tagName']
+};
+
 /**
- * Get entries indexed by tag
+ * Get a tags created
  * @type {Function}
  */
-const execute = Promise.coroutine(function*(data: { start?: number, limit?: number, tagName: string, reverse: boolean }) {
-    let currentId = (data.start) ? data.start : yield contracts.instance.entries.getTagEntryFirst(data.tagName);
-    if (currentId === '0') {
-        return { collection: [], tagName: data.tagName };
-    }
-    const maxResults = (data.limit) ? data.limit : 5;
-    const fetchCalls = [];
-    let counter = 0;
-    if (!data.start) {
-        fetchCalls.push(getEntry.execute({ entryId: currentId }));
-        counter = 1;
-    }
+const execute = Promise.coroutine(function* (data: { toBlock: number, limit?: number,
+    tagName: string, lastIndex?: number, reversed?: boolean }) {
+    const v = new schema.Validator();
+    v.validate(data, entryTagIterator, { throwError: true });
 
-    while (counter < maxResults) {
-        currentId = (data.reverse) ? yield contracts.instance.entries.getTagEntryPrev(data.tagName, currentId) :
-            yield contracts.instance.entries.getTagEntryNext(data.tagName, currentId);
-        if (currentId === '0') {
-            break;
-        }
-        fetchCalls.push(getEntry.execute({ entryId: currentId }));
-        counter++;
-    }
-    const results = yield Promise.all(fetchCalls);
-    return { collection: results, tagName: data.tagName, limit: maxResults };
+    const maxResults = data.limit || 5;
+    return fetchFromTagIndex(Object.assign({}, data, { limit: maxResults, args: { tagName: data.tagName }, reversed: data.reversed || false }));
 });
 
 export default { execute, name: 'entryTagIterator' };

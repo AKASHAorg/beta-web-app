@@ -1,101 +1,118 @@
-import { fromJS, List, Map, Record } from 'immutable';
-import * as types from '../constants/SearchConstants';
+import { List } from 'immutable';
+import * as types from '../constants';
 import { createReducer } from './create-reducer';
+import { entrySearchLimit } from '../../constants/iterator-limits';
+import { SearchRecord } from './records/search-record';
 
-const PAGE_SIZE = 5;
+const initialState = new SearchRecord();
 
-const Error = Record({
-    code: null,
-    message: '',
-    fatal: false,
-    type: null
-});
-
-const initialState = fromJS({
-    consecutiveQueryErrors: 0,
-    currentPage: null,
-    errors: new List(),
-    flags: new Map(),
-    query: '',
-    resultsCount: null,
-    searchService: null,
-    showResults: false,
-    totalPages: null,
-});
-
-const flagHandler = (state, { flags }) =>
-    state.merge({
-        errors: new List(),
-        flags: state.get('flags').merge(flags)
-    });
-
-const queryErrorHandler = (state, { error, flags }) =>
-    state.merge({
-        consecutiveQueryErrors: state.get('consecutiveQueryErrors') >= 3 ?
-            0 :
-            state.get('consecutiveQueryErrors') + 1,
-        errors: state.get('errors').push(new Error(error)),
-        flags: state.get('flags').merge(flags)
-    });
+function getEntryIds (entries) {
+    return entries.map(entry => entry.entryId);
+}
 
 const searchState = createReducer(initialState, {
-    [types.HANDSHAKE]: flagHandler,
+    [types.SEARCH_MORE_QUERY]: state =>
+        state.setIn(['flags', 'moreQueryPending'], true),
 
-    [types.HANDSHAKE_SUCCESS]: (state, { data, flags }) =>
-        state.merge({
-            consecutiveQueryErrors: 0,
-            searchService: data.searchService,
-            flags: state.get('flags').merge(flags)
-        }),
-
-    [types.HANDSHAKE_ERROR]: (state, { error, flags }) =>
-        state.merge({
-            errors: state.get('errors').push(new Error(error)),
-            searchService: null,
-            flags: state.get('flags').merge(flags)
-        }),
-
-    [types.QUERY]: (state, { query, flags }) =>
-        state.merge({
-            query,
-            errors: new List(),
-            flags: state.get('flags').merge(flags)
-        }),
-
-    [types.QUERY_SUCCESS]: (state, { data, flags }) =>
-        state.merge({
-            consecutiveQueryErrors: 0,
-            currentPage: 1,
-            totalPages: Math.ceil(data.total / PAGE_SIZE),
-            resultsCount: data.total,
-            showResults: true,
-            flags: state.get('flags').merge(flags)
-        }),
-
-    [types.QUERY_ERROR]: queryErrorHandler,
-
-    [types.MORE_QUERY]: flagHandler,
-
-    [types.MORE_QUERY_SUCCESS]: (state, { data, flags }) =>
-        state.merge({
-            consecutiveQueryErrors: 0,
+    [types.SEARCH_MORE_QUERY_SUCCESS]: (state, { data }) => {
+        let entryIds = state.get('entryIds');
+        data.collection.forEach((entry) => {
+            if (!entryIds.includes(entry.entryId)) {
+                entryIds = entryIds.push(entry.entryId);
+            }
+        });
+        return state.merge({
             currentPage: state.get('currentPage') + 1,
-            totalPages: Math.ceil(data.total / PAGE_SIZE),
-            resultsCount: data.total,
-            flags: state.get('flags').merge(flags)
+            entryIds,
+            flags: state.get('flags').merge({ moreQueryPending: false }),
+            offset: state.get('offset') + data.collection.length,
+            resultsCount: data.totalHits,
+            totalPages: Math.ceil(data.totalHits / entrySearchLimit),
+        });
+    },
+
+    [types.SEARCH_MORE_QUERY_ERROR]: state =>
+        state.merge({
+            flags: state.get('flags').merge({ moreQueryPending: false })
         }),
 
-    [types.MORE_QUERY_ERROR]: queryErrorHandler,
+    [types.SEARCH_PROFILES]: (state, { query, autocomplete }) => {
+        if (autocomplete) {
+            return state.merge({
+                flags: state.get('flags').set('autocompletePending', true),
+                profilesAutocomplete: new List(),
+                queryAutocomplete: query.toLowerCase(),
+            });
+        }
+        return state.merge({
+            flags: state.get('flags').set('queryPending', true),
+            profiles: new List(),
+            query: query.toLowerCase(),
+        });
+    },
 
-    [types.RESET_RESULTS]: state =>
+    [types.SEARCH_PROFILES_ERROR]: (state, { request }) => {
+        if (request.autocomplete) {
+            return state.setIn(['flags', 'autocompletePending'], false);
+        }
+        return state.setIn(['flags', 'queryPending'], false);
+    },
+
+    [types.SEARCH_PROFILES_SUCCESS]: (state, { data, request }) => {
+        if (request.autocomplete) {
+            return state.merge({
+                flags: state.get('flags').set('autocompletePending', false),
+                profilesAutocomplete: new List(data)
+            });
+        }
+        return state.merge({
+            flags: state.get('flags').set('queryPending', false),
+            profiles: new List(data)
+        });
+    },
+
+    [types.SEARCH_QUERY]: (state, { text }) =>
         state.merge({
-            consecutiveQueryErrors: 0,
             currentPage: null,
-            errors: new List(),
-            query: '',
-            totalPages: null,
+            entryIds: new List(),
+            flags: state.get('flags').merge({ queryPending: true }),
+            offset: null,
+            query: text,
             resultsCount: null,
-            showResults: false
+            totalPages: null,
+        }),
+
+    [types.SEARCH_QUERY_SUCCESS]: (state, { data }) =>
+        state.merge({
+            currentPage: 1,
+            entryIds: new List(getEntryIds(data.collection)),
+            flags: state.get('flags').merge({ queryPending: false }),
+            offset: data.collection.length,
+            resultsCount: data.totalHits,
+            totalPages: Math.ceil(data.totalHits / entrySearchLimit),
+        }),
+
+    [types.SEARCH_QUERY_ERROR]: state =>
+        state.setIn(['flags', 'queryPending'], false),
+
+    [types.SEARCH_RESET_RESULTS]: () => initialState,
+
+    [types.SEARCH_TAGS]: (state, { query }) =>
+        state.merge({
+            flags: state.get('flags').set('queryPending', true),
+            query: query.toLowerCase(),
+            tags: new List(),
+            tagResultsCount: 0
+        }),
+
+    [types.SEARCH_TAGS_ERROR]: state =>
+        state.setIn(['flags', 'queryPending'], false),
+
+    [types.SEARCH_TAGS_SUCCESS]: (state, { data }) =>
+        state.merge({
+            flags: state.get('flags').set('queryPending', false),
+            tags: new List(data),
+            tagResultsCount: data.length,
         }),
 });
 

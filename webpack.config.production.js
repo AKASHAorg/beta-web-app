@@ -3,9 +3,11 @@ import webpack from 'webpack';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import merge from 'webpack-merge';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import BabiliPlugin from 'babili-webpack-plugin';
+import UglifyJSPlugin from 'uglifyjs-webpack-plugin';
 import baseConfig from './webpack.config.base';
 
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+// @TODO extract akasha themes in separated files
 export default merge(baseConfig, {
     devtool: 'source-map',
 
@@ -28,7 +30,7 @@ export default merge(baseConfig, {
             {
                 test: /\.module\.css$/,
                 use: ExtractTextPlugin.extract({
-                        loader: ['style-loader',
+                        use: ['style-loader',
                             'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]']
                     }
                 )
@@ -51,24 +53,32 @@ export default merge(baseConfig, {
             {
                 test: /^((?!\.global).)*\.scss$/,
                 use: ExtractTextPlugin.extract({
-                    fallbackLoader: 'style-loader',
-                    loader: ['css-loader?modules&importLoaders=1&minimize&localIdentName=[name]__[local]___[hash:base64:5]', 'sass-loader']
+                    fallback: 'style-loader',
+                    use: ['css-loader?modules&importLoaders=1&minimize&localIdentName=[name]__[local]___[hash:base64:5]', 'sass-loader']
                 })
             },
             {
-                test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+                test: /^((?!\.global).)*\.less$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader?importLoaders=1&minimize&localIdentName=[name]__[local]___[hash:base64:5]', 'less-loader']
+                })
+            },
+            {
+                test: /\.woff(\?[a-z0-9-=]+)?$/,
                 use: {
-                    loader: 'url-loader',
+                    loader: 'file-loader',
                     options: {
                         limit: 10000,
                         mimetype: 'application/font-woff',
+                        name: 'fonts/[name].[ext]'
                     }
                 },
             },
             {
-                test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.woff2(\?[a-z0-9-=]+)?$/,
                 use: {
-                    loader: 'url-loader',
+                    loader: 'file-loader',
                     options: {
                         limit: 10000,
                         mimetype: 'application/font-woff',
@@ -77,32 +87,44 @@ export default merge(baseConfig, {
                 }
             },
             {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.ttf(\?[a-z0-9-=]+)?$/,
                 use: {
-                    loader: 'url-loader',
+                    loader: 'file-loader',
                     options: {
                         limit: 10000,
-                        mimetype: 'application/octet-stream'
+                        mimetype: 'application/octet-stream',
+                        name: 'fonts/[name].[ext]'
                     }
                 }
             },
             {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                use: 'file-loader',
+                test: /\.eot(\?[a-z0-9-=]+)?$/,
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        name: 'fonts/[name].[ext]'
+                    }
+                }
             },
             {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.svg(\?[a-z0-9-=]+)?$/,
                 use: {
-                    loader: 'url-loader',
+                    loader: 'file-loader',
                     options: {
                         limit: 10000,
                         mimetype: 'image/svg+xml',
+                        name: 'fonts/[name].[ext]'
                     }
                 }
             },
             {
                 test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
-                use: 'url-loader',
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        name: 'fonts/[name].[ext]'
+                    }
+                }
             }
         ]
     },
@@ -118,23 +140,33 @@ export default merge(baseConfig, {
          * development checks
          */
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
+            'process.env.NODE_ENV': JSON.stringify('production'),
+            'process.env.DARK_THEME': JSON.stringify(process.env.DARK_THEME),
+            'process.env.AKASHA_VERSION': JSON.stringify('beta#1')
         }),
-
         /**
          * Babli is an ES6+ aware minifier based on the Babel toolchain (beta)
          */
-        new BabiliPlugin(),
-
-        new ExtractTextPlugin({filename: 'style.css', allChunks: true, ignoreOrder: true}),
-
+        new UglifyJSPlugin({
+            parallel: true,
+            sourceMap: true
+        }),
+        new ExtractTextPlugin({
+            filename: (process.env.DARK_THEME) ? 'dark-style.css' : 'style.css',
+            allChunks: true,
+            ignoreOrder: true
+        }),
+        new OptimizeCssAssetsPlugin({
+            cssProcessorOptions: { discardComments: { removeAll: true } },
+            canPrint: true
+        }),
         /**
          * Dynamically generate index.html page
          */
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: 'app/app.template.html',
-            inject: true
+            inject: false
         })
     ],
 

@@ -1,49 +1,99 @@
 import { defineMessages } from 'react-intl';
 
 export const profileMessages = defineMessages({
-    createProfileTitle: {
-        id: 'app.profileTitle',
-        description: 'Modal title for new identity form',
-        defaultMessage: 'Create new identity'
-    },
-    optionalDetailsLabel: {
-        id: 'app.profile.optionalDetailsLabel',
-        description: 'Label for optional details checkbox',
-        defaultMessage: 'Optional details'
+    amountPlaceholder: {
+        id: 'app.profile.amountPlaceholder',
+        description: 'placeholder for amount input',
+        defaultMessage: 'Type an amount'
     },
     avatarTitle: {
         id: 'app.profile.avatarTitle',
         description: 'Avatar section title',
-        defaultMessage: 'Avatar'
+        defaultMessage: 'PROFILE PICTURE'
     },
     backgroundImageTitle: {
         id: 'app.profile.backgroundImageTitle',
         description: 'Background image section title',
-        defaultMessage: 'Background image'
+        defaultMessage: 'COVER PHOTO'
     },
-    aboutYouTitle: {
-        id: 'app.profile.aboutYouTitle',
-        description: 'About You section title',
-        defaultMessage: 'About You'
+    backgroundImageTooltip: {
+        id: 'app.profile.backgroundImageTooltip',
+        description: 'Background image section tooltip',
+        defaultMessage: 'Please upload a picture with a ratio of 2:1'
+    },
+    aboutMeCharCount: {
+        id: 'app.profile.aboutMeCharCount',
+        description: 'About Me character counter title',
+        defaultMessage: 'Characters left:'
+    },
+    aboutMeTitle: {
+        id: 'app.profile.aboutMeTitle',
+        description: 'About Me section title',
+        defaultMessage: 'About me'
+    },
+    essenceReady: {
+        id: 'app.profile.essenceReady',
+        description: 'title for Essence popover',
+        defaultMessage: 'Ready to collect'
+    },
+    contacts: {
+        id: 'app.profile.contacts',
+        description: 'Contacts card title',
+        defaultMessage: 'Contacts'
+    },
+    cycledAmountAvailable: {
+        id: 'app.profile.cycledAmountAvailable',
+        description: 'amount of cycled AETH available to be collected',
+        defaultMessage: 'Amount available {amount} AETH'
+    },
+    cyclingComplete: {
+        id: 'app.profile.cyclingComplete',
+        description: 'cycling process complete',
+        defaultMessage: 'Cycling complete'
+    },
+    cyclingPlaceholder: {
+        id: 'app.profile.cyclingPlaceholder',
+        description: 'placeholder for empty cycling AETH table',
+        defaultMessage: 'No Cycling AETH pending'
+    },
+    cyclingProcess: {
+        id: 'app.profile.cyclingProcess',
+        description: 'cycling process in progress',
+        defaultMessage: 'Cycling process'
+    },
+    editProfileTitle: {
+        id: 'app.profile.editProfileTitle',
+        description: 'Edit profile page title',
+        defaultMessage: 'Edit Profile Information'
     },
     shortDescriptionLabel: {
         id: 'app.profile.shortDescriptionLabel',
         description: 'Label for Short description text field',
-        defaultMessage: 'Short description'
+        defaultMessage: 'Type something about you'
+    },
+    karmaLevel: {
+        id: 'app.profile.karmaLevel',
+        description: 'Karma level',
+        defaultMessage: 'Karma lvl {karmaLevel}'
+    },
+    linksPlaceholder: {
+        id: 'app.profile.linksPlaceholder',
+        description: 'Links placeholder text',
+        defaultMessage: 'Type or paste your link'
     },
     linksTitle: {
         id: 'app.profile.linksTitle',
         description: 'Links section title',
-        defaultMessage: 'Links'
+        defaultMessage: 'LINKS'
     },
     addLinkButtonTitle: {
         id: 'app.profile.addLinkButtontitle',
-        description: 'text shown when hovering Add Link button',
-        defaultMessage: 'add link'
+        description: 'title for add link button',
+        defaultMessage: 'Add a new link'
     },
     removeLinkButtonTitle: {
         id: 'app.profile.removeLinkButtonTitle',
-        description: 'text shown when hovering Remove Link button',
+        description: 'tooltip for Remove Link button',
         defaultMessage: 'remove link'
     },
     cryptoAddresses: {
@@ -59,178 +109,37 @@ export const profileMessages = defineMessages({
     cryptoName: {
         id: 'app.profile.cryptoName',
         description: 'crypto name label',
-        defaultMessage: 'Cryptocurrency Name'
+        defaultMessage: 'Cryptocurrency name'
     },
     cryptoAddress: {
         id: 'app.profile.cryptoAddress',
         description: 'crypto address label',
-        defaultMessage: 'Cryptocurrency Address'
+        defaultMessage: 'Cryptocurrency address'
+    },
+    registerProfile: {
+        id: 'app.profile.registerProfile',
+        description: 'register profile button label',
+        defaultMessage: 'Register Profile'
     },
     removeCryptoButtonTitle: {
         id: 'app.profile.removeCryptoButtonTitle',
         description: 'remove crypto button label',
         defaultMessage: 'Remove cryptocurrency link'
     },
-    keepAccUnlockedLabel: {
-        id: 'app.profile.keepAccUnlocked',
-        description: 'Label for "Keep Account Unlocked For" checkbox',
-        defaultMessage: 'Keep account unlocked for'
-    },
-    terms: {
-        id: 'app.profile.terms',
-        description: `Terms agreement for account creation.
-                        Do not translate {termsLink} and {privacyLink}!`,
-        defaultMessage: `By proceeding to create your account and use AKASHA, you are agreeing to
-                         our {termsLink}. If you do not agree, you cannot use
-                         AKASHA.`
-    },
-    registeringIdentity: {
-        id: 'app.profile.registeringIdentity',
-        description: 'Registering identity status',
-        defaultMessage: 'Registering identity'
-    },
-    yourIdentityIsBroadcasted: {
-        id: 'app.profile.yourIdentityIsBroadcasted',
-        description: 'describing that identity is broadcasted into network',
-        defaultMessage: 'Your identity is broadcasted into the AKASHA private network.'
-    },
-    willTakeFewMoments: {
-        id: 'app.profile.willTakeFewMinutes',
-        description: 'action `will take a few moments` to complete',
-        defaultMessage: 'This will take a few moments'
-    },
-    TEMP_PROFILE_CREATE: {
-        id: 'app.profile.tempProfileCreate',
-        description: 'creating a temp profile status message',
-        defaultMessage: 'Creating a temporary profile'
-    },
-    TEMP_PROFILE_CREATE_SUCCESS: {
-        id: 'app.profile.tempProfileCreateSuccess',
-        description: 'a temporary profile was successfully saved to database',
-        defaultMessage: 'Profile data saved to a local database'
-    },
-    ETH_ADDRESS_CREATE: {
-        id: 'app.profile.ethAddressCreate',
-        description: 'Message status when generating eth key',
-        defaultMessage: 'Creating local Ethereum key'
-    },
-    ETH_ADDRESS_CREATE_SUCCESS: {
-        id: 'app.profile.ethAddressCreateSuccess',
-        description: 'Message status when eth key generated',
-        defaultMessage: 'Ethereum key created'
-    },
-    FUND_FROM_FAUCET: {
-        id: 'app.profile.fundFromFaucet',
-        description: 'Message status when request to faucet started',
-        defaultMessage: 'Requesting aethers from AKASHA'
-    },
-    FUND_FROM_FAUCET_SUCCESS: {
-        id: 'app.profile.fundFromFaucetSuccess',
-        description: 'Message status when faucet request accepted',
-        defaultMessage: 'Request accepted.\nTransaction id is: {faucetTx}'
-    },
-    TEMP_PROFILE_FAUCET_TX_MINED: {
-        id: 'app.profile.tempProfileFaucetTxMined',
-        description: 'Message status when waiting for mined event',
-        defaultMessage: 'Waiting for faucet transaction to be mined.'
-    },
-    TEMP_PROFILE_FAUCET_TX_MINED_SUCCESS: {
-        id: 'app.profile.tempProfileFaucetTxMinedSuccess',
-        description: 'Message status when tx mined',
-        defaultMessage: 'Faucet Transaction successfully mined.'
-    },
-    TEMP_PROFILE_LOGIN: {
-        id: 'app.profile.tempProfileLogin',
-        description: 'Message status when login requested',
-        defaultMessage: 'Logging in with @{akashaId}'
-    },
-    TEMP_PROFILE_LOGIN_SUCCESS: {
-        id: 'app.profile.tempProfileLoginSuccess',
-        description: 'Message status when login succeded',
-        defaultMessage: 'Login was successful'
-    },
-    TEMP_PROFILE_PUBLISH: {
-        id: 'app.profile.tempProfilePublish',
-        description: 'Message status when publish profile requested',
-        defaultMessage: 'Publishing your profile'
-    },
-    TEMP_PROFILE_PUBLISH_SUCCESS: {
-        id: 'app.profile.tempProfilePublishSuccess',
-        description: 'Message status when profile was published',
-        defaultMessage: 'Profile published.\nTransaction id is: {publishTx}'
-    },
-    TEMP_PROFILE_PUBLISH_TX_MINED: {
-        id: 'app.profile.tempProfilePublishTxMined',
-        description: 'Message status when waiting for mined event for publish tx',
-        defaultMessage: 'Waiting for publish transaction to be mined'
-    },
-    TEMP_PROFILE_PUBLISH_TX_MINED_SUCCESS: {
-        id: 'app.profile.tempProfilePublishTxMinedSuccess',
-        description: 'Message status when publish tx mined',
-        defaultMessage: 'Publish transaction mined'
-    },
-    findingProfiles: {
-        id: 'app.profile.findingProfiles',
-        description: 'Message status when there are no temporary profiles in stores yet. But might be in database',
-        defaultMessage: 'Finding profiles to publish...'
-    },
-    finishingProfileCreation: {
-        id: 'app.profile.finishingProfileCreation',
-        description: 'Message status when all steps completed and data cleanup takes longer than expected.',
-        defaultMessage: 'Finishing profile publishing.'
-    },
-    enjoyAkasha: {
-        id: 'app.profile.enjoyAkasha',
-        description: 'button label when register complete',
-        defaultMessage: 'Enjoy AKASHA'
-    },
-    tipsBeforeStart: {
-        id: 'app.profile.tipsBeforeStart',
-        description: 'Title for some tips before using AKASHA',
-        defaultMessage: 'Tips before you get started'
-    },
-    weCannotHelpRecover: {
-        id: 'app.profile.weCannotHelpRecover',
-        description: 'text explaining we cannot recover lost passphrases',
-        defaultMessage: 'Since we cannot help you recover passphrases, or identities make sure to:'
-    },
-    writePassKeepSafe: {
-        id: 'app.profile.writePassKeepSafe',
-        description: 'a tip for storing passphrase safely',
-        defaultMessage: 'Write down your passphrase and keep it safe'
-    },
-    backupYourId: {
-        id: 'app.profile.backupYourId',
-        description: 'tip to backup your id',
-        defaultMessage: 'Backup your ID (in the next screen) and don’t be sorry later'
-    },
-    dontShareKey: {
-        id: 'app.profile.dontShareKey',
-        description: 'tip to not share the key with anyone',
-        defaultMessage: 'Don’t (ever) share your key with other people'
-    },
-    personalProfile: {
-        id: 'app.profile.personalProfile',
-        description: 'Title for edit profile panel',
-        defaultMessage: 'Personal profile'
+    entries: {
+        id: 'app.profile.entries',
+        description: 'Title for entries column',
+        defaultMessage: 'Entries'
     },
     follow: {
         id: 'app.profile.follow',
         description: 'follow a profile',
         defaultMessage: 'Follow'
     },
-    unfollow: {
-        id: 'app.profile.unfollow',
-        description: 'unfollow a profile',
-        defaultMessage: 'Unfollow'
-    },
-    entriesCount: {
-        id: 'app.profile.entriesCount',
-        description: 'counting a profile\'s entries',
-        defaultMessage: `{entriesCount, number} {entriesCount, plural,
-            one {entry}
-            other {entries}
-        }`
+    updateProfile: {
+        id: 'app.profile.updateProfile',
+        description: 'update a profile',
+        defaultMessage: 'Update Profile'
     },
     followers: {
         id: 'app.profile.followers',
@@ -242,12 +151,17 @@ export const profileMessages = defineMessages({
         description: 'number of followers',
         defaultMessage: `{followers, number} {followers, plural,
             one {follower}
-            other {followers} 
+            other {followers}
         }`
     },
     following: {
         id: 'app.profile.following',
-        description: 'Label for following tab',
+        description: 'following an user',
+        defaultMessage: 'Following'
+    },
+    followings: {
+        id: 'app.profile.followings',
+        description: 'Label for following card',
         defaultMessage: 'Following'
     },
     followingsCount: {
@@ -255,18 +169,88 @@ export const profileMessages = defineMessages({
         description: 'number of followings',
         defaultMessage: `{followings, number} {followings, plural,
             one {following}
-            other {followings} 
+            other {followings}
         }`
     },
-    allEntries: {
-        id: 'app.profile.allEntries',
-        description: 'Label for all entries tab',
-        defaultMessage: 'All entries'
+    highlights: {
+        id: 'app.profile.highlights',
+        description: 'title for highlights card',
+        defaultMessage: 'Highlights'
     },
-    interestingPeople: {
-        id: 'app.profile.interestingPeople',
-        description: 'Label for interesting people tab',
-        defaultMessage: 'Interesting people'
+    lists: {
+        id: 'app.profile.lists',
+        description: 'Title for lists card',
+        defaultMessage: 'Lists'
+    },
+    myBalance: {
+        id: 'app.profile.myBalance',
+        description: 'Title for my balance card',
+        defaultMessage: 'My balance'
+    },
+    myEntries: {
+        id: 'app.profile.myEntries',
+        description: 'Title for my entries',
+        defaultMessage: 'My entries'
+    },
+    myProfile: {
+        id: 'app.profile.myProfile',
+        description: 'Title for profile overview sidebar',
+        defaultMessage: 'My profile'
+    },
+    noPendingTransactions: {
+        id: 'app.profile.noPendingTransactions',
+        description: 'placeholder message for empty pending transactions log',
+        defaultMessage: 'You have no pending transactions'
+    },
+    noProfiles: {
+        id: 'app.entry.noProfiles',
+        description: 'placeholder for empty profiles list',
+        defaultMessage: 'No profiles'
+    },
+    noTransactions: {
+        id: 'app.profile.noTransactions',
+        description: 'placeholder message for empty transactions history log',
+        defaultMessage: 'You have no transactions'
+    },
+    overview: {
+        id: 'app.profile.overview',
+        description: 'Title for overview card',
+        defaultMessage: 'Overview'
+    },
+    profileDoesntExist: {
+        id: 'app.profile.profileDoesntExist',
+        description: 'placeholder message for entry list when username does not exist',
+        defaultMessage: 'This username doesn\'t exist'
+    },
+    settings: {
+        id: 'app.profile.settings',
+        description: 'Title for profile settings',
+        defaultMessage: 'Settings'
+    },
+    receive: {
+        id: 'app.profile.receive',
+        description: 'Receive button label',
+        defaultMessage: 'Receive'
+    },
+    receiverPlaceholder: {
+        id: 'app.profile.receiverPlaceholder',
+        description: 'Placeholder for receiver input',
+        defaultMessage: 'Type a username or paste an ethereum address'
+    },
+    rewardsAndGoals: {
+        id: 'app.profile.rewardsAndGoals',
+        description: 'Title for rewards and goals card',
+        defaultMessage: 'Rewards and goals'
+    },
+    saveForLater: {
+        id: 'app.profile.saveForLater',
+        description: 'Save for later button label',
+        defaultMessage: 'Save for later'
+    },
+    send: {
+        id: 'app.profile.send',
+        description: 'send button label',
+        defaultMessage: 'Send'
     },
     sendTip: {
         id: 'app.profile.sendTip',
@@ -278,14 +262,64 @@ export const profileMessages = defineMessages({
         description: 'tooltip for send tip button when waiting for transaction',
         defaultMessage: 'Sending tip ...'
     },
-    disableNotifications: {
-        id: 'app.profile.disableNotifications',
-        description: 'tooltip for disable notifications button',
-        defaultMessage: 'Disable notifications'
+    sendTipTo: {
+        id: 'app.profile.sendTipTo',
+        description: 'title for send tip form',
+        defaultMessage: 'Send tip to {name}'
     },
-    enableNotifications: {
-        id: 'app.profile.enableNotifications',
-        description: 'tooltip for enable notifications button',
-        defaultMessage: 'Enable notifications'
+    sendTo: {
+        id: 'app.profile.sendTo',
+        description: 'label for receiver input',
+        defaultMessage: 'Send to'
+    },
+    sentTip: {
+        id: 'app.profile.sentTip',
+        description: 'sent tip action',
+        defaultMessage: 'Sent tip'
+    },
+    support: {
+        id: 'app.profile.support',
+        description: 'support/tip a user',
+        defaultMessage: 'Support'
+    },
+    supported: {
+        id: 'app.profile.supported',
+        description: 'supported by someone',
+        defaultMessage: 'Supported'
+    },
+    supporting: {
+        id: 'app.profile.supporting',
+        description: 'supporting someone',
+        defaultMessage: 'Supporting'
+    },
+    tipAmount: {
+        id: 'app.profile.tipAmount',
+        description: 'placeholder for tip amount input',
+        defaultMessage: 'Tip amount'
+    },
+    totalBalance: {
+        id: 'app.profile.totalBalance',
+        description: 'total ETH balance',
+        defaultMessage: 'Total balance'
+    },
+    transactionsLog: {
+        id: 'app.profile.transactionsLog',
+        description: 'title for transactions log panel',
+        defaultMessage: 'Transactions log'
+    },
+    transactionsLogSubtitle: {
+        id: 'app.profile.transactionsLogSubtitle',
+        description: 'subtitle for transactions log panel',
+        defaultMessage: 'Your interactions with the blockchain'
+    },
+    unfollow: {
+        id: 'app.profile.unfollow',
+        description: 'unfollow a profile',
+        defaultMessage: 'Unfollow'
+    },
+    yourEthAddress: {
+        id: 'app.profile.yourEthAddress',
+        description: 'label for ethereum address input',
+        defaultMessage: 'Your ethereum address'
     }
 });

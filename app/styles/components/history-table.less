@@ -1,0 +1,50 @@
+.history-table {
+    height: 100%;
+    font-size: 13px;
+    padding-right: 4px;
+
+    &__inner {
+        padding: 24px 32px;
+        height: 100%;
+        overflow-y: auto;            
+    }
+
+    &__header {
+        display: flex;
+        height: 36px;
+        text-transform: uppercase;
+    }
+
+    &__row {
+        display: flex;
+        border-top: 1px solid @light-border;
+        height: 36px;
+        color: @heading-color;
+        font-weight: 500;
+    }
+
+    &__action {
+        flex: 0 0 auto;
+        width: 164px;
+    }
+
+    &__amount {
+        flex: 0 0 auto;        
+        width: 164px;
+    }
+
+    &__block-number {
+        flex: 0 0 auto;        
+        width: 60px;
+    }
+
+    &__error-icon {
+        width: 16px;
+        height: 16px;
+        stroke: @error-color !important;
+
+        g > g {
+            fill: @error-color !important;
+        }
+    }
+}

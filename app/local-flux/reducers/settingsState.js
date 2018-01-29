@@ -1,11 +1,23 @@
 import * as types from '../constants';
-import * as settingsTypes from '../constants/SettingsConstants';
-import * as appTypes from '../constants/AppConstants';
 import { createReducer } from './create-reducer';
-import { ErrorRecord, GeneralSettings, GethSettings, IpfsSettings, PasswordPreference,
+import { GeneralSettings, GethSettings, HiddenContent, IpfsSettings, PasswordPreference,
     PortsRecord, SettingsRecord, UserSettings } from './records';
 
 const initialState = new SettingsRecord();
+
+const getUserSettings = (state, data) => {
+    const preference = new PasswordPreference(data.passwordPreference);
+    const hideComment = new HiddenContent(data.hideCommentContent);
+    const hideEntry = new HiddenContent(data.hideEntryContent);
+    if (!data.defaultLicense) {
+        data.defaultLicense = state.getIn(['userSettings', 'defaultLicense']);
+    }
+    return new UserSettings(data).merge({
+        hideCommentContent: hideComment,
+        hideEntryContent: hideEntry,
+        passwordPreference: preference
+    });
+};
 
 const settingsState = createReducer(initialState, {
 
@@ -69,32 +81,19 @@ const settingsState = createReducer(initialState, {
             flags: state.get('flags').merge({ savingIpfsSettings: false })
         }),
 
-    [settingsTypes.GET_USER_SETTINGS_SUCCESS]: (state, { data }) =>
-        state.merge({
-            userSettings: data ? new UserSettings(data) : new UserSettings()
-        }),
+    // [types.SAVE_LATEST_MENTION_SUCCESS]: (state, { data }) =>
+    //     state.merge({
+    //         userSettings: state.get('userSettings').merge({
+    //             latestMention: data
+    //         })
+    //     }),
 
-    [settingsTypes.CLEAN_USER_SETTINGS]: state =>
-        state.set('userSettings', new UserSettings()),
+    // [types.SAVE_LATEST_MENTION_ERROR]: (state, { error }) =>
+    //     state.merge({
+    //         errors: state.get('errors').push(new ErrorRecord(error)),
+    //     }),
 
-    [settingsTypes.SAVE_LATEST_MENTION_SUCCESS]: (state, { data }) =>
-        state.merge({
-            userSettings: state.get('userSettings').merge({
-                latestMention: data
-            })
-        }),
-
-    [settingsTypes.SAVE_LATEST_MENTION_ERROR]: (state, { error }) =>
-        state.merge({
-            errors: state.get('errors').push(new ErrorRecord(error)),
-        }),
-
-    [settingsTypes.SAVE_PASSWORD_PREFERENCE_SUCCESS]: (state, { data }) => {
-        const userSettings = state.get('userSettings').set('passwordPreference', data);
-        return state.set('userSettings', userSettings);
-    },
-
-    [settingsTypes.CHANGE_THEME]: (state, action) => state.updateIn(['general', 'theme'], () => action.theme),
+    // [types.CHANGE_THEME]: (state, action) => state.updateIn(['general', 'theme'], () => action.theme),
 
     [types.GENERAL_SETTINGS]: state =>
         state.setIn(['flags', 'generalSettingsPending'], true),
@@ -122,6 +121,10 @@ const settingsState = createReducer(initialState, {
                 gethSettings[key] = action.data[key];
             }
         });
+
+        if (!action.data.syncmode) {
+            gethSettings.syncmode = initialSettings.syncmode;
+        }
 
         return state.merge({
             geth: new GethSettings(gethSettings),
@@ -168,20 +171,31 @@ const settingsState = createReducer(initialState, {
             })
         }),
 
+    [types.PROFILE_LOGOUT_SUCCESS]: state =>
+        state.set('userSettings', new UserSettings()),
+
     [types.USER_SETTINGS_CLEAR]: state =>
         state.set('userSettings', new UserSettings()),
 
+    [types.USER_SETTINGS_REQUEST]: state =>
+        state.set('userSettings', new UserSettings()),
+
     [types.USER_SETTINGS_SUCCESS]: (state, { data }) =>
-        state.set('userSettings', new UserSettings(data)),
+        state.set('userSettings', getUserSettings(state, data)),
 
-    [types.USER_SETTINGS_SAVE_SUCCESS]: (state, { data }) => {
-        if (data.passwordPrefence) {
-            data.passwordPrefence = new PasswordPreference(data.passwordPrefence);
-        }
-        return state.set('userSettings', new UserSettings(data));
-    },
+    [types.USER_SETTINGS_SAVE]: state =>
+        state.setIn(['flags', 'savingUserSettings'], true),
 
-    [appTypes.CLEAN_STORE]: state =>
+    [types.USER_SETTINGS_SAVE_ERROR]: state =>
+        state.setIn(['flags', 'savingUserSettings'], false),
+
+    [types.USER_SETTINGS_SAVE_SUCCESS]: (state, { data }) =>
+        state.merge({
+            flags: state.get('flags').set('savingUserSettings', false),
+            userSettings: getUserSettings(state, data)
+        }),
+
+    [types.CLEAN_STORE]: state =>
         state.merge({
             userSettings: new UserSettings()
         }),

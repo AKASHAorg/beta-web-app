@@ -1,5 +1,4 @@
-import IpfsConnector from '@akashaproject/ipfs-js-connector';
-import { Buffer } from 'safe-buffer';
+import { IpfsConnector } from '@akashaproject/ipfs-connector';
 import * as Promise from 'bluebird';
 import { is, isEmpty, values } from 'ramda';
 import { entries } from '../models/records';
@@ -9,10 +8,11 @@ export const IMAGE_TYPE = 'image';
 export const max_size = 200 * 1000;
 export const EXCERPT = 'excerpt';
 export const FEATURED_IMAGE = 'featuredImage';
+export const CARD_INFO = 'cardInfo';
 export const DRAFT_PART = 'draft-part';
 export const PREVIOUS_VERSION = 'previous-version';
 class IpfsEntry {
-    create(content, tags, previous) {
+    create(content, tags, entryType, previous) {
         const ipfsApiRequests = [];
         this.entryLinks = [];
         this.draft = Object.assign({}, content.draft);
@@ -21,12 +21,32 @@ class IpfsEntry {
         this.licence = content.licence;
         this.tags = tags;
         this.wordCount = content.wordCount;
-        if (content.featuredImage) {
-            ipfsApiRequests.push(IpfsConnector.getInstance().api
-                .add(content.featuredImage, true)
-                .then((obj) => {
+        if (content.featuredImage && is(Object, content.featuredImage)) {
+            const req = (Object.keys(content.featuredImage).sort()).map((imSize) => {
+                if (!content.featuredImage[imSize].src) {
+                    return Promise.resolve({});
+                }
+                const mediaData = this._normalizeImage(content.featuredImage[imSize].src);
+                return IpfsConnector.getInstance().api
+                    .add(content.featuredImage[imSize].src, true, is(String, mediaData))
+                    .then((obj) => {
+                    return { [imSize]: Object.assign({}, content.featuredImage[imSize], { src: obj.hash }) };
+                });
+            });
+            ipfsApiRequests.push(Promise.all(req).then((sizes) => {
+                const LINK = {};
+                sizes.forEach((record) => {
+                    Object.assign(LINK, record);
+                });
+                return IpfsConnector.getInstance().api.add(LINK);
+            }).then((obj) => {
                 this.entryLinks.push(Object.assign({}, obj, { name: FEATURED_IMAGE }));
             }));
+        }
+        if (content.cardInfo) {
+            ipfsApiRequests.push(IpfsConnector.getInstance().api
+                .add(content.cardInfo)
+                .then((obj) => this.entryLinks.push(Object.assign({}, obj, { name: CARD_INFO }))));
         }
         ipfsApiRequests.push(IpfsConnector.getInstance().api
             .add(content.excerpt)
@@ -48,18 +68,19 @@ class IpfsEntry {
                 tags: this.tags,
                 title: this.title,
                 wordCount: this.wordCount,
+                entryType: entryType,
                 version: (previous && previous.hasOwnProperty('version')) ? ++previous.version : 0
             }, this.entryLinks).then((node) => node.hash);
         });
     }
-    edit(content, tags, previousHash) {
+    edit(content, tags, entryType, previousHash) {
         return IpfsConnector.getInstance().api
             .get(previousHash)
             .then((data) => {
             if (content.hasOwnProperty('version')) {
                 delete content.version;
             }
-            return this.create(content, tags, {
+            return this.create(content, tags, entryType, {
                 hash: previousHash,
                 version: (data.version) ? data.version : 0
             });
@@ -79,21 +100,24 @@ class IpfsEntry {
         });
         return { blockIndex, imageEntities };
     }
+    _normalizeImage(data) {
+        if (is(String, data) || Buffer.isBuffer(data)) {
+            return data;
+        }
+        return Buffer.from(values(data));
+    }
     _uploadMediaDraft() {
         const uploads = [];
         const { imageEntities, blockIndex } = this._filterForImages();
         imageEntities.forEach((element, index) => {
             const keys = Object.keys(element.data.files).sort();
             keys.forEach((imSize) => {
-                if (!element.data.files[imSize].src || is(String, element.data.files[imSize].src)) {
-                    return false;
+                if (!element.data.files[imSize].src) {
+                    return;
                 }
-                const mediaData = Buffer.isBuffer(element.data.files[imSize].src) ?
-                    element.data.files[imSize].src
-                    :
-                        Buffer.from(values(element.data.files[imSize].src));
+                const mediaData = this._normalizeImage(element.data.files[imSize].src);
                 uploads.push(IpfsConnector.getInstance().api
-                    .add(mediaData, true)
+                    .add(mediaData, true, is(String, mediaData))
                     .then((obj) => {
                     this.entryLinks.push(Object.assign({}, obj, { name: (imSize + index) }));
                     this.draft[DRAFT_BLOCKS][blockIndex[index]].data.files[imSize].src = obj.hash;
@@ -131,17 +155,13 @@ export const getShortContent = Promise.coroutine(function* (hash) {
     }
     const response = {
         [EXCERPT]: '',
-        [FEATURED_IMAGE]: ''
+        [FEATURED_IMAGE]: '',
+        [CARD_INFO]: ''
     };
     const root = yield IpfsConnector.getInstance().api.get(hash);
-    const extraData = yield IpfsConnector.getInstance().api.findLinks(hash, [EXCERPT, FEATURED_IMAGE]);
+    const extraData = yield IpfsConnector.getInstance().api.findLinks(hash, [EXCERPT, FEATURED_IMAGE, CARD_INFO]);
     for (let i = 0; i < extraData.length; i++) {
-        if (extraData[i].name === FEATURED_IMAGE) {
-            response[FEATURED_IMAGE] = extraData[i].multihash;
-        }
-        if (extraData[i].name === EXCERPT) {
-            response[EXCERPT] = yield IpfsConnector.getInstance().api.get(extraData[i].multihash);
-        }
+        response[extraData[i].name] = yield IpfsConnector.getInstance().api.get(extraData[i].multihash);
     }
     const data = Object.assign({}, root, response);
     entries.setShort(hash, data);

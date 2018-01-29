@@ -5,7 +5,7 @@ import styles from './panel-container-header.scss';
 class PanelContainerHeader extends Component {
     render () {
         const { header, showBorder, subTitle, title, icon, shrinked, muiTheme,
-        headerHeight, headerMinHeight, headerStyle, children, headerActions } = this.props;
+            headerHeight, headerMinHeight, headerStyle, children, headerActions } = this.props;
         return (
           <div
             className={`row middle-xs ${styles.root}`}
@@ -25,7 +25,7 @@ class PanelContainerHeader extends Component {
                 {icon}
               </div>
             }
-            <div className={`${styles.headerTitle} col-xs-10`}>
+            <div className={`${styles.headerTitle} col-xs-12`}>
               {children && children}
               {!children &&
                 <div className="row middle-xs">

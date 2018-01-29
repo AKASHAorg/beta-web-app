@@ -2,59 +2,115 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { ColumnHeader } from '../';
-import { ColumnTag } from '../svg';
-import { EntryListContainer } from '../../shared-components';
-import { entryMessages } from '../../locale-data/messages';
+import classNames from 'classnames';
+import Waypoint from 'react-waypoint';
+import { ColumnHeader, EntryList } from '../';
+import { entryMessages, tagMessages } from '../../locale-data/messages';
+import { dashboardResetColumnEntries } from '../../local-flux/actions/dashboard-actions';
 import { entryMoreTagIterator, entryTagIterator } from '../../local-flux/actions/entry-actions';
-import { tagGetSuggestions } from '../../local-flux/actions/tag-actions';
-import { selectColumnEntries } from '../../local-flux/selectors';
+import { searchTags } from '../../local-flux/actions/search-actions';
+import { selectColumnEntries, selectTagExists, selectTagSearchResults } from '../../local-flux/selectors';
+
+const DELAY = 60000;
 
 class TagColumn extends Component {
+    firstCallDone = false;
+    interval = null;
+    timeout = null;
 
-    componentDidMount () {
-        const { column } = this.props;
+    componentWillReceiveProps ({ column }) {
         const value = column.get('value');
-        if (!column.get('entries').size && value) {
-            this.props.entryTagIterator(column.get('id'), value);
+        if (value !== this.props.column.get('value')) {
+            this.props.entryTagIterator({ columnId: column.get('id'), value });
+            if (this.interval) {
+                clearInterval(this.interval);
+            }
+            this.timeout = setTimeout(this.setPollingInterval, DELAY);
+        }
+        if (column.get('hasNewEntries') && this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
         }
     }
 
-    componentWillReceiveProps ({ column }) {
-        const newValue = column.get('value');
-        if (newValue !== this.props.column.get('value')) {
-            this.props.entryTagIterator(column.get('id'), newValue);
+    componentWillUnmount () {
+        const { column } = this.props;
+        if (this.interval) {
+            clearInterval(this.interval);
         }
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+        this.props.dashboardResetColumnEntries(column.get('id'));
+    }
+
+    firstLoad = () => {
+        const { column } = this.props;
+        const value = column.get('value');
+        if (!this.firstCallDone && value) {
+            this.entryIterator();
+            this.firstCallDone = true;
+        }
+    };
+
+    setPollingInterval = () => {
+        this.interval = setInterval(() => {
+            this.props.entryTagIterator({
+                columnId: this.props.column.get('id'),
+                reversed: true,
+                value: this.props.column.get('value')
+            });
+        }, DELAY);
+    };
+
+    entryIterator = () => {
+        const { column } = this.props;
+        this.props.entryTagIterator({
+            columnId: column.get('id'),
+            value: column.get('value')
+        });
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.timeout = setTimeout(this.setPollingInterval, DELAY);
     }
 
     entryMoreTagIterator = () => {
         const { column } = this.props;
-        this.props.entryMoreTagIterator(column.get('id'), column.get('value'));
+        this.props.entryMoreTagIterator({ columnId: column.get('id'), value: column.get('value') });
     };
 
     render () {
-        const { column, entries, intl, profiles, suggestions } = this.props;
-        const placeholderMessage = column.get('value') ?
-            intl.formatMessage(entryMessages.noEntries) :
+        const { column, entriesList, intl, tagExists, tagResults } = this.props;
+        let placeholderMessage;
+        if (column.get('value')) {
+            placeholderMessage = tagExists.get(column.get('value')) ?
+                intl.formatMessage(entryMessages.noEntries) :
+                intl.formatMessage(tagMessages.tagDoesntExist);
+        } else {
             intl.formatMessage(entryMessages.searchTag);
+        }
+        const className = classNames('column', { column_large: column.get('large') });
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className={className}>
             <ColumnHeader
-              columnId={column.get('id')}
-              onInputChange={this.props.tagGetSuggestions}
-              icon={<ColumnTag />}
-              suggestions={suggestions}
-              value={column.get('value')}
+              column={column}
+              dataSource={tagResults}
+              iconType="tag"
+              onRefresh={this.entryIterator}
+              onSearch={this.props.searchTags}
             />
-            <EntryListContainer
-              entries={entries}
+            <Waypoint onEnter={this.firstLoad} horizontal />
+            <EntryList
+              contextId={column.get('id')}
+              entries={entriesList}
               fetchingEntries={column.getIn(['flags', 'fetchingEntries'])}
               fetchingMoreEntries={column.getIn(['flags', 'fetchingMoreEntries'])}
               fetchMoreEntries={this.entryMoreTagIterator}
+              large={column.get('large')}
               moreEntries={column.getIn(['flags', 'moreEntries'])}
               placeholderMessage={placeholderMessage}
-              profiles={profiles}
             />
           </div>
         );
@@ -63,28 +119,31 @@ class TagColumn extends Component {
 
 TagColumn.propTypes = {
     column: PropTypes.shape().isRequired,
-    entries: PropTypes.shape().isRequired,
+    dashboardResetColumnEntries: PropTypes.func.isRequired,
+    entriesList: PropTypes.shape().isRequired,
     entryMoreTagIterator: PropTypes.func.isRequired,
     entryTagIterator: PropTypes.func.isRequired,
     intl: PropTypes.shape().isRequired,
-    profiles: PropTypes.shape().isRequired,
-    suggestions: PropTypes.shape().isRequired,
-    tagGetSuggestions: PropTypes.func.isRequired,
+    searchTags: PropTypes.func.isRequired,
+    tagExists: PropTypes.shape().isRequired,
+    tagResults: PropTypes.shape().isRequired,
 };
 
 function mapStateToProps (state, ownProps) {
+    const columnId = ownProps.column.get('id');
     return {
-        entries: selectColumnEntries(state, ownProps.column.get('id')),
-        profiles: state.profileState.get('byId'),
-        suggestions: state.tagState.get('suggestions')
+        entriesList: selectColumnEntries(state, columnId),
+        tagExists: selectTagExists(state),
+        tagResults: selectTagSearchResults(state),
     };
 }
 
 export default connect(
     mapStateToProps,
     {
+        dashboardResetColumnEntries,
         entryMoreTagIterator,
         entryTagIterator,
-        tagGetSuggestions
+        searchTags,
     }
 )(injectIntl(TagColumn));

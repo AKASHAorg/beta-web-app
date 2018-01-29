@@ -1,30 +1,31 @@
 import { defineMessages } from 'react-intl';
 
 const tagMessages = defineMessages({
-    recommendedTags: {
-        id: 'app.tag.recommendedTags',
-        description: 'tags recommended by Akasha',
-        defaultMessage: 'Recommended tags'
+    addTag: {
+        id: 'app.tag.addTag',
+        description: 'placeholder for tag editor field',
+        defaultMessage: '#category...'
     },
-    subscribedTags: {
-        id: 'app.tag.subscribedTags',
-        description: 'tags that the user has subscribed',
-        defaultMessage: 'Subscribed tags'
+    notEnoughKarma: {
+        id: 'app.tag.notEnoughKarma',
+        description: 'message to display when user does not have enough karma to create a tag',
+        defaultMessage: 'Sorry! You don\'t have enough karma to create tags.'
     },
-    newestTags: {
-        id: 'app.tag.newestTags',
-        description: 'newest tags in the network',
-        defaultMessage: 'Newest tags'
+    tagDoesntExist: {
+        id: 'app.tag.tagDoesntExist',
+        description: 'placeholder message for entry list when tag does not exist',
+        defaultMessage: 'This tag doesn\'t exist'
     },
-    subscribe: {
-        id: 'app.tag.subscribe',
-        description: 'label for subscribe button',
-        defaultMessage: 'Subscribe'
+    tagNotCreated: {
+        id: 'app.tag.tagNotCreated',
+        description: 'Message to display when the tag was not created before',
+        defaultMessage: 'This is a new tag that wasn`t created by anyone before!'
     },
-    unsubscribe: {
-        id: 'app.tag.unsubscribe',
-        description: 'label for unsubscribe button',
-        defaultMessage: 'Unsubscribe'
+    tagsLeft: {
+        id: 'app.tag.tagsLeft',
+        description: 'How many tags you can add',
+        defaultMessage: '({value} remaining)'
     }
 });
+
 export { tagMessages };

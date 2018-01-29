@@ -1,66 +1,21 @@
-// keep this alphabetically sorted
-import AppRecord, { NotificationRecord, PendingActionRecord } from './app-record';
-import { CommentData, CommentRecord, CommentsState } from './comments-record';
-import { ColumnRecord, DashboardRecord, DashboardState } from './dashboard-record';
-import { EntriesStream, EntryContent, EntryEth, EntryPageOverlay, EntryRecord,
-    EntryState } from './entry-record';
-import ErrorRecord, { ErrorState } from './error-record';
-import { GethRecord, GethStatus, GethSyncStatus } from './geth-record';
-import { IpfsRecord, IpfsStatus } from './ipfs-record';
-import { LicenseRecord, LicenseState } from './license-record';
-import LogRecord from './log-record';
-import { PanelState } from './panel-record';
-import ProfileState, { LoggedProfile, ProfileRecord } from './profile-record';
-import SettingsRecord, { GeneralSettings, GethSettings, IpfsSettings, PasswordPreference,
-    PortsRecord, UserSettings } from './settings-record';
-import TempProfileRecord, { TempProfileStatus } from './temp-profile-record';
-import { MinedTransaction, PendingTransaction, TransactionFlags,
-    TransactionState } from './transaction-record';
-import UtilsState from './utils-record';
-
-// keep this alphabetically sorted
-export {
-    AppRecord,
-    ColumnRecord,
-    CommentData,
-    CommentRecord,
-    CommentsState,
-    DashboardRecord,
-    DashboardState,
-    EntriesStream,
-    EntryContent,
-    EntryEth,
-    EntryPageOverlay,
-    EntryRecord,
-    EntryState,
-    ErrorRecord,
-    ErrorState,
-    GeneralSettings,
-    GethRecord,
-    GethSettings,
-    GethStatus,
-    GethSyncStatus,
-    IpfsRecord,
-    IpfsSettings,
-    IpfsStatus,
-    LicenseRecord,
-    LicenseState,
-    LoggedProfile,
-    LogRecord,
-    MinedTransaction,
-    NotificationRecord,
-    PanelState,
-    PasswordPreference,
-    PendingActionRecord,
-    PendingTransaction,
-    PortsRecord,
-    ProfileRecord,
-    ProfileState,
-    SettingsRecord,
-    TempProfileRecord,
-    TempProfileStatus,
-    TransactionFlags,
-    TransactionState,
-    UserSettings,
-    UtilsState
-};
+export { ActionRecord, ActionState } from './action-record';
+export { AppRecord, NotificationRecord, PreviewRecord } from './app-record';
+export { CommentAuthor, CommentData, CommentRecord, CommentsState } from './comments-record';
+export { ColumnRecord, DashboardRecord, DashboardState, NewColumnRecord } from './dashboard-record';
+export { DraftContent, Draft, CardInfo } from './draft-record';
+export { EntryAuthor, EntryBalance, EntryContent, EntryEth, EntryPageOverlay, EntryRecord,
+    EntryState, EntryVote, ProfileEntries } from './entry-record';
+export { ErrorRecord, ErrorState } from './error-record';
+export { GethRecord, GethStatus, GethSyncStatus } from './geth-record';
+export { HighlightRecord, HighlightState } from './highlight-record';
+export { IpfsRecord, IpfsStatus } from './ipfs-record';
+export { License, LicenseDescription, LicenseState } from './license-record';
+export { ListRecord, ListState } from './list-record';
+export { LogRecord } from './log-record';
+export { AethBalance, Balance, EssenceBalance, LoggedProfile, ManaBalance, ProfileExistsRecord, ProfileRecord,
+    ProfileState } from './profile-record';
+export { GeneralSettings, GethSettings, HiddenContent, IpfsSettings, PasswordPreference,
+    PortsRecord, SettingsRecord, UserSettings } from './settings-record';
+export { TagRecord } from './tag-record';
+export { TempProfileRecord } from './temp-profile-record';
+export { UtilsState } from './utils-record';

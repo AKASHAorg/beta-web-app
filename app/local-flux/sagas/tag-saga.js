@@ -1,107 +1,130 @@
-import { apply, call, cancel, fork, put, select, take, takeEvery } from 'redux-saga/effects';
-import * as reduxSaga from 'redux-saga';
+import { apply, call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { actionChannels, enableChannel } from './helpers';
-import { selectTagMargins } from '../selectors';
+import { selectToken } from '../selectors';
 import * as actions from '../actions/tag-actions';
-import * as tagService from '../services/tag-service';
+import * as actionActions from '../actions/action-actions';
 import * as types from '../constants';
-import { channel as Channel } from 'services';
+import * as actionStatus from '../../constants/action-status';
+import * as draftActions from '../actions/draft-actions';
 
-const TAG_LIMIT = 30;
-let tagFetchAllTask;
+const Channel = global.Channel;
+const TAG_SEARCH_LIMIT = 10;
 
-function* cancelTagIterator () {
-    if (tagFetchAllTask) {
-        yield cancel(tagFetchAllTask);
-        tagFetchAllTask = null;
-    }
+function* tagCreate ({ data }) {
+    const channel = Channel.server.tags.create;
+    const token = yield select(selectToken);
+    yield call(enableChannel, channel, Channel.client.tags.manager);
+    yield call([channel, channel.send], {
+        ...data,
+        token,
+    });
 }
 
-function* tagIterator () {
-    const channel = Channel.instance.server.tags.tagIterator;
-    yield call(enableChannel, channel, Channel.instance.client.tags.manager);
-    while (true) {
-        const margins = yield select(selectTagMargins);
-        // first get the older tags (until the first created tag), then fetch newest
-        const start = margins.get('firstTag') === '1' ? null : margins.get('firstTag');
-        yield apply(channel, channel.send, [{ start, limit: TAG_LIMIT }]);
-        yield apply(reduxSaga, reduxSaga.delay, [2000]);
-    }
+function* tagCanCreateCheck ({ data }) {
+    const channel = Channel.server.tags.canCreate;
+    const { ethAddress } = data;
+    yield call(enableChannel, channel, Channel.client.tags.manager);
+    yield call([channel, channel.send], { ethAddress });
 }
 
-export function* tagGetMargins () {
-    try {
-        const margins = yield apply(tagService, tagService.getTagMargins);
-        yield put(actions.tagGetMarginsSuccess(margins));
-        yield put(actions.tagIterator());
-    } catch (error) {
-        yield put(actions.tagGetMarginsError(error));
-    }
+function* tagExists ({ data }) {
+    const channel = Channel.server.tags.exists;
+    yield apply(channel, channel.send, [data]);
 }
 
-export function* tagGetSuggestions ({ tag }) {
-    try {
-        const suggestions = yield apply(tagService, tagService.getTagSuggestions, [tag]);
-        yield put(actions.tagGetSuggestionsSuccess(suggestions));
-    } catch (error) {
-        yield put(actions.tagGetSuggestionsError(error));
-    }
+function* tagGetEntriesCount ({ tags }) {
+    const channel = Channel.server.entry.getTagEntriesCount;
+    yield call(enableChannel, channel, Channel.client.entry.manager);
+    yield apply(channel, channel.send, [tags]);
 }
 
-function* tagSave ({ data }) {
-    try {
-        const margins = yield apply(tagService, tagService.saveTags, [data]);
-        yield put(actions.tagSaveSuccess(margins));
-    } catch (error) {
-        yield put(actions.tagSaveError(error));
-        yield call(cancelTagIterator);
-    }
-}
-
-// Action watchers
-
-function* watchTagGetSuggestions () {
-    yield takeEvery(types.TAG_GET_SUGGESTIONS, tagGetSuggestions);
-}
-
-function* watchTagIterator () {
-    yield take(types.TAG_ITERATOR);
-    tagFetchAllTask = yield fork(tagIterator);
-}
-
-function* watchTagSave () {
-    yield takeEvery(types.TAG_SAVE, tagSave);
+function* tagSearch ({ tagName }) {
+    const channel = Channel.server.tags.searchTag;
+    yield call(enableChannel, channel, Channel.client.tags.manager);
+    yield apply(channel, channel.send, [{ tagName, limit: TAG_SEARCH_LIMIT }]);
 }
 
 // Channel watchers
-
-function* watchTagIteratorChannel () {
+function* watchTagCreateChannel () {
     while (true) {
-        const resp = yield take(actionChannels.tags.tagIterator);
-        const { data, error } = resp;
-        if (error) {
-            yield put(actions.tagIteratorError(error));
-            yield call(cancelTagIterator);
-        } else if (data.collection && data.collection.length) {
-            const margins = yield select(selectTagMargins);
-            const newestTag = data.collection[0].tagId;
-            const noNewTags = margins.get('firstTag') === '1' &&
-                Number(newestTag) <= Number(margins.get('lastTag'));
-            if (noNewTags) {
-                yield call(cancelTagIterator);
-            } else {
-                yield put(actions.tagSave(resp.data));
+        const response = yield take(actionChannels.tags.create);
+        if (response.error) {
+            yield put(actions.tagCreateError(response.error));
+        } else {
+            return yield put(actionActions.actionUpdate({
+                id: response.request.actionId,
+                status: actionStatus.publishing,
+                tx: response.data.tx
+            }));
+        }
+    }
+}
+
+function* watchTagCanCreateChannel () {
+    while (true) {
+        const response = yield take(actionChannels.tags.canCreate);
+        if (response.error) {
+            yield put(actions.tagCanCreateError(response.error));
+        } else {
+            yield put(actions.tagCanCreateSuccess(response.data));
+        }
+    }
+}
+
+function* watchTagExistsChannel () {
+    while (true) {
+        const resp = yield take(actionChannels.tags.exists);
+        if (resp.error) {
+            yield put(actions.tagExistsError(resp.error, resp.request));
+        } else {
+            if (resp.request.addToDraft) {
+                yield put(draftActions.draftAddTagSuccess({ ...resp.data, draftId: resp.request.draftId }));
+            }
+            if (!resp.request.addToDraft) {
+                yield put(actions.tagExistsSuccess(resp.data));
+            }
+        }
+    }
+}
+
+function* watchTagGetEntriesCountChannel () {
+    while (true) {
+        const resp = yield take(actionChannels.entry.getTagEntriesCount);
+        if (resp.error) {
+            yield put(actions.tagGetEntriesCountError(resp.error));
+        } else {
+            yield put(actions.tagGetEntriesCountSuccess(resp.data));
+        }
+    }
+}
+
+function* watchTagSearchChannel () {
+    while (true) {
+        const resp = yield take(actionChannels.tags.searchTag);
+        if (resp.error) {
+            yield put(actions.tagSearchError(resp.error));
+        } else {
+            const query = yield select(state => state.tagState.get('searchQuery'));
+            if (query === resp.request.tagName) {
+                yield put(actions.tagSearchSuccess(resp.data.collection));
+                yield put(actions.tagGetEntriesCount(resp.data.collection.map(tagName => ({ tagName }))));
             }
         }
     }
 }
 
 export function* registerTagListeners () {
-    yield fork(watchTagIteratorChannel);
+    yield fork(watchTagCreateChannel);
+    yield fork(watchTagExistsChannel);
+    yield fork(watchTagGetEntriesCountChannel);
+    yield fork(watchTagSearchChannel);
+    yield fork(watchTagCanCreateChannel);
 }
 
 export function* watchTagActions () {
-    yield fork(watchTagGetSuggestions);
-    yield fork(watchTagIterator);
-    yield fork(watchTagSave);
+    yield takeEvery(types.TAG_CREATE, tagCreate);
+    yield takeEvery(types.TAG_EXISTS, tagExists);
+    yield takeEvery(types.TAG_GET_ENTRIES_COUNT, tagGetEntriesCount);
+    yield takeLatest(types.TAG_SEARCH, tagSearch);
+    yield takeLatest(types.TAG_CAN_CREATE, tagCanCreateCheck);
 }

@@ -3,11 +3,14 @@ import EntryContent from './entry-content';
 
 const draftSchema = Dexie.defineClass({
     id: String, // local id
-    akashaId: String,
+    ethAddress: String,
     content: EntryContent,
     tags: Array,
     created_at: Date,
     updated_at: Date,
+    localChanges: Boolean,
+    onChain: Boolean,
+    type: String,
     tx: String
 });
 export default draftSchema;

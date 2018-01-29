@@ -1,25 +1,53 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { columnType } from '../../constants/columns';
-import { LatestColumn, ProfileColumn, StreamColumn, TagColumn } from '../';
+import * as columnTypes from '../../constants/columns';
+import { LatestColumn, ListColumn, ProfileColumn, ProfileEntriesColumn, ProfileFollowersColumn,
+    ProfileFollowingsColumn, StreamColumn, TagColumn } from '../';
 
-const Column = ({ column }) => {
-    switch (column.get('type')) {
-        case columnType.latest:
-            return <LatestColumn column={column} />;
-        case columnType.tag:
-            return <TagColumn column={column} />;
-        case columnType.stream:
-            return <StreamColumn column={column} />;
-        case columnType.profile:
-            return <ProfileColumn column={column} />;
+const Column = ({ column, baseWidth, ethAddress, type }) => {
+    let component;
+    const props = { column, baseWidth };
+    switch (type) {
+        case columnTypes.latest:
+            component = <LatestColumn {...props} />;
+            break;
+        case columnTypes.list:
+            component = <ListColumn {...props} />;
+            break;
+        case columnTypes.tag:
+            component = <TagColumn {...props} />;
+            break;
+        case columnTypes.stream:
+            component = <StreamColumn {...props} />;
+            break;
+        case columnTypes.profile:
+            component = <ProfileColumn {...props} />;
+            break;
+        case columnTypes.profileEntries:
+            component = <ProfileEntriesColumn ethAddress={ethAddress} />;
+            break;
+        case columnTypes.profileFollowers:
+            component = <ProfileFollowersColumn ethAddress={ethAddress} />;
+            break;
+        case columnTypes.profileFollowings:
+            component = <ProfileFollowingsColumn ethAddress={ethAddress} />;
+            break;
         default:
-            return null;
+            break;
     }
+
+    return (
+      <div className="column__wrapper">
+        {component}
+      </div>
+    );
 };
 
 Column.propTypes = {
-    column: PropTypes.shape()
+    baseWidth: PropTypes.number,
+    column: PropTypes.shape(),
+    ethAddress: PropTypes.string,
+    type: PropTypes.string,
 };
 
 export default Column;

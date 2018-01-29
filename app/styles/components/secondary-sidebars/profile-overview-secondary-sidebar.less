@@ -1,0 +1,56 @@
+.profile-overview-sidebar {
+    height: 100%;
+    padding: 10px 10px 0px;
+    
+    &__title {
+        padding: 0px 8px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 13px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+    }
+
+    &__menu {
+        padding-bottom: 0px 8px 10px 8px;
+    }
+
+    &__line {
+        border-top: 1px outset @light-border;
+    }
+
+    &__line-wrapper {
+        margin: 10px 0px;
+    }
+
+    &__logout {       
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        &:hover {
+            background-color: @background;
+        }
+    }
+
+    &__link {
+        text-decoration: none;
+        color: @text-color;
+
+        &:hover {
+            color: @text-color;
+        }
+    }
+
+    &__link-title {
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        &:hover:not(&_active) {
+            background-color: @background;
+        }
+        &_active {
+            color: @heading-color;
+            background-color: @dark-background;
+        }
+    }
+}

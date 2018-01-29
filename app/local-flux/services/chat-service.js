@@ -1,37 +1,35 @@
 import BaseService from './base-service';
 import chatDB from './db/chat';
-import { channel } from 'services';
 
 class ChatService extends BaseService {
-
     joinChannels = ({ channels, onSuccess = () => {}, onError = () => {} }) =>
         this.openChannel({
-            clientManager: channel.instance.client.chat.manager,
-            serverChannel: channel.instance.server.chat.join,
-            clientChannel: channel.instance.client.chat.join,
+            clientManager: Channel.client.chat.manager,
+            serverChannel: Channel.server.chat.join,
+            clientChannel: Channel.client.chat.join,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            channel.instance.server.chat.join.send({ channels })
+            Channel.server.chat.join.send({ channels })
         );
 
     leaveChannels = ({ channels, onSuccess = () => {}, onError = () => {} }) =>
         this.openChannel({
-            clientManager: channel.instance.client.chat.manager,
-            serverChannel: channel.instance.server.chat.leave,
-            clientChannel: channel.instance.client.chat.leave,
+            clientManager: Channel.client.chat.manager,
+            serverChannel: Channel.server.chat.leave,
+            clientChannel: Channel.client.chat.leave,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            channel.instance.server.chat.leave.send({ channels })
+            Channel.server.chat.leave.send({ channels })
         );
 
     getCurrentChannels = ({ onSuccess, onError }) =>
         this.openChannel({
-            clientManager: channel.instance.client.chat.manager,
-            serverChannel: channel.instance.server.chat.getCurrentChannels,
-            clientChannel: channel.instance.client.chat.getCurrentChannels,
+            clientManager: Channel.client.chat.manager,
+            serverChannel: Channel.server.chat.getCurrentChannels,
+            clientChannel: Channel.client.chat.getCurrentChannels,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            channel.instance.server.chat.getCurrentChannels.send()
+            Channel.server.chat.getCurrentChannels.send()
         );
 
     getJoinedChannels = ({ akashaId, onSuccess, onError }) =>
@@ -59,7 +57,7 @@ class ChatService extends BaseService {
                 if (!data[0]) {
                     chatDB.channels
                         .put({ akashaId: loggedAkashaId, joinedChannels: [channel] })
-                        .then(updated => updated ? onSuccess(channel) : onError(''))
+                        .then(updated => (updated ? onSuccess(channel) : onError('')))
                         .catch(error => onError(error));
                     return;
                 }
@@ -71,7 +69,7 @@ class ChatService extends BaseService {
                     const newChannels = [...joinedChannels, channel];
                     chatDB.channels
                         .update(loggedAkashaId, { joinedChannels: newChannels })
-                        .then(updated => updated ? onSuccess(channel) : onError())
+                        .then(updated => (updated ? onSuccess(channel) : onError()))
                         .catch(reason => onError(reason));
                 }
             })
@@ -95,7 +93,7 @@ class ChatService extends BaseService {
                     joinedChannels.splice(index, 1);
                     chatDB.channels
                         .update(loggedAkashaId, { joinedChannels })
-                        .then(updated => updated ? onSuccess(channel) : onError())
+                        .then(updated => (updated ? onSuccess(channel) : onError()))
                         .catch(reason => onError(reason));
                 }
             })
@@ -111,7 +109,7 @@ class ChatService extends BaseService {
                 if (!data[0]) {
                     chatDB.channels
                         .put({ akashaId: loggedAkashaId, recentChannels: [channel] })
-                        .then(updated => updated ? onSuccess([channel]) : onError(''))
+                        .then(updated => (updated ? onSuccess([channel]) : onError('')))
                         .catch(error => onError(error));
                     return;
                 }
@@ -130,7 +128,7 @@ class ChatService extends BaseService {
                 }
                 chatDB.channels
                     .update(loggedAkashaId, { recentChannels: newChannels })
-                    .then(updated => updated ? onSuccess(newChannels) : onError())
+                    .then(updated => (updated ? onSuccess(newChannels) : onError()))
                     .catch(reason => onError(reason));
             })
             .catch(reason => onError(reason));
@@ -153,7 +151,7 @@ class ChatService extends BaseService {
                     recentChannels.splice(index, 1);
                     chatDB.channels
                         .update(loggedAkashaId, { recentChannels })
-                        .then(updated => updated ? onSuccess(channel) : onError())
+                        .then(updated => (updated ? onSuccess(channel) : onError()))
                         .catch(reason => onError(reason));
                 }
             })

@@ -1,4 +1,4 @@
-/* eslint new-cap: ["error", { "capIsNewExceptions": ["Record", "Map"] }]*/
+/* eslint new-cap: ["error", { "capIsNewExceptions": ["Record", "Map"] }] */
 import { fromJS, Record, List } from 'immutable';
 import * as types from '../constants/ChatConstants';
 import * as appTypes from '../constants/AppConstants';

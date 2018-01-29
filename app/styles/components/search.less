@@ -1,0 +1,41 @@
+.search {
+    background-color: @background;
+    height: 100%;
+    
+    &__content {
+        width: 60%;
+        height: 100%;
+        margin: 0 auto;
+    }
+
+    &__input-wrapper {
+        padding: 40px 5px 20px 5px;
+        height: 96px;
+
+        .ant-input-prefix {
+            display: flex;
+            justify-content: center;
+            height: 34px;
+            width: 36px;
+            left: 0;
+            align-items: center;
+            border-right: 1px inset @input-border-color;
+        }
+
+        .ant-input-affix-wrapper .ant-input {
+            padding-left: 45px;
+        }
+    }
+
+    .ant-tabs {
+        height: ~'calc(100% - 96px)';
+    }
+
+    .ant-tabs-bar {
+        margin-bottom: 0px;
+    }
+
+    .ant-tabs-content {
+        height: ~'calc(100% - 44px)';
+    }
+}

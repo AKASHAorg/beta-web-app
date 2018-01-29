@@ -1,7 +1,7 @@
 import { action } from './helpers';
 import * as types from '../constants';
 
-export const dashboardAdd = name => action(types.DASHBOARD_ADD, { name });
+export const dashboardAdd = (name, columns) => action(types.DASHBOARD_ADD, { name, columns });
 
 export const dashboardAddError = (error) => {
     error.code = 'DAE01';
@@ -10,7 +10,12 @@ export const dashboardAddError = (error) => {
 };
 
 export const dashboardAddSuccess = data => action(types.DASHBOARD_ADD_SUCCESS, { data });
-export const dashboardAddColumn = columnType => action(types.DASHBOARD_ADD_COLUMN, { columnType });
+
+export const dashboardAddFirst = (name, interests) => action(types.DASHBOARD_ADD_FIRST, { name, interests });
+export const dashboardAddFirstSuccess = () => action(types.DASHBOARD_ADD_FIRST_SUCCESS);
+
+export const dashboardAddColumn = (columnType, value) =>
+    action(types.DASHBOARD_ADD_COLUMN, { columnType, value });
 
 export const dashboardAddColumnError = (error) => {
     error.code = 'DACE01';
@@ -20,8 +25,18 @@ export const dashboardAddColumnError = (error) => {
 
 export const dashboardAddColumnSuccess = data =>
     action(types.DASHBOARD_ADD_COLUMN_SUCCESS, { data });
-export const dashboardDelete = name =>
-    action(types.DASHBOARD_DELETE, { name });
+export const dashboardAddNewColumn = () => action(types.DASHBOARD_ADD_NEW_COLUMN);
+export const dashboardReorderColumn = (dashboardId, sourceIndex, targetIndex) =>
+    action(types.DASHBOARD_REORDER_COLUMN, { data: { dashboardId, sourceIndex, targetIndex } });
+
+export const dashboardReorder = (dashboardId, sourceIndex, targetIndex) =>
+    action(types.DASHBOARD_REORDER, { data: { dashboardId, sourceIndex, targetIndex } });
+
+export const dashboardCreateNew = () => action(types.DASHBOARD_CREATE_NEW);
+export const dashboardDeleteNew = () => action(types.DASHBOARD_DELETE_NEW);
+
+export const dashboardDelete = id =>
+    action(types.DASHBOARD_DELETE, { id });
 
 export const dashboardDeleteError = (error) => {
     error.code = 'DDE01';
@@ -42,6 +57,7 @@ export const dashboardDeleteColumnError = (error) => {
 
 export const dashboardDeleteColumnSuccess = data =>
     action(types.DASHBOARD_DELETE_COLUMN_SUCCESS, { data });
+export const dashboardDeleteNewColumn = () => action(types.DASHBOARD_DELETE_NEW_COLUMN);
 
 export const dashboardGetActiveError = (error) => {
     error.code = 'DGAE01';
@@ -60,15 +76,23 @@ export const dashboardGetAllError = (error) => {
 
 export const dashboardGetAllSuccess = data => action(types.DASHBOARD_GET_ALL_SUCCESS, { data });
 
-export const dashboardGetColumnsError = (error) => {
-    error.code = 'DGCE01';
-    error.messageId = 'dashboardGetColumns';
-    return action(types.DASHBOARD_GET_COLUMNS_ERROR, { error });
+export const dashboardHideTutorial = () => action(types.DASHBOARD_HIDE_TUTORIAL);
+
+export const dashboardRename = (dashboardId, newName) =>
+    action(types.DASHBOARD_RENAME, { dashboardId, newName });
+
+export const dashboardRenameError = (error) => {
+    error.code = 'DRE01';
+    error.messageId = 'dashboardRename';
+    return action(types.DASHBOARD_RENAME_ERROR, { error });
 };
 
-export const dashboardGetColumnsSuccess = data =>
-    action(types.DASHBOARD_GET_COLUMNS_SUCCESS, { data });
-export const dashboardSetActive = name => action(types.DASHBOARD_SET_ACTIVE, { name });
+export const dashboardRenameSuccess = data => action(types.DASHBOARD_RENAME_SUCCESS, { data });
+export const dashboardResetColumnEntries = columnId =>
+    action(types.DASHBOARD_RESET_COLUMN_ENTRIES, { columnId });
+export const dashboardResetNewColumn = () => action(types.DASHBOARD_RESET_NEW_COLUMN);
+export const dashboardSearch = query => action(types.DASHBOARD_SEARCH, { query });
+export const dashboardSetActive = id => action(types.DASHBOARD_SET_ACTIVE, { id });
 
 export const dashboardSetActiveError = (error) => {
     error.code = 'DSAE01';
@@ -78,6 +102,27 @@ export const dashboardSetActiveError = (error) => {
 
 export const dashboardSetActiveSuccess = data =>
     action(types.DASHBOARD_SET_ACTIVE_SUCCESS, { data });
+
+export const dashboardToggleProfileColumn = (dashboardId, ethAddress) =>
+    action(types.DASHBOARD_TOGGLE_PROFILE_COLUMN, { dashboardId, ethAddress });
+export const dashboardToggleProfileColumnError = (error) => {
+    error.code = 'DTPCE01';
+    error.messageId = 'dashboardToggleProfileColumn';
+    return action(types.DASHBOARD_TOGGLE_PROFILE_COLUMN_ERROR, { error });
+};
+export const dashboardToggleProfileColumnSuccess = data =>
+    action(types.DASHBOARD_TOGGLE_PROFILE_COLUMN_SUCCESS, { data });
+
+export const dashboardToggleTagColumn = (dashboardId, tag) =>
+    action(types.DASHBOARD_TOGGLE_TAG_COLUMN, { dashboardId, tag });
+export const dashboardToggleTagColumnError = (error) => {
+    error.code = 'DTTCE01';
+    error.messageId = 'dashboardToggleTagColumn';
+    return action(types.DASHBOARD_TOGGLE_TAG_COLUMN_ERROR, { error });
+};
+export const dashboardToggleTagColumnSuccess = data =>
+    action(types.DASHBOARD_TOGGLE_TAG_COLUMN_SUCCESS, { data });
+
 export const dashboardUpdateColumn = (id, changes) =>
     action(types.DASHBOARD_UPDATE_COLUMN, { id, changes });
 
@@ -89,3 +134,5 @@ export const dashboardUpdateColumnError = (error) => {
 
 export const dashboardUpdateColumnSuccess = data =>
     action(types.DASHBOARD_UPDATE_COLUMN_SUCCESS, { data });
+export const dashboardUpdateNewColumn = changes =>
+    action(types.DASHBOARD_UPDATE_NEW_COLUMN, { changes });

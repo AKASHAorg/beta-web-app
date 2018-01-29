@@ -1,0 +1,170 @@
+// general overwrites for antd(applied for all themes)
+
+//colors
+// @heading-color: @dark;
+// @text-color: @dark-grey;
+// @text-color-dark: @light-background;
+// @text-color-secondary: @grey;
+// @success-color: @green;
+// @error-color: @red;
+// @border-color: @light-border;
+// @primary-color: @blue;
+@font-family: Roboto, sans-serif;
+@font-size-base: 14px;
+@input-height-lg: 36px;
+@border-radius-base: 2px;
+
+// avatar (presenter)
+@avatar-size-base: 40px;
+@avatar-size-lg: 100px;
+@avatar-size-sm: 32px;
+@avatar-border-radius: 4px;
+
+// spin dot size
+@spin-dot-size-lg: 48px;
+
+@zindex-dropdown: 2050;
+
+// colors
+@disabled-color: @text-color-secondary;
+@input-placeholder-color: @text-color-secondary;
+.disabled-button {
+    user-select: none;
+    cursor: default !important;
+    color: @disabled-color;
+}
+.ant-btn-lg {
+    font-weight: 400;
+    font-size: 15px;
+    height: 36px;
+}
+
+.anticon-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    background-color: @text-color;
+}
+.ant-tooltip-inner {
+    font-size: 13px;
+}
+
+.ant-carousel .slick-dots {
+    height: 12px;
+
+    li {
+        margin: 0 6px;
+    }
+    li button, li.slick-active button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+}
+
+.ant-btn:not(.ant-btn-primary):not(.ant-btn-ghost):not(.ant-btn-danger) {
+    background-color: @light-background;
+    &:hover, &:focus {
+        background-color: @light-background;
+    }
+}
+
+.ant-btn-danger {
+    background-color: @light-background;
+    &:active,
+    &.active {
+        background-color: @error-color !important;
+    }
+}
+
+.ant-checkbox-inner {
+    background: @checkbox-bg;
+    border-color: @checkbox-border-color;
+}
+
+.ant-radio-inner {
+    border-color: @radio-border-color;
+}
+
+.ant-radio-disabled .ant-radio-inner:after {
+    background-color: @radio-disabled-bg;
+}
+
+.ant-tag {
+    color: @text-color;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ant-modal {
+    &-content {
+        background-color: @light-background;
+    }
+
+    &-footer {
+        background-color: @light-background;
+    }
+}
+
+.ant-input-number-handler:active {
+    background: @input-number-handler-bg;
+}
+
+.ant-select {
+    &-selection {
+        background-color: @input-bg;
+        // color: @input-color;
+
+        &-selected-value {
+            color: @input-color;
+        }
+    }
+    &-dropdown-menu-item-selected {
+        background-color: @item-selected-bg;
+        &:hover {
+            background-color: @item-selected-bg;
+        }
+    }
+}
+
+.ant-slider-rail {
+    background-color: @slider-rail-color !important;
+    &:hover {
+        background-color: @slider-rail-color;
+    }
+}
+
+.borderless {
+    border: none;
+}
+
+.gradient(@type; @colors; @dir: 0deg; @prefixes: webkit, moz, ms, o; @index: length(@prefixes)) when (@index > 0) {
+    .gradient(@type; @colors; @dir; @prefixes; (@index - 1));
+
+    @prefix  : extract(@prefixes, @index);
+    @dir-old : 90 - (@dir);
+
+    background-image: ~"-@{prefix}-@{type}-gradient(@{dir-old}, @{colors})";
+  & when ( @index = length(@prefixes) ) {
+        background-image: ~"@{type}-gradient(@{dir}, @{colors})";
+    }
+}
+
+.ant-form-item-label {
+    line-height: 24px;
+    text-transform: uppercase;
+
+    label {
+        font-size: 12px;
+        color: @text-color-secondary;
+    }
+}
+
+ul {
+    padding-left: 0;
+    margin-bottom: 0;
+    li {
+        list-style: none;
+    }
+}

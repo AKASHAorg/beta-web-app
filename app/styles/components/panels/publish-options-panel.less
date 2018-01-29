@@ -1,0 +1,84 @@
+.publish-options-panel {
+    height: 100%;
+    position: relative;
+    border-left: 1px solid @border-color;
+    &__header {
+        display: flex;
+        flex-wrap: nowrap;
+        padding: 18px 24px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: @light-background;
+        z-index: 10;
+        transition: padding 0.218s ease-in-out;
+        &_scrolled {
+            border-bottom: 1px solid @light-border;
+            padding: 6px 24px;
+        }
+    }
+    &__content {
+        position: absolute;
+        top: 68px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0 24px 24px 24px;
+        &_scrolled {
+            top: 45px;
+        }
+    }
+    &__header-title {
+        flex: 100%;
+        font-weight: 500;
+        font-size: 14px;
+        align-self: center;
+    }
+    &__header-actions {
+        flex: 1 auto;
+    }
+    &__excerpt-container {
+        padding-bottom: 16px;        
+    }
+    &__excerpt-textarea {
+        resize: none;
+        width: 100%;
+    }
+    &__licence-container {
+        &-menu {
+            border: 1px solid lighten(@text-color, 75%);
+            border-radius: 3px;
+        }
+    }
+    &__container-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 300;
+        padding: 0 0 8px;
+    }
+    &__licence-radio-group {
+        padding: 12px 0;
+    }
+    &__licence-radio {
+        width: 100%;
+        padding: 4px 0;
+        font-size: 13px;
+    }
+}
+
+.publish-options-panel__licence-select {
+    .ant-select-selection--single {
+        height: 38px;
+        padding: 5px;
+        &.ant-select-selection {
+            box-shadow: none;
+            &:focus,
+            &:active {
+                box-shadow: none;
+            }
+        }
+    }
+}

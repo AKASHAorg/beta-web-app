@@ -1,0 +1,130 @@
+.image-block {
+    position: relative;
+    &__readonly {
+        .image-block__image {
+            cursor: zoom-in;
+        }
+    }
+    &__gif-play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -30px;
+        margin-left: -30px;
+        color: rgba(255, 255, 255, 0.86);
+        opacity: 1;
+        transition: opacity 0.218s ease-in-out;
+        font-size: 60px;
+        line-height: 1;
+        z-index: 999;
+
+        &_is-playing {
+            opacity: 0;
+        }
+    }
+
+    &__image-size-menu {
+        display: flex;
+        border: none;
+    }
+
+    &__image-size-menu-item {
+        height: 24px !important;
+    }
+
+    &__image-wrapper {
+        position: relative;
+    }
+    &__image-remove-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: @red;
+        cursor: pointer;
+        height: 24px;
+        width: 24px;
+        stroke: #FFF !important;
+        padding: 5px;
+    }
+    &__xs {
+        float: left;
+        width: 320px !important;
+        margin-left: ~'calc((100% - 700px) / 2)' !important;
+        margin-right: 48px !important;
+    }
+
+    &__md {
+        width: 700px !important;
+        clear: left;
+        .image-block__image-caption {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+    }
+
+    &__lg {
+        width: 100%;
+        clear: left;
+        .image-block__image-caption {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+    }
+
+    &__image {
+        position: relative;
+        margin: 0 auto;
+        img {
+            width: 100%;
+            display: inherit;
+        }
+    }
+    &__image-placeholder {
+        filter: blur(30px);
+        transform: scale(1);
+        left: -32px;
+        width: 100%;
+    }
+    &__image-placeholder-wrapper {
+        position: relative;
+        &_xs {
+            max-width: 320px;
+            overflow: hidden;
+        }
+        &_md {
+            max-width: 700px;
+            overflow: hidden;
+        }
+        &_lg {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        &_loaded {
+            .image-block__image-placeholder-wrapper_overlay {
+                display: none;
+            }
+        }
+        &_overlay {
+            margin: 0 auto;
+        }
+    }
+    &__image-caption {
+        text-align: center;
+        font-family: 'Roboto', sans-serif;
+        line-height: 1;
+        margin-bottom: 8px;
+        text-align: center;
+        font-style: italic;
+    }
+    &__caption-input {
+        resize: none;
+        border: none;
+        text-align: center;
+        outline: none;
+        background: transparent;
+        &:focus {
+            border: none;
+            box-shadow: none;
+        }
+    }
+}

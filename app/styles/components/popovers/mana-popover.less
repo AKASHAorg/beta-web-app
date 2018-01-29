@@ -1,0 +1,71 @@
+.mana-popover {
+    width: 320px;
+
+    &__progress {
+        width: 35px;
+        height: 35px;
+
+        .ant-progress-circle-trail {
+            stroke: @mana-color;
+            opacity: 0.2;
+        }
+
+        .ant-progress-circle-path {
+            stroke: @mana-color;
+        }
+    }
+
+    &__content {
+        height: 330px;
+        padding: 0px 12px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__title {
+        font-size: 15px;
+        height: 40px;
+        color: @heading-color;
+        flex: 0 0 auto;
+    }
+
+    &__mana-score {
+        color: @heading-color;
+        font-weight: 500;
+        margin-left: 10px;
+    }
+
+    &__chart-wrapper {
+        flex: 1 1 auto;
+        width: 220px;
+        position: relative;
+        margin: 0px auto;
+    }
+
+    &__actions {
+        flex: 0 0 auto;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    &__button {
+        width: ~'calc(50% - 6px)';
+        padding: 0px 8px;
+
+        svg {
+            flex: 0 0 auto;
+            margin-right: 6px;
+        }
+
+        &:hover svg {
+            transition: all 150ms ease-in-out;
+            stroke: @primary-color !important;
+        }
+    }
+
+    .ant-popover-inner-content {
+        padding: 0px;
+    }
+}

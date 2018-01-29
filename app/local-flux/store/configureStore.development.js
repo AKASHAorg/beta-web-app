@@ -3,18 +3,18 @@ import { persistState } from 'redux-devtools';
 import thunk from 'redux-thunk';
 import sagaMiddleware from './sagaMiddleware';
 import rootReducer from '../reducers';
-import * as actionCreators from '../actions/action-creators';
+import * as actionCreators from '../actions';
 
 const finalCreateStore = compose(
-  applyMiddleware(thunk, sagaMiddleware),
-  global.devToolsExtension ?
-    global.devToolsExtension({ actionCreators }) :
-    noop => noop,
-  // persistState(
-  //   global.location.href.match(
-  //     /[?&]debug_session=([^&]+)\b/
-  //   )
-  // )
+    applyMiddleware(thunk, sagaMiddleware),
+    global.devToolsExtension ?
+        global.devToolsExtension({ actionCreators }) :
+        noop => noop,
+    // persistState(
+    //   global.location.href.match(
+    //     /[?&]debug_session=([^&]+)\b/
+    //   )
+    // )
 )(createStore);
 
 export default function configureStore (initialState) {
@@ -25,6 +25,6 @@ export default function configureStore (initialState) {
             store.replaceReducer(require('../reducers')) // eslint-disable-line global-require
         );
     }
-    global.__store = store;
+    self.redux__store = store;
     return store;
 }

@@ -1,25 +1,40 @@
 import { defineMessages } from 'react-intl';
 
 const setupMessages = defineMessages({
-    changeGethDataDir: {
-        id: 'app.setup.changeGethDataDir',
-        description: 'Label for changing geth data directory',
-        defaultMessage: 'Change this if geth has different data directory'
+    authComplete: {
+        id: 'app.setup.authComplete',
+        description: 'title for complete profile setup page',
+        defaultMessage: 'This is your new identity'
+    },
+    backup: {
+        id: 'app.setup.backup',
+        description: 'backup button label',
+        defaultMessage: 'Backup keys'
+    },
+    completeProfile: {
+        id: 'app.setup.completeProfile',
+        description: 'description for profile complete setup page',
+        defaultMessage: 'To enjoy the full experience, complete your profile now!'
+    },
+    createIdentity: {
+        id: 'app.setup.createIdentity',
+        description: 'Create identity button label',
+        defaultMessage: 'Create new identity'
+    },
+    getStarted: {
+        id: 'app.setup.getStarted',
+        description: 'welcome subtitle when there are no profiles',
+        defaultMessage: 'Get started by creating a new identity!'
     },
     gethDataDirPath: {
         id: 'app.setup.gethDataDirPath',
         description: 'geth datadir path field label',
         defaultMessage: 'Geth Datadir path'
     },
-    changeGethAlreadyStarted: {
-        id: 'app.setup.changeGethAlreadyStarted',
-        description: 'input field placeholder text',
-        defaultMessage: 'Change this if geth is already started with --ipcpath'
-    },
     gethIPCPath: {
         id: 'app.setup.gethIPCPath',
-        description: 'geth ipc path input placeholder',
-        defaultMessage: 'Geth IPC Path'
+        description: 'geth IPC path input placeholder',
+        defaultMessage: 'Geth IPC path'
     },
     gethCacheSize: {
         id: 'app.setup.gethCacheSize',
@@ -31,80 +46,80 @@ const setupMessages = defineMessages({
         description: 'geth network id placeholder',
         defaultMessage: 'Geth network id'
     },
-    gethAutodag: {
-        id: 'app.setup.gethAutodag',
-        description: 'geth autodag flag',
-        defaultMessage: 'Autodag'
-    },
-    gethFast: {
-        id: 'app.setup.gethFast',
-        description: 'geth fast flag',
-        defaultMessage: 'Fast'
-    },
-    gethMine: {
-        id: 'app.setup.gethMine',
-        description: 'geth mine flag',
-        defaultMessage: 'Mine'
-    },
-    gethMinerThreads: {
-        id: 'app.setup.gethMinerThreads',
-        description: 'number of threads used for mining',
-        defaultMessage: 'Miner threads'
-    },
-    changeIfIpfsRunning: {
-        id: 'app.setup.changeIfIpfsRunning',
-        description: 'ipfs input field placeholder',
-        defaultMessage: 'Change this if ipfs daemon is already running'
-    },
-    changeGethCacheSize: {
-        id: 'app.setup.changeGethCacheSize',
-        description: 'geth cache size input label',
-        defaultMessage: 'Change geth cache size (min. 512MB)'
-    },
-    gethCacheSizeError: {
-        id: 'app.setup.gethCacheSizeError',
-        description: 'error shown when user sets a cache size lower than 512mb',
-        defaultMessage: 'Cache size should not be less than 512Mb'
+    importKeys: {
+        id: 'app.setup.importKeys',
+        description: 'Label for import keys button',
+        defaultMessage: 'Import keys'
     },
     ipfsStoragePath: {
         id: 'app.setup.ipfsStoragePath',
-        description: 'ipfs input field label',
+        description: 'IPFS input field label',
         defaultMessage: 'IPFS storage path'
     },
-    changeIpfsStoragePath: {
-        id: 'app.setup.changeIpfsStoragePath',
-        description: 'ipfs input field label',
-        defaultMessage: 'Change IPFS directory'
+    ipfsStoragePathInfo: {
+        id: 'app.setup.ipfsStoragePathInfo',
+        description: 'tooltip with extra information about the IPFS storage path',
+        defaultMessage: 'Changing this will reset your configuration and your local IPFS content'
     },
     ipfsApiPort: {
         id: 'app.setup.ipfsApiPort',
-        description: 'ipfs input field label',
+        description: 'IPFS API port input field label',
         defaultMessage: 'IPFS API port'
     },
     ipfsGatewayPort: {
         id: 'app.setup.ipfsGatewayPort',
-        description: 'ipfs input field label',
+        description: 'IPFS gateway port input field label',
         defaultMessage: 'IPFS gateway port'
     },
     ipfsSwarmPort: {
         id: 'app.setup.ipfsSwarmPort',
-        description: 'ipfs input field label',
+        description: 'IPFS swarm port input field label',
         defaultMessage: 'IPFS swarm port'
-    },
-    firstTimeSetupTitle: {
-        id: 'app.setup.firstTimeSetupTitle',
-        description: 'title for first time setup page',
-        defaultMessage: 'First time setup'
     },
     configuration: {
         id: 'app.setup.configuration',
         description: 'panel header for configuration page',
         defaultMessage: 'Configuration'
     },
+    lightSync: {
+        id: 'app.setup.lightSync',
+        description: 'geth light sync option',
+        defaultMessage: 'Light sync'
+    },
+    lightSyncDescription: {
+        id: 'app.setup.lightSyncDescription',
+        description: 'info when user selects light sync mode',
+        defaultMessage: '...'
+    },
+    newIdentitySubtitle: {
+        id: 'app.setup.newIdentitySubtitle',
+        description: 'subtitle for new identity page',
+        defaultMessage: 'Please enter your passphrase below'
+    },
+    normalSync: {
+        id: 'app.setup.normalSync',
+        description: 'geth normal sync option',
+        defaultMessage: 'Normal sync'
+    },
+    normalSyncDescription: {
+        id: 'app.setup.normalSyncDescription',
+        description: 'info when user selects normal sync mode',
+        defaultMessage: `Congratulations, you are a pioneer synchronizing with the Ethereum test network! We recommend Normal Sync with the Express setup but the brave ones can also choose the (very) experimental Light Sync! :)`
+    },
+    normalSyncDescriptionAlt: {
+        id: 'app.setup.normalSyncDescriptionAlt',
+        description: 'more info',
+        defaultMessage: 'We recommend Normal Sync with the Express setup. The brave ones can also choose the experimental Light Sync.'
+    },
     synchronization: {
         id: 'app.setup.synchronization',
         description: 'panel header for synchronization page',
         defaultMessage: 'Synchronization'
+    },
+    syncOptions: {
+        id: 'app.setup.syncOptions',
+        description: 'title for synchronization options',
+        defaultMessage: 'Sync options'
     },
     logDetails: {
         id: 'app.setup.logDetails',
@@ -113,37 +128,68 @@ const setupMessages = defineMessages({
     },
     login: {
         id: 'app.setup.login',
-        description: 'panel header for login page',
+        description: 'title for login page',
         defaultMessage: 'Login'
+    },
+    welcome: {
+        id: 'app.setup.welcome',
+        description: 'auth page title',
+        defaultMessage: 'Welcome!'
+    },
+    chooseIdentity: {
+        id: 'app.setup.chooseIdentity',
+        description: 'subtitle for login page',
+        defaultMessage: 'Please select one identity to login'
     },
     newIdentity: {
         id: 'app.setup.newIdentity',
         description: 'panel header for new identity page',
         defaultMessage: 'Create new identity'
     },
-    akashaNextGenNetwork: {
-        id: 'app.setup.akashaNextGenNetwork',
-        description: 'akasha next gen description',
-        defaultMessage: `AKASHA is a next-generation social blogging network powered by a new
-                        kind of world computer known as Ethereum and the
-                        Inter Planetary File System.`
+    interestedIn: {
+        id: 'app.setup.interestedIn',
+        description: 'title for new identity interests page',
+        defaultMessage: 'What are you interested in?'
     },
-    youHaveNotHeared: {
-        id: 'app.setup.youHavenNotHeared',
-        description: 'You have not heard about these :)',
-        defaultMessage: `If you haven’t heard of these technologies before don’t worry, simply
-                        click next and we’ll take care of the rest.`
-    },
-    ifYouHaveEth: {
-        id: 'app.setup.ifYouHaveEth',
-        description: 'if you already have Ethereum',
-        defaultMessage: `If you already have the Ethereum Go client or IPFS installed on your
-                        machine please choose the advanced option.`
+    interestSuggestion: {
+        id: 'app.setup.interestSuggestion',
+        description: 'description for new identity interests page',
+        defaultMessage: 'We\'ll suggest incredible stuff to read based on your interests.'
     },
     expressSetup: {
         id: 'app.setup.expressSetup',
         description: 'Express setup option checkbox',
         defaultMessage: 'Express setup'
+    },
+    faucetPending: {
+        id: 'app.setup.faucetPending',
+        description: 'message shown while faucet tx is pending',
+        defaultMessage: 'Thank you for playing!'
+    },
+    faucetPending1: {
+        id: 'app.setup.faucetPending1',
+        description: 'message shown while faucet tx is pending',
+        defaultMessage: 'Here are some test ETH :)'
+    },
+    faucetError: {
+        id: 'app.setup.faucetError',
+        description: 'message shown when faucet tx fails',
+        defaultMessage: 'Something went wrong :('
+    },
+    faucetRetry: {
+        id: 'app.setup.faucetRetry',
+        description: 'message shown when faucet tx fails to allow user to retry the tx',
+        defaultMessage: 'Click here to retry'
+    },
+    faucetSuccess: {
+        id: 'app.setup.faucetSuccess',
+        description: 'message shown on faucet tx success',
+        defaultMessage: 'HoHoHoHo!'
+    },
+    faucetSuccess1: {
+        id: 'app.setup.faucetSuccess1',
+        description: 'message shown on faucet tx success',
+        defaultMessage: 'You received test ETH!'
     },
     advancedSetup: {
         id: 'app.setup.advancedSetup',
@@ -182,46 +228,28 @@ const setupMessages = defineMessages({
     },
     synchronizing: {
         id: 'app.setup.synchronizing',
-        description: 'state of block sync',
+        description: 'message shown when synchronizing with the blockchain',
         defaultMessage: 'Synchronizing'
     },
     syncStopped: {
         id: 'app.setup.syncStopped',
-        description: 'state of block sync',
+        description: 'message shown when synchronization was stopped',
         defaultMessage: 'Synchronization was stopped'
     },
     syncCompleted: {
         id: 'app.setup.syncCompleted',
-        description: 'state of block sync',
+        description: 'message shown when synchronization is completed',
         defaultMessage: 'Synchronization completed'
     },
     syncPaused: {
         id: 'app.setup.syncPaused',
-        description: 'state of block sync',
+        description: 'message shown when synchronization is completed',
         defaultMessage: 'Synchronization is paused'
-    },
-    syncResuming: {
-        id: 'app.setup.syncResuming',
-        description: 'state of block sync',
-        defaultMessage: 'Resuming synchronization...'
-    },
-    disconnected: {
-        id: 'app.setup.disconnected',
-        description: 'disconnected',
-        defaultMessage: 'Disconnected'
-    },
-    beforeSyncStart: {
-        id: 'app.setup.beforeSyncStart',
-        description: 'Message to show before sync is starting',
-        defaultMessage: `We are starting synchronization with the Ethereum world computer.
-                        Please be patient.`
     },
     onSyncStart: {
         id: 'app.setup.onSyncStart',
         description: 'Message to show when synchronizing',
-        defaultMessage: `Your machine is currently synchronizing with the Ethereum world computer
-                        network. You will be able to log in and enjoy the full AKASHA experience as
-                        soon as the sync is complete.`
+        defaultMessage: 'You will be able to log in and enjoy the full experience as soon as the sync is complete! We are waiting for you on the other side! o/'
     },
     afterSyncFinish: {
         id: 'app.setup.afterSyncFinish',
@@ -230,29 +258,19 @@ const setupMessages = defineMessages({
                         continue. You can start it manually from the status bar in the header or
                         click NEXT to start it automatically.`
     },
-    initializingTitle: {
-        id: 'app.setup.initializingTitle',
-        description: 'Title for initializing state page',
-        defaultMessage: 'Initializing'
-    },
     noProfilesFound: {
         id: 'app.setup.noProfilesFound',
-        description: 'message if no local profiles found.',
-        defaultMessage: 'No profiles found. Create a new identity or import an existing one.'
-    },
-    findingProfiles: {
-        id: 'app.setup.findingProfiles',
-        description: 'when we are trying to discover local profiles with akasha account',
-        defaultMessage: 'Finding profiles..'
+        description: 'placeholder message shown if no local profiles were found',
+        defaultMessage: 'If you want to import an identity please see this link.'
     },
     findingPeers: {
         id: 'app.setup.findingPeers',
-        description: 'finding peers status',
+        description: 'finding peers',
         defaultMessage: 'Finding peers'
     },
     launchingServices: {
         id: 'app.setup.launchingServices',
-        description: 'message to display when both services are stopped',
+        description: 'message to display when geth and IPFS services are about to start',
         defaultMessage: 'Launching services'
     },
     waitingForServices: {
@@ -267,46 +285,21 @@ const setupMessages = defineMessages({
     },
     peerCount: {
         id: 'app.setup.peerCount',
-        description: 'counting connected peers',
+        description: 'number of peers connected',
         defaultMessage: `{peerCount, number} {peerCount, plural,
             one {peer}
             few {peers}
             many {peers}
             other {peers}
-        }, {peerCount, plural,
+        } {peerCount, plural,
             one {connected}
             other {connected}
         }`
     },
-    peers: {
-        id: 'app.setup.peers',
-        description: 'base plural form of peer',
-        defaultMessage: 'peers'
-    },
-    hideDetails: {
-        id: 'app.setup.hideDetails',
-        description: 'hide geth logs',
-        defaultMessage: 'Hide details'
-    },
-    viewDetails: {
-        id: 'app.setup.viewDetails',
-        description: 'show geth logs',
-        defaultMessage: 'View details'
-    },
-    retry: {
-        id: 'app.setup.retry',
-        description: 'try again',
-        defaultMessage: 'Retry'
-    },
-    retryStep: {
-        id: 'app.setup.retryStep',
-        description: 'retry current step',
-        defaultMessage: 'Retry Step'
-    },
-    identityRegistered: {
-        id: 'app.setup.identityRegistered',
-        description: 'panel title when identity registered',
-        defaultMessage: 'Identity Registered!'
+    details: {
+        id: 'app.setup.details',
+        description: 'details button label',
+        defaultMessage: 'details'
     },
     gethStopped: {
         id: 'app.setup.gethStopped',
@@ -319,7 +312,27 @@ const setupMessages = defineMessages({
         description: 'message to be displayed when ipfs is stopped and profiles cannot be loaded',
         defaultMessage: `IPFS service is stopped. Please start it manually in order to fetch
                         your profiles.`
-    }
+    },
+    tutorialTitle: {
+        id: 'app.setup.tutorialTitle',
+        description: 'title for tutorial Modal',
+        defaultMessage: 'A few tips before you get started'
+    },
+    tutorialEth: {
+        id: 'app.setup.tutorialEth',
+        description: 'text for tutorial Modal',
+        defaultMessage: 'This dapp uses test ETH (Ether) so please DO NOT send real ETH to in-dapp addresses.'
+    },
+    tutorialMana: {
+        id: 'app.setup.tutorialMana',
+        description: 'text for tutorial Modal',
+        defaultMessage: 'The dapp requires Manafied AETH (Mana) for interactions. You can obtain Mana by clicking your AETH balance in the upper right side, selecting Manafy in the Transform tab.'
+    },
+    tutorialManaAlt: {
+        id: 'app.setup.tutorialManaAlt',
+        description: 'text for tutorial Modal',
+        defaultMessage: 'Alternatively, you can click the sidebar Mana indicator next to your avatar photo and choose Shift up.'
+    },
 });
 
 export { setupMessages };

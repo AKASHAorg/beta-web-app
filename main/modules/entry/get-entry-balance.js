@@ -1,25 +1,34 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import { web3Api } from '../../services';
+import schema from '../utils/jsonschema';
+import { GethConnector } from '@akashaproject/geth-connector';
+export const getEntryBalance = {
+    'id': '/getEntryBalance',
+    'type': 'array',
+    'items': {
+        'type': 'string'
+    },
+    'uniqueItems': true,
+    'minItems': 1
+};
 const execute = Promise.coroutine(function* (data) {
-    if (!Array.isArray(data.entryId)) {
-        throw new Error('data.entryId must be an array');
-    }
-    const requests = data.entryId.map((id) => {
-        return contracts.instance.entries
-            .getEntryFund(id)
-            .then((balanceAddress) => {
-            if (!balanceAddress) {
-                return { balance: 'claimed', unit: data.unit, entryId: id };
-            }
-            return web3Api.instance.eth.getBalanceAsync(balanceAddress)
-                .then((weiAmount) => {
-                const balance = web3Api.instance.fromWei(weiAmount, data.unit);
-                return { balance: balance.toString(10), unit: data.unit, entryId: id };
+    const v = new schema.Validator();
+    v.validate(data, getEntryBalance, { throwError: true });
+    const collection = [];
+    const requests = data.map((id) => {
+        return contracts.instance.Votes.getRecord(id).then((result) => {
+            const [_totalVotes, _score, _endPeriod, _totalKarma, _claimed] = result;
+            collection.push({
+                entryId: id,
+                totalVotes: _totalVotes.toString(10),
+                score: _score.toString(10),
+                endPeriod: (new Date(_endPeriod.toNumber() * 1000)).toISOString(),
+                totalKarma: (GethConnector.getInstance().web3.fromWei(_totalKarma, 'ether')).toString(10),
+                claimed: _claimed
             });
         });
     });
-    const collection = yield Promise.all(requests);
+    yield Promise.all(requests);
     return { collection };
 });
 export default { execute, name: 'getEntryBalance' };

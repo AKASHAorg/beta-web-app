@@ -1,0 +1,54 @@
+.transform-form {
+    padding: 20px 24px;
+    height: 100%;
+    position: relative;
+
+    &__select-wrapper {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    &__select-item {
+        width: ~'calc(50% - 16px)';
+    }
+
+    &__slider {
+        flex: 1 1 auto;
+    }
+
+    &__slider-amount {
+        flex: 0 0 auto;
+        min-width: 64px;
+        margin-right: 0px !important;
+        margin-left: 5px;
+        color: @input-color;
+    }
+    
+    &__disclaimer {
+        margin-top: 24px;
+        color: @input-color;
+        font-weight: 500;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        bottom: 24px;
+    }
+
+    .ant-form-explain {
+        font-size: 12px;
+        color: @text-color;
+    }
+
+    .ant-form-item-label label {
+        color: @text-color;
+    }
+
+    .ant-select-selection-selected-value {
+        color: @heading-color;
+    }
+}

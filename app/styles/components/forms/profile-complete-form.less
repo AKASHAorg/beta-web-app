@@ -1,0 +1,160 @@
+.profile-complete-form {
+    &__avatar-title {
+        font-size: 11px;
+        color: @text-color;
+        margin-bottom: 10px;
+    }
+
+    &__bg-image-title {
+        font-size: 11px;
+        color: @text-color;
+        margin-bottom: 10px;        
+    }
+
+    &__bg-image-wrap {
+        height: 160px;
+        width: 320px;
+        overflow: hidden;
+    }
+
+    &__bg-image-float {
+        float: right;
+    }
+
+    &__char-count-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    &__char-count {
+        margin-left: 5px;
+    }
+
+    &__textarea {
+        resize: none;
+    }
+    &__wrap {
+        height:100%;
+    }
+
+    &__form-wrapper {
+        height:  ~"calc(100% - 100px)";
+        padding-right: 20px;
+        overflow-y: auto;
+
+        .ant-form-item-label {
+            padding-bottom: 3px;
+        }
+        .ant-form-item-label label {
+            font-size: 11px;
+            color: @text-color;
+        }
+        .ant-input {
+            color: @input-color;
+        }
+    }
+
+    &__buttons-wrapper {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    &__insufficient-funds {
+        padding: 20px 0;
+    }
+
+    &__image-wrap {
+        padding-bottom: 20px;
+    }
+
+    &__filler {
+        padding-bottom: 30px;
+    }
+
+    &__save-btn {
+        padding-right: 10px;
+    }
+
+    &__terms {
+        padding: 20px 0;
+    }
+
+    &__tips-description {
+        margin-top: 33px;
+        margin-left: 8px;
+        float: left;
+        color: @heading-color;
+    }
+
+    &__tips-switch {
+        float: left;
+    }
+
+    &__add-links-btn {
+        .ant-btn {
+            font-size: 12px;
+            padding: 0;
+        }
+    }
+
+    &__link {
+        padding-top: 20px;
+        color: @text-color;
+        font-size: 11px;
+    }
+
+    &__footer {
+        justify-content: space-between !important;
+        border-top: 0.5px outset @light-border !important;
+        background-color: @light-background;
+    }
+
+    &__request-btn {
+        margin-top: 20px;
+    }
+
+    &__input {
+        color: @heading-color;
+        width: 100%;
+    }
+
+    &__my-address {
+        min-width: 350px;
+        border-radius: 2px 0 0 2px;
+        width: ~'calc(100% - 46px)';
+    }
+
+    &__copy-button {
+        position: relative;
+        color: @primary-color;
+        border-top: 1px solid @light-border;
+        border-right: 1px solid @light-border;
+        border-bottom: 1px solid @light-border;
+        width: 46px;
+        height: 32px;
+        font-size: 13px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__form-item {
+        height: 64px;
+
+        .ant-form-explain {
+            font-size: 12px;
+        }
+    }
+
+    &__address-info {
+        padding-top: 15px;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    &__skip-icon {
+        margin-left: 6px;
+    }
+}

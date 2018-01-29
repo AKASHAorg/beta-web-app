@@ -1,0 +1,53 @@
+.tag-list-interests {
+    display: flex;
+    flex-flow: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    margin: 15px 0px;
+    background-color: @light-background;
+    border-radius: 4px;
+    
+    &__no-tags {
+        display: flex;
+        justify-content: center;
+        color: @text-color-secondary;
+        padding-top: 24px;
+    }
+
+    &__tag-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid @border-color;
+        padding: 15px 0px;
+        margin: 0px 15px;
+
+        &_last {
+            border-bottom: none;
+        }
+    }
+
+    &__tag-list-item-text-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__tag-list-tag-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: @input-color;
+        text-transform: uppercase;
+    }
+
+    &__tag-list-entry-count {
+        font-size: 12px;
+        font-weight: 150;
+        color: @text-color-secondary;
+    }
+
+    &__tag-list-switch {
+        padding-right: 15px;
+    }
+
+}

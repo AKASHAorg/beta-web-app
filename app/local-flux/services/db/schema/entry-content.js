@@ -1,4 +1,11 @@
 // import MultiResImage from './multi-res-image';
+const CardInfo = {
+    title: String,
+    description: String,
+    image: String,
+    bgColor: String,
+    url: String,
+};
 
 const draftJSContent = {
     blocks: Array,
@@ -10,7 +17,8 @@ const entryContent = {
     draft: draftJSContent,
     tags: Array,
     excerpt: String,
-    // featuredImage: MultiResImage,
+    cardInfo: CardInfo,
     wordCount: Number,
+    entryType: Number,
 };
 export default entryContent;

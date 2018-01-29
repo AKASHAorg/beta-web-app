@@ -1,15 +1,17 @@
 import { eventChannel } from 'redux-saga';
-import { put, take } from 'redux-saga/effects';
-import { channel } from 'services';
+import { put, select, take } from 'redux-saga/effects';
+import { tap } from 'ramda';
+import { selectAction, selectLoggedEthAddress } from '../../selectors';
+
+const Channel = global.Channel;
 export const actionChannels = {};
 export const enabledChannels = [];
 
 // this function creates an event channel from a given ipc client channel
 export function createActionChannel (channel) {
     return eventChannel((emit) => {
-        const handler = (resp) => {
-            console.log(channel, resp);
-            emit(resp);
+        const handler = (ev, resp) => {
+            tap(emit, resp);
         };
         channel.on(handler);
 
@@ -22,31 +24,35 @@ export function createActionChannel (channel) {
 }
 
 export function createActionChannels () {
-    const modules = Object.keys(channel.instance.client);
+    const modules = Object.keys(Channel.client);
     modules.forEach((module) => {
-        const channels = Object.keys(channel.instance.client[module]);
+        const channels = Object.keys(Channel.client[module]);
         actionChannels[module] = {};
-        channels.forEach((channel1) => {
-            const actionChannel = createActionChannel(channel.instance.client[module][channel1]);
-            actionChannels[module][channel1] = actionChannel;
+        channels.forEach((channel) => {
+            actionChannels[module][channel] = createActionChannel(Channel.client[module][channel]);
         });
     });
 }
 
 export function enableChannel (channel, mananger) {
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve) => {
         if (enabledChannels.indexOf(channel.channel) !== -1) {
             resolve();
             return;
         }
-        const enabled = channel.enable();
-        if(enabled){
+        mananger.once(() => {
             enabledChannels.push(channel.channel);
-            return resolve();
-        }
-        return reject(new Error(`Could not enable channel ${channel.channel}`))
+            resolve();
+        });
+        channel.enable();
     });
     return promise;
+}
+
+export function* isLoggedProfileRequest (actionId) {
+    const action = yield select(state => selectAction(state, actionId));
+    const loggedEthAddress = yield select(selectLoggedEthAddress);
+    return action && action.get('ethAddress') === loggedEthAddress;
 }
 
 export function* registerListener ({ channel, successAction, errorAction }) {

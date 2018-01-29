@@ -1,22 +1,33 @@
-import BaseService from './base-service';
-import { channel } from 'services';
+import searchDB from './db/search';
 
-class SearchService extends BaseService {
-    handshake = ({ onError, onSuccess }) => {
-        this.registerListener(
-            channel.instance.client.search.handshake,
-            this.createListener(onError, onSuccess)
-        );
-        channel.instance.server.search.handshake.send({});
-    };
+export const getLastEntriesBlock = ethAddress =>
+    searchDB.lastEntriesBlock
+        .where('ethAddress')
+        .equals(ethAddress)
+        .first()
+        .then((data) => {
+            if (!data) {
+                return 0;
+            }
+            return data.blockNr;
+        });
 
-    query = ({ text, offset = 0, pageSize = 5, onError, onSuccess }) => {
-        this.registerListener(
-            channel.instance.client.search.query,
-            this.createListener(onError, onSuccess)
-        );
-        channel.instance.server.search.query.send({ text, offset, pageSize });
-    };
-}
+export const getLastTagsBlock = type =>
+    searchDB.lastTagsBlock
+        .where('type')
+        .equals(type)
+        .first()
+        .then((data) => {
+            if (!data) {
+                return null;
+            }
+            return data.blockNr;
+        });
 
-export { SearchService };
+export const updateLastEntriesBlock = ({ ethAddress, blockNr }) =>
+    searchDB.lastEntriesBlock
+        .put({ ethAddress, blockNr });
+
+export const updateLastTagsBlock = ({ type, blockNr }) =>
+    searchDB.lastTagsBlock
+        .put({ type, blockNr });

@@ -1,46 +1,52 @@
 import { List, Map, Record } from 'immutable';
-import { columnType } from '../../../constants/columns';
 
-export const Flags = Record({
+const Flags = Record({
+    firstDashboardReady: false,
+    renamingDashboard: false
+});
+
+const ColumnFlags = Record({
     fetchingEntries: false,
     fetchingMoreEntries: false,
-    moreEntries: false,
+    moreEntries: false
 });
 
 export const ColumnRecord = Record({
     id: null,
-    entries: new List(),
-    flags: new Flags(),
+    entriesList: new List(),
+    firstBlock: null,
+    flags: new ColumnFlags(),
+    hasNewEntries: false,
     large: false,
     lastBlock: null,
+    lastIndex: null,
     type: null,
     value: '',
 });
 
 export const DashboardRecord = Record({
-    akashaId: null,
     columns: new List(),
+    ethAddress: null,
     id: null,
     name: null,
+    timestamp: null
 });
 
-const ids = ['latest', 'tagakasha', 'followingstream', 'profile'];
-
-const defaultDashboard = new DashboardRecord({
-    name: 'default',
-    columns: new List(ids)
+export const NewColumnRecord = Record({
+    suggestions: new List(),
+    type: null,
+    value: ''
 });
 
 export const DashboardState = Record({
     activeDashboard: null,
     allDashboards: new List(),
-    dashboardById: new Map({
-        // default: defaultDashboard
-    }),
+    byId: new Map(),
     columnById: new Map({
-        // [ids[0]]: new ColumnRecord({ id: ids[0], type: columnType.latest }),
-        // [ids[1]]: new ColumnRecord({ id: ids[1], type: columnType.tag, value: 'akasha' }),
-        // [ids[2]]: new ColumnRecord({ id: ids[2], type: columnType.stream }),
-        // [ids[3]]: new ColumnRecord({ id: ids[3], type: columnType.profile, value: 'john.doe' })
+        newColumn: new ColumnRecord()
     }),
+    flags: new Flags(),
+    newColumn: null,
+    newDashboard: false,
+    search: null,
 });

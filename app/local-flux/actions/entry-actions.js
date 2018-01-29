@@ -1,703 +1,46 @@
-import { AppActions, TransactionActions } from './';
-import { EntryService, ProfileService } from '../services';
-import { entryActionCreators } from './action-creators';
 import { action } from './helpers';
 import * as types from '../constants';
 
-let entryActions = null;
-
-class EntryActions {
-
-    constructor (dispatch) { // eslint-disable-line consistent-return
-        if (entryActions) {
-            return entryActions;
-        }
-        this.dispatch = dispatch;
-        this.appActions = new AppActions(dispatch);
-        this.transactionActions = new TransactionActions(dispatch);
-        this.entryService = new EntryService();
-        this.profileService = new ProfileService();
-        entryActions = this;
-    }
-
-    getEntriesCount = (akashaId) => {
-        this.dispatch((dispatch, getState) => {
-            const flags = getState().entryState.get('flags');
-            if (!flags.get('fetchingEntriesCount')) {
-                dispatch(entryActionCreators.getEntriesCount({
-                    fetchingEntriesCount: true
-                }));
-                this.entryService.getEntriesCount({
-                    akashaId,
-                    onSuccess: result =>
-                        dispatch(entryActionCreators.getEntriesCountSuccess(result, {
-                            fetchingEntriesCount: false,
-                            entriesCountFetched: true
-                        })),
-                    onError: reason => dispatch(entryActionCreators.getEntriesCountError(reason, {
-                        fetchingEntriesCount: false,
-                        entriesCountFetched: true
-                    }))
-                });
-            }
-        });
-    };
-
-    getTags = (startingIndex = 0) => {
-        this.dispatch(entryActionCreators.getTags());
-        return this.entryService.getTags(startingIndex).then(result =>
-            this.dispatch(entryActionCreators.getTagsSuccess(result))
-        ).catch(reason => this.dispatch(entryActionCreators.getTagsError(reason)));
-    };
-
-    checkTagExistence = (tag) => {
-        this.dispatch(entryActionCreators.checkTagExistence());
-        return this.entryService.checkTagExistence(tag).then(result =>
-            this.dispatch(entryActionCreators.checkTagExistenceSuccess(result))
-        ).catch(reason => this.dispatch(entryActionCreators.checkTagExistenceError(reason)));
-    };
-
-    getSortedEntries = ({ sortBy }) => {
-        this.entryService.getSortedEntries({ sortBy }).then(result =>
-            this.dispatch(entryActionCreators.getSortedEntries(result))
-        );
-    };
-    saveEntry = (akashaId, entryId) => {
-        this.dispatch(entryActionCreators.saveEntry({ savingEntry: true }));
-        this.entryService.pinEntry({ operation: 1, entryId });
-        this.entryService.saveEntry({
-            akashaId,
-            entry: { entryId },
-            onSuccess: savedEntry =>
-                this.dispatch(entryActionCreators.saveEntrySuccess(savedEntry, {
-                    savingEntry: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.saveEntryError(error, {
-                    savingEntry: false
-                }))
-        });
-    };
-    deleteEntry = (akashaId, entryId) => {
-        this.dispatch(entryActionCreators.deleteEntry({ deletingEntry: true }));
-        this.entryService.pinEntry({ operation: 2, entryId });
-        this.entryService.deleteEntry({
-            akashaId,
-            entryId,
-            onSuccess: id =>
-                this.dispatch(entryActionCreators.deleteEntrySuccess(id, {
-                    deletingEntry: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.deleteEntryError(error, {
-                    deletingEntry: false
-                }))
-        });
-    };
-    getSavedEntries = (akashaId) => {
-        this.dispatch(entryActionCreators.getSavedEntries({ fetchingSavedEntries: true }));
-        this.entryService.getSavedEntries({
-            akashaId,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.getSavedEntriesSuccess(data, {
-                    fetchingSavedEntries: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.getSavedEntriesError(error, {
-                    fetchingSavedEntries: false
-                }))
-        });
-    };
-
-    getSavedEntriesList = limit =>
-        this.dispatch((dispatch, getState) => {
-            this.dispatch(entryActionCreators.getSavedEntriesList({
-                fetchingSavedEntriesList: true
-            }));
-            const savedEntries = getState().entryState.get('savedEntries');
-            const entries = savedEntries.reverse().slice(0, limit).toJS();
-            this.entryService.getEntryList({
-                entries,
-                onSuccess: data => {
-                    const akashaIds = [];
-                    data.collection && data.collection.forEach(entry => {
-                        if (entry.entryEth.publisher && entry.entryEth.publisher.akashaId) {
-                            akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-                        }
-                    });
-                    this.profileService.saveAkashaIds(akashaIds);
-                    this.dispatch(entryActionCreators.getSavedEntriesListSuccess(data, {
-                        fetchingSavedEntriesList: false
-                    }));
-                },
-                onError: error =>
-                    this.dispatch(entryActionCreators.getSavedEntriesListError(error, {
-                        fetchingSavedEntriesList: false
-                    }))
-            });
-        });
-
-    moreSavedEntriesList = limit =>
-        this.dispatch((dispatch, getState) => {
-            if (limit !== 1) {
-                this.dispatch(entryActionCreators.moreSavedEntriesList({
-                    fetchingMoreSavedEntriesList: true
-                }));
-            }
-            const startIndex = getState().entryState.get('entries').filter(entry =>
-                entry.get('type') === 'savedEntry').size;
-            const savedEntries = getState().entryState.get('savedEntries');
-            const entries = savedEntries.reverse().slice(startIndex, startIndex + limit).toJS();
-            this.entryService.moreEntryList({
-                entries,
-                onSuccess: data => {
-                    const akashaIds = [];
-                    data.collection && data.collection.forEach(entry => {
-                        if (entry.entryEth.publisher && entry.entryEth.publisher.akashaId) {
-                            akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-                        }
-                    });
-                    this.profileService.saveAkashaIds(akashaIds);
-                    this.dispatch(entryActionCreators.moreSavedEntriesListSuccess(data, {
-                        fetchingMoreSavedEntriesList: false
-                    }))
-                },
-                onError: error =>
-                    this.dispatch(entryActionCreators.moreSavedEntriesListError(error, {
-                        fetchingMoreSavedEntriesList: false
-                    }))
-            });
-        });
-
-    entryProfileIterator = (akashaId, start, limit = 6) =>
-        this.dispatch((dispatch, getState) => {
-            const loggedAkashaId = getState().profileState.getIn(['loggedProfile', 'akashaId']);
-            dispatch(entryActionCreators.entryProfileIterator({
-                fetchingProfileEntries: akashaId !== loggedAkashaId,
-                fetchingPublishedEntries: akashaId === loggedAkashaId
-            }));
-            this.entryService.entryProfileIterator({
-                akashaId,
-                start,
-                limit,
-                onSuccess: data =>
-                    dispatch(entryActionCreators.entryProfileIteratorSuccess(data, {
-                        fetchingProfileEntries: false,
-                        fetchingPublishedEntries: false
-                    })),
-                onError: error =>
-                    dispatch(entryActionCreators.entryProfileIteratorError(error, {
-                        fetchingProfileEntries: false,
-                        fetchingPublishedEntries: false
-                    }))
-            });
-        });
-
-    moreEntryProfileIterator = (akashaId, start, limit = 6) =>
-        this.dispatch((dispatch, getState) => {
-            const loggedAkashaId = getState().profileState.getIn(['loggedProfile', 'akashaId']);
-            this.dispatch(entryActionCreators.moreEntryProfileIterator({
-                fetchingMoreProfileEntries: akashaId !== loggedAkashaId,
-                fetchingMorePublishedEntries: akashaId === loggedAkashaId
-            }));
-            this.entryService.moreEntryProfileIterator({
-                akashaId,
-                start,
-                limit,
-                onSuccess: data =>
-                    this.dispatch(entryActionCreators.moreEntryProfileIteratorSuccess(data, {
-                        fetchingMoreProfileEntries: false,
-                        fetchingMorePublishedEntries: false
-                    })),
-                onError: error =>
-                    this.dispatch(entryActionCreators.moreEntryProfileIteratorError(error, {
-                        fetchingMoreProfileEntries: false,
-                        fetchingMorePublishedEntries: false
-                    }))
-            });
-        });
-
-    entryTagIterator = (tagName, start, limit) => {
-        // this.dispatch((dispatch, getState) => {
-        //     const selectedTag = getState().tagState.get('selectedTag');
-        //     this.dispatch(entryActionCreators.entryTagIterator({ fetchingTagEntries: true }));
-        //     this.entryService.entryTagIterator({
-        //         tagName,
-        //         start,
-        //         limit,
-        //         onSuccess: (data) => {
-        //             const akashaIds = [];
-        //             data.collection && data.collection.forEach(entry => {
-        //                 if (entry.entryEth.publisher.akashaId) {
-        //                     akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-        //                 }
-        //             });
-        //             this.profileService.saveAkashaIds(akashaIds);
-        //             if (selectedTag === data.tagName || !selectedTag) {
-        //                 dispatch(entryActionCreators.entryTagIteratorSuccess(data, {
-        //                     fetchingTagEntries: false
-        //                 }));
-        //             }
-        //         },
-        //         onError: error => dispatch(entryActionCreators.entryTagIteratorError(error, {
-        //             fetchingTagEntries: false
-        //         }))
-        //     });
-        // });
-    };
-
-    moreEntryTagIterator = (tagName, start, limit) => {
-        this.dispatch(entryActionCreators.moreEntryTagIterator({ fetchingMoreTagEntries: true }));
-        this.entryService.moreEntryTagIterator({
-            tagName,
-            start,
-            limit,
-            onSuccess: data => {
-                const akashaIds = [];
-                data.collection && data.collection.forEach(entry => {
-                    if (entry.entryEth.publisher && entry.entryEth.publisher.akashaId) {
-                        akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(entryActionCreators.moreEntryTagIteratorSuccess(data, {
-                    fetchingMoreTagEntries: false
-                }));
-            },
-            onError: error => this.dispatch(entryActionCreators.moreEntryTagIteratorError(error, {
-                fetchingMoreTagEntries: false
-            }))
-        });
-    };
-
-    allStreamIterator = (limit, toBlock) => {
-        this.dispatch(entryActionCreators.allStreamIterator({ fetchingAllStream: true }));
-        this.entryService.allStreamIterator({
-            limit,
-            toBlock,
-            onSuccess: data => {
-                const akashaIds = [];
-                data.collection && data.collection.forEach(entry => {
-                    if (entry.entryEth.publisher && entry.entryEth.publisher.akashaId) {
-                        akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(entryActionCreators.allStreamIteratorSuccess(data, {
-                    fetchingAllStream: false
-                }))
-            },
-            onError: error => this.dispatch(entryActionCreators.allStreamIteratorError(error, {
-                fetchingAllStream: false
-            }))
-        });
-    };
-
-    moreAllStreamIterator = (toBlock, limit) => {
-        this.dispatch(entryActionCreators.moreAllStreamIterator({ fetchingMoreAllStream: true }));
-        this.entryService.allStreamIterator({
-            toBlock,
-            limit,
-            onSuccess: data => {
-                const akashaIds = [];
-                data.collection && data.collection.forEach(entry => {
-                    if (entry.entryEth.publisher && entry.entryEth.publisher.akashaId) {
-                        akashaIds.push({ akashaId: entry.entryEth.publisher.akashaId });
-                    }
-                });
-                this.profileService.saveAkashaIds(akashaIds);
-                this.dispatch(entryActionCreators.moreAllStreamIteratorSuccess(data, {
-                    fetchingMoreAllStream: false
-                }))
-            },
-            onError: error =>
-                this.dispatch(entryActionCreators.moreAllStreamIteratorError(error, {
-                    fetchingMoreAllStream: false
-                }))
-        });
-    };
-
-    getTagEntriesCount = (tagName) => {
-        this.dispatch(entryActionCreators.getTagEntriesCount({ fetchingTagEntriesCount: true }));
-        this.entryService.getTagEntriesCount({
-            tagName,
-            onSuccess: data => this.dispatch(entryActionCreators.getTagEntriesCountSuccess(data, {
-                fetchingTagEntriesCount: false
-            })),
-            onError: error => this.dispatch(entryActionCreators.getTagEntriesCountError(error, {
-                fetchingTagEntriesCount: false
-            }))
-        });
-    }
-
-    getLicences = () => {
-        this.entryService.getLicences({
-            onSuccess: ({ licenses }) =>
-                this.dispatch(entryActionCreators.getLicencesSuccess(licenses)),
-            onError: error => this.dispatch(entryActionCreators.getLicencesError(error))
-        });
-    };
-    getLicenceById = (id) => {
-        this.entryService.getLicenceById({
-            id,
-            onSuccess: ({ license }) =>
-                this.dispatch(entryActionCreators.getLicenceByIdSuccess(license)),
-            onError: error => this.dispatch(entryActionCreators.getLicenceByIdError(error))
-        });
-    };
-
-    getEntriesStream = (akashaId) => {
-        this.dispatch(entryActionCreators.getEntriesStream({ fetchingEntriesStream: true }));
-        this.entryService.getEntriesStream({
-            akashaId,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.getEntriesStreamSuccess(data, {
-                    fetchingEntriesStream: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.getEntriesStreamError(error, {
-                    fetchingEntriesStream: false
-                }))
-        });
-    };
-
-    clearAllStream = () =>
-        this.dispatch(entryActionCreators.clearAllStream());
-
-    clearTagEntries = () =>
-        this.dispatch(entryActionCreators.clearTagEntries());
-
-    clearSavedEntries = () =>
-        this.dispatch(entryActionCreators.clearSavedEntries());
-
-    clearProfileEntries = () =>
-        this.dispatch(entryActionCreators.clearProfileEntries());
-
-    addUpvoteAction = payload =>
-        this.appActions.addPendingAction({
-            type: 'upvote',
-            payload,
-            gas: 2000000,
-            status: 'needWeightConfirmation'
-        });
-
-    addDownvoteAction = payload =>
-        this.appActions.addPendingAction({
-            type: 'downvote',
-            payload,
-            gas: 2000000,
-            status: 'needWeightConfirmation'
-        });
-
-    addClaimAction = payload =>
-        this.appActions.addPendingAction({
-            type: 'claim',
-            payload,
-            gas: 2000000,
-            titleId: 'claimTitle',
-            messageId: 'claim',
-            status: 'checkAuth'
-        });
-
-    voteCost = (weight) => {
-        this.dispatch(entryActionCreators.voteCost({
-            fetchingVoteCost: true
-        }));
-        this.entryService.voteCost({
-            weight,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.voteCostSuccess(data, {
-                    fetchingVoteCost: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.voteCostError(error, {
-                    fetchingVoteCost: false
-                }))
-        });
-    };
-
-    upvote = (entryId, entryTitle, weight, value, gas) =>
-        this.dispatch((dispatch, getState) => {
-            const token = getState().profileState.getIn(['loggedProfile', 'token']);
-            dispatch(entryActionCreators.upvote({ votePending: { entryId, value: true } }));
-            this.entryService.upvote({
-                token,
-                entryId,
-                extra: { entryTitle },
-                weight,
-                value,
-                gas,
-                onSuccess: (data) => {
-                    const title = data.extra.entryTitle;
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'upvote',
-                        entryId: data.entryId,
-                        entryTitle: title,
-                        gas
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'upvotingEntry',
-                        values: { entryTitle: title },
-                        duration: 3000
-                    });
-                },
-                onError: (error, data) =>
-                    dispatch(entryActionCreators.upvoteError(error, {
-                        votePending: { entryId: data.entryId, value: false }
-                    }))
-            });
-        });
-
-    downvote = (entryId, entryTitle, weight, value, gas) =>
-        this.dispatch((dispatch, getState) => {
-            const token = getState().profileState.getIn(['loggedProfile', 'token']);
-            dispatch(entryActionCreators.downvote({ votePending: { entryId, value: true } }));
-            this.entryService.downvote({
-                token,
-                entryId,
-                extra: { entryTitle },
-                weight,
-                value,
-                gas,
-                onSuccess: (data) => {
-                    const title = data.extra.entryTitle;
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'downvote',
-                        entryId: data.entryId,
-                        entryTitle: title,
-                        gas
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'downvotingEntry',
-                        values: { entryTitle: title },
-                        duration: 3000
-                    });
-                },
-                onError: (error, data) =>
-                    dispatch(entryActionCreators.downvoteError(error, {
-                        votePending: { entryId: data.entryId, value: false }
-                    }))
-            });
-        });
-
-    upvoteSuccess = (entryId, entryTitle, minedSuccessfully) => {
-        this.dispatch(entryActionCreators.upvoteSuccess({
-            votePending: { entryId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: minedSuccessfully ? 'upvoteEntrySuccess' : 'upvoteEntryError',
-            values: { entryTitle }
-        });
-    };
-
-    downvoteSuccess = (entryId, entryTitle, minedSuccessfully) => {
-        this.dispatch(entryActionCreators.downvoteSuccess({
-            votePending: { entryId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: minedSuccessfully ? 'downvoteEntrySuccess' : 'downvoteEntryError',
-            values: { entryTitle }
-        });
-    };
-
-    getEntry = (entryId, full) => {
-        this.dispatch(entryActionCreators.getEntry({ fetchingEntry: true }));
-        this.entryService.getEntry({
-            entryId,
-            full,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.getEntrySuccess(data, { fetchingEntry: false })),
-            onError: error =>
-                this.dispatch(entryActionCreators.getEntryError(error, { fetchingEntry: false }))
-        });
-    };
-
-    getFullEntry = (entryId, version, full = true) => {
-        this.dispatch(entryActionCreators.getFullEntry({ fetchingFullEntry: true }));
-        this.entryService.getEntry({
-            entryId,
-            full,
-            version,
-            onSuccess: (data) => {
-                if (data.entryEth.publisher && data.entryEth.publisher.akashaId) {
-                    this.profileService.saveAkashaIds([{
-                        akashaId: data.entryEth.publisher.akashaId
-                    }]);
-                }
-                // @todo: [code: 3ntry3] get rid of this asap!!
-                // we need this to load images from ipfs
-                window.entry__baseUrl = data.baseUrl;
-                this.dispatch(entryActionCreators.getFullEntrySuccess(data, {
-                    fetchingFullEntry: false
-                }));
-            },
-            onError: error =>
-                this.dispatch(entryActionCreators.getFullEntryError(error, {
-                    fetchingFullEntry: false
-                }))
-        });
-    }
-
-    getLatestVersion = (entryId) =>
-        this.entryService.getEntry({
-            entryId,
-            onSuccess: (data) => {
-                if (data.content) {
-                    this.setLatestVersion(data.content.version);
-                }
-            },
-            onError: (error) => this.dispatch(entryActionCreators.getEntryError(error))
-        });
-
-    setLatestVersion = (version) => this.dispatch(entryActionCreators.setLatestVersion(version));
-
-    unloadFullEntry = () => {
-        this.dispatch(entryActionCreators.unloadFullEntry());
-    }
-
-    getScore = (entryId) => {
-        this.dispatch(entryActionCreators.getScore({ fetchingScore: true }));
-        this.entryService.getScore({
-            entryId,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.getScoreSuccess(data, { fetchingScore: false })),
-            onError: error =>
-                this.dispatch(entryActionCreators.getScoreError(error, { fetchingScore: false }))
-        });
-    };
-
-    isActive = (entryId) => {
-        this.dispatch(entryActionCreators.isActive({ isActivePending: true }));
-        this.entryService.isActive({
-            entryId,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.isActiveSuccess(data, {
-                    isActivePending: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.isActiveError(error, { isActivePending: false }))
-        });
-    };
-
-    getVoteOf = (akashaId, entryId) => {
-        this.dispatch(entryActionCreators.getVoteOf({ fetchingVoteOf: true }));
-        this.entryService.getVoteOf({
-            akashaId,
-            entryId,
-            onSuccess: data =>
-                this.dispatch(entryActionCreators.getVoteOfSuccess(data, {
-                    fetchingVoteOf: false
-                })),
-            onError: error =>
-                this.dispatch(entryActionCreators.getVoteOfError(error, { fetchingVoteOf: false }))
-        });
-    }
-
-    canClaim = (entryId) => {
-        this.dispatch(entryActionCreators.canClaim({ canClaimPending: true }));
-        this.entryService.canClaim({
-            entryId,
-            onSuccess: data => this.dispatch(entryActionCreators.canClaimSuccess(data, {
-                canClaimPending: false
-            })),
-            onError: error => this.dispatch(entryActionCreators.canClaimError(error, {
-                canClaimPending: false
-            }))
-        });
-    }
-
-    getEntryBalance = (entryId) => {
-        this.dispatch(entryActionCreators.getEntryBalance({ fetchingEntryBalance: true }));
-        this.entryService.getEntryBalance({
-            entryId,
-            onSuccess: data => this.dispatch(entryActionCreators.getEntryBalanceSuccess(data, {
-                fetchingEntryBalance: false
-            })),
-            onError: error => this.dispatch(entryActionCreators.getEntryBalanceError(error, {
-                fetchingEntryBalance: false
-            }))
-        });
-    }
-
-    claim = (entryId, gas) =>
-        this.dispatch((dispatch, getState) => {
-            const token = getState().profileState.getIn(['loggedProfile', 'token']);
-            dispatch(entryActionCreators.claim({ claimPending: { entryId, value: true } }));
-            this.entryService.claim({
-                token,
-                entryId,
-                gas,
-                onSuccess: (data) => {
-                    const entry = getState().entryState.get('entries')
-                        .find(en => en.get('entryId') === data.entryId);
-                    const entryTitle = entry ?
-                        entry.getIn(['content', 'content', 'title']) :
-                        getState().entryState.get('fullEntry').content.title;
-                    this.transactionActions.listenForMinedTx();
-                    this.transactionActions.addToQueue([{
-                        tx: data.tx,
-                        type: 'claim',
-                        entryId: data.entryId,
-                        gas,
-                        title: entryTitle
-                    }]);
-                    this.appActions.showNotification({
-                        id: 'claiming',
-                        values: { entryTitle },
-                        duration: 3000
-                    });
-                },
-                onError: (error, data) =>
-                    dispatch(entryActionCreators.claimError(error, {
-                        claimPending: { entryId: data.entryId, value: false }
-                    }))
-            });
-        });
-
-    claimSuccess = (entryId, entryTitle, minedSuccessfully) => {
-        this.dispatch(entryActionCreators.claimSuccess({
-            claimPending: { entryId, value: false }
-        }));
-        this.appActions.showNotification({
-            id: minedSuccessfully ? 'claimSuccess' : 'claimError',
-            values: { entryTitle }
-        });
-    }
-}
-
-export { EntryActions };
-
-export const entryAddClaimAction = payload => action(types.ENTRY_ADD_CLAIM_ACTION, { payload });
-export const entryAddDownvoteAction = payload =>
-    action(types.ENTRY_ADD_DOWNVOTE_ACTION, { payload });
-export const entryAddUpvoteAction = payload => action(types.ENTRY_ADD_UPVOTE_ACTION, { payload });
-export const entryCanClaim = entryId => action(types.ENTRY_CAN_CLAIM, { entryId });
-
+export const entryCanClaim = entryIds => action(types.ENTRY_CAN_CLAIM, { entryIds });
 export const entryCanClaimError = (error) => {
     error.code = 'ECCE01';
     error.messageId = 'entryCanClaim';
     return action(types.ENTRY_CAN_CLAIM_ERROR, { error });
 };
-
 export const entryCanClaimSuccess = data => action(types.ENTRY_CAN_CLAIM_SUCCESS, { data });
-export const entryClaim = (entryId, entryTitle, gas) =>
-    action(types.ENTRY_CLAIM, { entryId, entryTitle, gas });
 
+export const entryCanClaimVote = entryIds => action(types.ENTRY_CAN_CLAIM_VOTE, { entryIds });
+export const entryCanClaimVoteError = (error) => {
+    error.code = 'ECCVE01';
+    error.messageId = 'entryCanClaimVote';
+    return action(types.ENTRY_CAN_CLAIM_VOTE_ERROR, { error });
+};
+export const entryCanClaimVoteSuccess = data => action(types.ENTRY_CAN_CLAIM_VOTE_SUCCESS, { data });
+
+export const entryClaim = ({ actionId, entryId, entryTitle }) =>
+    action(types.ENTRY_CLAIM, { actionId, entryId, entryTitle });
 export const entryClaimError = (error, entryId, entryTitle) => {
     error.code = 'ECE01';
     error.messageId = 'entryClaim';
     error.values = { entryTitle };
     return action(types.ENTRY_CLAIM_ERROR, { error, entryId });
 };
-
 export const entryClaimSuccess = data => action(types.ENTRY_CLAIM_SUCCESS, { data });
+
+export const entryClaimVote = ({ actionId, entryId, entryTitle }) =>
+    action(types.ENTRY_CLAIM_VOTE, { actionId, entryId, entryTitle });
+export const entryClaimVoteError = (error, request) => {
+    error.code = 'ECVE01';
+    error.messageId = 'entryClaimVote';
+    error.values = { entryTitle: request.entryTitle };
+    return action(types.ENTRY_CLAIM_ERROR, { error, request });
+};
+export const entryClaimVoteSuccess = data => action(types.ENTRY_CLAIM_VOTE_SUCCESS, { data });
+
 export const entryCleanFull = () => action(types.ENTRY_CLEAN_FULL);
-export const entryDownvote = (entryId, entryTitle, weight, value, gas) =>
-    action(types.ENTRY_DOWNVOTE, { entryId, entryTitle, weight, value, gas });
+
+export const entryDownvote = ({ actionId, entryId, entryTitle, ethAddress, weight, value }) =>
+    action(types.ENTRY_DOWNVOTE, { actionId, entryId, entryTitle, ethAddress, weight, value });
 
 export const entryDownvoteError = (error, entryId, entryTitle) => {
     error.code = 'EDE01';
@@ -705,48 +48,69 @@ export const entryDownvoteError = (error, entryId, entryTitle) => {
     error.values = { entryTitle };
     return action(types.ENTRY_DOWNVOTE_ERROR, { error, entryId });
 };
-
 export const entryDownvoteSuccess = data =>
     action(types.ENTRY_DOWNVOTE_SUCCESS, { data });
-export const entryGetBalance = entryId => action(types.ENTRY_GET_BALANCE, { entryId });
 
+export const entryGetBalance = entryIds => action(types.ENTRY_GET_BALANCE, { entryIds });
 export const entryGetBalanceError = (error) => {
     error.code = 'EGBE01';
     error.messageId = 'entryGetBalance';
     return action(types.ENTRY_GET_BALANCE_ERROR, { error });
 };
-
 export const entryGetBalanceSuccess = data => action(types.ENTRY_GET_BALANCE_SUCCESS, { data });
-export const entryGetFull = (entryId, version) =>
-    action(types.ENTRY_GET_FULL, { entryId, version });
 
+export const entryGetFull = ({
+    akashaId, entryId, ethAddress, version, asDraft,
+    revert, publishedDateOnly, latestVersion
+}) =>
+    action(types.ENTRY_GET_FULL, {
+        akashaId, entryId, ethAddress, version, asDraft, revert, publishedDateOnly, latestVersion
+    });
 export const entryGetFullError = (error) => {
     error.code = 'EGFE01';
     error.messageId = 'entryGetFull';
     return action(types.ENTRY_GET_FULL_ERROR, { error });
 };
+export const entryGetFullSuccess = (data, request) => action(types.ENTRY_GET_FULL_SUCCESS, { data, request });
 
-export const entryGetFullSuccess = data => action(types.ENTRY_GET_FULL_SUCCESS, { data });
+export const entryGetFullAsDraft = data => action(types.ENTRY_GET_FULL_AS_DRAFT, { data });
+export const entryGetFullAsDraftError = error => action(types.ENTRY_GET_FULL_AS_DRAFT_ERROR, { error });
+export const entryGetFullAsDraftSuccess = data => action(types.ENTRY_GET_FULL_AS_DRAFT_SUCCESS, { data });
+
+export const entryGetVersionPublishedDateSuccess = (data, req) =>
+    action(types.ENTRY_GET_VERSION_PUBLISHED_DATE_SUCCESS, { data, req });
+
+export const entryGetVerionPublishedDateError = error =>
+    action(types.ENTRY_GET_VERSION_PUBLISHED_DATE_ERROR, { error });
+
 export const entryGetLatestVersion = entryId => action(types.ENTRY_GET_LATEST_VERSION, { entryId });
-
 export const entryGetLatestVersionError = (error) => {
     error.code = 'EGLVE01';
     error.messageId = 'entryGetLatestVersion';
     action(types.ENTRY_GET_LATEST_VERSION_ERROR, { error });
 };
-
 export const entryGetLatestVersionSuccess = data =>
     action(types.ENTRY_GET_LATEST_VERSION_SUCCESS, { data });
-export const entryGetScore = entryId => action(types.ENTRY_GET_SCORE, { entryId });
 
+export const entryGetScore = entryId => action(types.ENTRY_GET_SCORE, { entryId });
 export const entryGetScoreError = (error) => {
     error.code = 'EGSE01';
-    error.messageId = 'entryGetError';
+    error.messageId = 'entryGetScore';
     return action(types.ENTRY_GET_SCORE_ERROR, { error });
 };
-
 export const entryGetScoreSuccess = data => action(types.ENTRY_GET_SCORE_SUCCESS, { data });
-export const entryGetVoteOf = entryId => action(types.ENTRY_GET_VOTE_OF, { entryId });
+export const entryGetShort = ({ context, entryId, ethAddress }) =>
+    action(types.ENTRY_GET_SHORT, { context, entryId, ethAddress });
+
+export const entryGetShortError = (error, request) => {
+    error.code = 'EGSE02';
+    error.messageId = 'entryGetShort';
+    return action(types.ENTRY_GET_SHORT_ERROR, { error, request });
+};
+
+export const entryGetShortSuccess = (data, request) =>
+    action(types.ENTRY_GET_SHORT_SUCCESS, { data, request });
+export const entryGetVoteOf = entryIds => action(types.ENTRY_GET_VOTE_OF, { entryIds });
 
 export const entryGetVoteOfError = (error) => {
     error.code = 'EGVOE01';
@@ -755,119 +119,129 @@ export const entryGetVoteOfError = (error) => {
 };
 
 export const entryGetVoteOfSuccess = data => action(types.ENTRY_GET_VOTE_OF_SUCCESS, { data });
-export const entryIsActive = entryId => action(types.ENTRY_IS_ACTIVE, { entryId });
 
-export const entryIsActiveError = (error) => {
-    error.code = 'EIAE01';
-    error.messageId = 'entryIsActive';
-    return action(types.ENTRY_IS_ACTIVE_ERROR, { error });
-};
+export const entryGetVoteRatio = data => action(types.ENTRY_GET_VOTE_RATIO, { data });
+export const entryGetVoteRatioSuccess = data => action(types.ENTRY_GET_VOTE_RATIO_SUCCESS, { data });
+export const entryGetVoteRatioError = error => action(types.ENTRY_GET_VOTE_RATIO_ERROR, { error });
 
-export const entryIsActiveSuccess = data => action(types.ENTRY_IS_ACTIVE_SUCCESS, { data });
-export const entryMoreNewestIterator = id => action(types.ENTRY_MORE_NEWEST_ITERATOR, { id });
 
-export const entryMoreNewestIteratorError = (error, req) => {
+export const entryListIterator = ({ columnId, value, limit }) =>
+    action(types.ENTRY_LIST_ITERATOR, { columnId, value, limit });
+export const entryListIteratorSuccess = (data, request) =>
+    action(types.ENTRY_LIST_ITERATOR_SUCCESS, { data, request });
+
+export const entryMoreListIterator = ({ columnId, value, limit }) =>
+    action(types.ENTRY_MORE_LIST_ITERATOR, { columnId, value, limit });
+export const entryMoreListIteratorSuccess = (data, request) =>
+    action(types.ENTRY_MORE_LIST_ITERATOR_SUCCESS, { data, request });
+
+export const entryMoreNewestIterator = columnId => action(types.ENTRY_MORE_NEWEST_ITERATOR, { columnId });
+export const entryMoreNewestIteratorError = (error, request) => {
     error.code = 'EMNIE01';
     error.messageId = 'entryMoreNewestIterator';
-    return action(types.ENTRY_MORE_NEWEST_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_MORE_NEWEST_ITERATOR_ERROR, { error, request });
 };
+export const entryMoreNewestIteratorSuccess = (data, request) =>
+    action(types.ENTRY_MORE_NEWEST_ITERATOR_SUCCESS, { data, request });
 
-export const entryMoreNewestIteratorSuccess = (data, req) =>
-    action(types.ENTRY_MORE_NEWEST_ITERATOR_SUCCESS, { data, req });
-export const entryMoreProfileIterator = (id, akashaId) =>
-    action(types.ENTRY_MORE_PROFILE_ITERATOR, { id, akashaId });
-
-export const entryMoreProfileIteratorError = (error, req) => {
+export const entryMoreProfileIterator = ({ columnId, value }) =>
+    action(types.ENTRY_MORE_PROFILE_ITERATOR, { columnId, value });
+export const entryMoreProfileIteratorError = (error, request) => {
     error.code = 'EMPIE01';
     error.messageId = 'entryMoreProfileIterator';
-    return action(types.ENTRY_MORE_PROFILE_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_MORE_PROFILE_ITERATOR_ERROR, { error, request });
 };
+export const entryMoreProfileIteratorSuccess = (data, request) =>
+    action(types.ENTRY_MORE_PROFILE_ITERATOR_SUCCESS, { data, request });
 
-export const entryMoreProfileIteratorSuccess = (data, req) =>
-    action(types.ENTRY_MORE_PROFILE_ITERATOR_SUCCESS, { data, req });
-export const entryMoreStreamIterator = id => action(types.ENTRY_MORE_STREAM_ITERATOR, { id });
-
-export const entryMoreStreamIteratorError = (error, req) => {
+export const entryMoreStreamIterator = columnId => action(types.ENTRY_MORE_STREAM_ITERATOR, { columnId });
+export const entryMoreStreamIteratorError = (error, request) => {
     error.code = 'EMSIE01';
     error.messageId = 'entryMoreStreamIterator';
-    return action(types.ENTRY_MORE_STREAM_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_MORE_STREAM_ITERATOR_ERROR, { error, request });
 };
+export const entryMoreStreamIteratorSuccess = (data, request) =>
+    action(types.ENTRY_MORE_STREAM_ITERATOR_SUCCESS, { data, request });
 
-export const entryMoreStreamIteratorSuccess = (data, req) =>
-    action(types.ENTRY_MORE_STREAM_ITERATOR_SUCCESS, { data, req });
-export const entryMoreTagIterator = (id, tagName) =>
-    action(types.ENTRY_MORE_TAG_ITERATOR, { id, tagName });
-
-export const entryMoreTagIteratorError = (error, req) => {
+export const entryMoreTagIterator = ({ columnId, value }) =>
+    action(types.ENTRY_MORE_TAG_ITERATOR, { columnId, value });
+export const entryMoreTagIteratorError = (error, request) => {
     error.code = 'EMTIE01';
     error.messageId = 'entryMoreTagIterator';
-    return action(types.ENTRY_MORE_TAG_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_MORE_TAG_ITERATOR_ERROR, { error, request });
 };
+export const entryMoreTagIteratorSuccess = (data, request) =>
+    action(types.ENTRY_MORE_TAG_ITERATOR_SUCCESS, { data, request });
 
-export const entryMoreTagIteratorSuccess = (data, req) =>
-    action(types.ENTRY_MORE_TAG_ITERATOR_SUCCESS, { data, req });
-export const entryNewestIterator = id => action(types.ENTRY_NEWEST_ITERATOR, { id });
-
-export const entryNewestIteratorError = (error, req) => {
+export const entryNewestIterator = (columnId, reversed) =>
+    action(types.ENTRY_NEWEST_ITERATOR, { columnId, reversed });
+export const entryNewestIteratorError = (error, request) => {
     error.code = 'ENIE01';
     error.messageId = 'entryNewestIterator';
-    return action(types.ENTRY_NEWEST_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_NEWEST_ITERATOR_ERROR, { error, request });
 };
+export const entryNewestIteratorSuccess = (data, request) =>
+    action(types.ENTRY_NEWEST_ITERATOR_SUCCESS, { data, request });
 
-export const entryNewestIteratorSuccess = (data, req) =>
-    action(types.ENTRY_NEWEST_ITERATOR_SUCCESS, { data, req });
 export const entryPageHide = () => action(types.ENTRY_PAGE_HIDE);
 export const entryPageShow = (entryId, version) =>
     action(types.ENTRY_PAGE_SHOW, { entryId, version });
-export const entryProfileIterator = (id, akashaId) =>
-    action(types.ENTRY_PROFILE_ITERATOR, { id, akashaId });
 
-export const entryProfileIteratorError = (error, req) => {
+export const entryProfileIterator = ({ columnId, value, limit, asDrafts, reversed }) =>
+    action(types.ENTRY_PROFILE_ITERATOR, { columnId, value, limit, asDrafts, reversed });
+export const entryProfileIteratorError = (error, request) => {
     error.code = 'EPIE01';
     error.messageId = 'entryProfileIterator';
-    return action(types.ENTRY_PROFILE_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_PROFILE_ITERATOR_ERROR, { error, request });
 };
+export const entryProfileIteratorSuccess = (data, request) =>
+    action(types.ENTRY_PROFILE_ITERATOR_SUCCESS, { data, request });
 
-export const entryProfileIteratorSuccess = (data, req) =>
-    action(types.ENTRY_PROFILE_ITERATOR_SUCCESS, { data, req });
-export const entryStreamIterator = id => action(types.ENTRY_STREAM_ITERATOR, { id });
+export const entryResolveIpfsHash = ({ entryId, ipfsHash }) =>
+    action(types.ENTRY_RESOLVE_IPFS_HASH, { entryId, ipfsHash });
+export const entryResolveIpfsHashError = (error, request) => {
+    error.code = 'ERIHE01';
+    error.messageId = 'entryResolveIpfsHash';
+    return action(types.ENTRY_RESOLVE_IPFS_HASH_ERROR, { error, request });
+};
+export const entryResolveIpfsHashSuccess = (data, request) =>
+    action(types.ENTRY_RESOLVE_IPFS_HASH_SUCCESS, { data, request });
 
-export const entryStreamIteratorError = (error, req) => {
+export const entryStreamIterator = (columnId, reversed) =>
+    action(types.ENTRY_STREAM_ITERATOR, { columnId, reversed });
+export const entryStreamIteratorError = (error, request) => {
     error.code = 'ESIE01';
     error.messageId = 'entryStreamIterator';
-    return action(types.ENTRY_STREAM_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_STREAM_ITERATOR_ERROR, { error, request });
 };
+export const entryStreamIteratorSuccess = (data, request) =>
+    action(types.ENTRY_STREAM_ITERATOR_SUCCESS, { data, request });
 
-export const entryStreamIteratorSuccess = (data, req) =>
-    action(types.ENTRY_STREAM_ITERATOR_SUCCESS, { data, req });
-export const entryTagIterator = (id, tagName) => action(types.ENTRY_TAG_ITERATOR, { id, tagName });
-
-export const entryTagIteratorError = (error, req) => {
+export const entryTagIterator = ({ columnId, value, reversed }) =>
+    action(types.ENTRY_TAG_ITERATOR, { columnId, value, reversed });
+export const entryTagIteratorError = (error, request) => {
     error.code = 'ETIE01';
     error.messageId = 'entryTagIterator';
-    return action(types.ENTRY_TAG_ITERATOR_ERROR, { error, req });
+    return action(types.ENTRY_TAG_ITERATOR_ERROR, { error, request });
 };
+export const entryTagIteratorSuccess = (data, request) =>
+    action(types.ENTRY_TAG_ITERATOR_SUCCESS, { data, request });
 
-export const entryTagIteratorSuccess = (data, req) =>
-    action(types.ENTRY_TAG_ITERATOR_SUCCESS, { data, req });
-export const entryUpvote = (entryId, entryTitle, weight, value, gas) =>
-    action(types.ENTRY_UPVOTE, { entryId, entryTitle, weight, value, gas });
-
+export const entryUpvote = ({ actionId, entryId, entryTitle, ethAddress, weight, value }) =>
+    action(types.ENTRY_UPVOTE, { actionId, entryId, entryTitle, ethAddress, weight, value });
 export const entryUpvoteError = (error, entryId, entryTitle) => {
     error.code = 'EUE01';
     error.messageId = 'entryUpvote';
     error.values = { entryTitle };
     return action(types.ENTRY_UPVOTE_ERROR, { error, entryId });
 };
-
 export const entryUpvoteSuccess = data =>
     action(types.ENTRY_UPVOTE_SUCCESS, { data });
-export const entryVoteCost = () => action(types.ENTRY_VOTE_COST);
 
+export const entryVoteCost = () => action(types.ENTRY_VOTE_COST);
 export const entryVoteCostError = (error) => {
     error.code = 'EVCE01';
     error.messageId = 'entryVoteCost';
     return action(types.ENTRY_VOTE_COST_ERROR, { error });
 };
-
 export const entryVoteCostSuccess = data => action(types.ENTRY_VOTE_COST_SUCCESS, { data });

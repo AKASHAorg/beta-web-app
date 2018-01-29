@@ -1,7 +1,7 @@
 import BaseService from './base-service';
 import profileDB from './db/profile';
-import { channel } from 'services';
 
+const Channel = global.Channel;
 /**
  * Auth Service.
  * default open channels => ['login', 'logout', 'requestEther']
@@ -11,7 +11,7 @@ import { channel } from 'services';
 class AuthService extends BaseService {
     constructor () {
         super();
-        this.clientManager = channel.instance.client.auth.manager;
+        this.clientManager = Channel.client.auth.manager;
     }
 
     /**
@@ -28,13 +28,13 @@ class AuthService extends BaseService {
      */
     login = ({ account, password, rememberTime, akashaId, registering = false, onSuccess, onError }) => {
         const successCb = data => profileDB.loggedProfile.put({ akashaId, ...data })
-                .then(() => onSuccess({ akashaId, ...data }))
-                .catch(error => onError(error));
+            .then(() => onSuccess({ akashaId, ...data }))
+            .catch(error => onError(error));
         this.registerListener(
-            channel.instance.client.auth.login,
+            Channel.client.auth.login,
             this.createListener(onError, successCb)
         );
-        channel.instance.server.auth.login.send({ account, password, rememberTime, registering });
+        Channel.server.auth.login.send({ account, password, rememberTime, registering });
     };
     /**
      *  Logout profile
@@ -50,10 +50,10 @@ class AuthService extends BaseService {
             this.deleteLoggedProfile({ profileKey: options.profileKey, onError, onSuccess });
         };
         this.registerListener(
-            channel.instance.client.auth.logout,
+            Channel.client.auth.logout,
             this.createListener(onError, successCb)
         );
-        channel.instance.server.auth.logout.send({});
+        Channel.server.auth.logout.send({});
     };
     /**
      * Sends a request to faucet
@@ -70,10 +70,10 @@ class AuthService extends BaseService {
             return onSuccess(data);
         };
         this.registerListener(
-            channel.instance.client.auth.requestEther,
+            Channel.client.auth.requestEther,
             this.createListener(onError, successCb)
         );
-        channel.instance.server.auth.requestEther.send({ address });
+        Channel.server.auth.requestEther.send({ address });
     };
     /**
      * Create a new eth address
@@ -83,11 +83,11 @@ class AuthService extends BaseService {
     createEthAddress = ({ password, onSuccess, onError }) => {
         this.openChannel({
             clientManager: this.clientManager,
-            serverChannel: channel.instance.server.auth.generateEthKey,
-            clientChannel: channel.instance.client.auth.generateEthKey,
+            serverChannel: Channel.server.auth.generateEthKey,
+            clientChannel: Channel.client.auth.generateEthKey,
             listenerCb: this.createListener(onError, onSuccess)
         }, () => {
-            channel.instance.server.auth.generateEthKey.send({ password });
+            Channel.server.auth.generateEthKey.send({ password });
         });
     };
 
@@ -99,12 +99,12 @@ class AuthService extends BaseService {
         }, onSuccess
     }) => this.openChannel({
         clientManager: this.clientManager,
-        serverChannel: channel.instance.server.auth.getLocalIdentities,
-        clientChannel: channel.instance.client.auth.getLocalIdentities,
+        serverChannel: Channel.server.auth.getLocalIdentities,
+        clientChannel: Channel.client.auth.getLocalIdentities,
         listenerCb: this.createListener(onError, onSuccess)
     }, () =>
-            channel.instance.server.auth.getLocalIdentities.send(options)
-        );
+        Channel.server.auth.getLocalIdentities.send(options)
+    );
     /**
      * Save logged profile to indexedDB database.
      * @param profileData

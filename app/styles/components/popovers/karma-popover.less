@@ -1,0 +1,169 @@
+.karma-popover {
+    width: 320px;
+    .ant-popover-inner-content {
+        padding: 0;
+    }
+
+    &__avatar {
+        cursor: pointer !important;
+    }
+
+    &__avatar-link {
+        display: flex;
+    }
+
+    &__back {
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+    &__back-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    &__card-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        color: @karma-card-content;
+    }
+
+    &__card-rank {
+        width: 18px;
+        text-align: center;
+        margin-right: 5px;
+        &_blue {
+            color: @primary-color;
+        }
+    }
+
+    &__card-left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    &__card-name {
+        margin-left: 5px;
+        cursor: pointer;
+        width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__content {
+        height: 354px;
+        position: relative;
+        padding: 12px 16px;
+    }
+
+    &__title-wrap {
+        font-size: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    &__wrap {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__title {
+        color: @text-color;
+    }
+
+    &__show-more {
+        cursor: pointer;
+        color: @primary-color;
+    }
+
+    &__possible-actions {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        color: @text-color;
+        height: 42px;
+    }
+
+    &__progress {
+        .ant-progress-bg {
+            background-color: @karma-color;
+        }
+    }
+
+    &__karma-score {
+        margin-left: 5px;
+        color: @heading-color;
+    }
+
+    &__karma-level {
+        font-size: 15px;
+        color: @text-color;
+        padding: 13px 0 7px 0;
+    }
+
+    &__karma-level-text {
+        color: @text-color-secondary;
+    }
+
+    &__info-icon {
+        width: 20px;
+        height: 20px;
+        stroke: initial !important;
+    }
+
+    &__leaderboard-title-wrap {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-bottom: 5px;
+    }
+
+    &__leaderboard-title {
+        font-size: 15px;
+        font-weight: 500;
+        color: @karma-card-content;
+    }
+
+    &__leaderboard-wrap {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    &__leaderboard-content {
+        margin-top: 10px;
+        height: 306px;
+    }
+
+    &__leaderboard-page-content {
+        height: 354px;
+        position: relative;
+        padding: 12px 4px 0 16px;
+    }
+
+    &__profile-card {
+        background-color: @karma-card-bg;
+        margin: 5px 0;
+        border-radius: 5px;
+        .ant-card-body {
+            padding: 5px;
+        }
+        .ant-card-bordered {
+            border: 1px solid @border-color;
+        }
+        &_self {
+            background-color: @karma-card-bg-reverse;
+        }
+    }
+
+    &__margin {
+        margin-right: 6px;
+    }
+
+    &__spin {
+        margin: 60px;
+    }
+}

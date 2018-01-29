@@ -1,14 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SvgIcon from 'material-ui/SvgIcon';
-import RaisedButton from 'material-ui/RaisedButton';
-import LinearProgress from 'material-ui/LinearProgress';
-import DeleteIcon from 'material-ui/svg-icons/action/delete';
-import R from 'ramda';
-import { AddImage } from '../svg';
+import { Button, Progress } from 'antd';
+import { fromJS } from 'immutable';
+import { equals } from 'ramda';
 import { generalMessages } from '../../locale-data/messages';
 import imageCreator, { getResizedImages, findClosestMatch } from '../../utils/imageUtils';
-import styles from './image-uploader.scss';
+import { uploadImage } from '../../local-flux/services/utils-service';
+import { Icon } from '../';
 
 const INITIAL_PROGRESS_VALUE = 20;
 
@@ -16,60 +14,46 @@ class ImageUploader extends Component {
     constructor (props) {
         super(props);
         this.state = {
-            imageFile: {},
             progress: INITIAL_PROGRESS_VALUE,
             error: null,
-            processingFinished: true
+            processingFinished: true,
+            imageLoaded: false,
+            imageUploaderClose: false
         };
     }
-    componentDidMount () {
-        const { initialImageLink, minHeight, minWidth } = this.props;
-        if (initialImageLink && initialImageLink.includes('/ipfs/')) {
-            const filePromises = getResizedImages([initialImageLink], {
-                minWidth,
-                minHeight,
-                ipfsFile: true
-            });
-            return Promise.all(filePromises)
-                .then((results) => {
-                    this.setState({
-                        imageFile: results,
-                        error: null
-                    }, () => {
-                        this.fileInput.value = '';
-                    });
-                }).catch((err) => {
-                    console.error(err);
-                    return this.setState({
-                        error: err
-                    });
-                });
-        }
-        return null;
-    }
+
     shouldComponentUpdate (nextProps, nextState) {
-        return !R.equals(nextProps.initialImage, this.props.initialImage) ||
-            !R.equals(nextProps.baseUrl, this.props.baseUrl) ||
-            !R.equals(nextProps.containerSize, this.props.containerSize) ||
-            !R.equals(nextState.imageFile, this.state.imageFile) ||
-            !R.equals(nextState.processingFinished, this.state.processingFinished) ||
-            !R.equals(nextState.progress, this.state.progress) ||
-            !R.equals(nextState.error, this.state.error);
+        return !equals(nextProps.initialImage, this.props.initialImage) ||
+            !equals(nextProps.baseUrl, this.props.baseUrl) ||
+            !equals(nextProps.containerSize, this.props.containerSize) ||
+            !equals(nextState.imageFile, this.state.imageFile) ||
+            !equals(nextState.imageLoaded, this.state.imageLoaded) ||
+            !equals(nextState.imageUploaderClose, this.state.imageUploaderClose) ||
+            !equals(nextState.processingFinished, this.state.processingFinished) ||
+            !equals(nextState.progress, this.state.progress) ||
+            !equals(nextState.error, this.state.error) ||
+            !equals(nextState.highlightDropZone, this.state.highlightDropZone);
     }
-    componentWillReceiveProps (nextProps) {
-        const { initialImage } = nextProps;
-        const hasBgImage = initialImage && R.is(Object, initialImage) && !R.isEmpty(initialImage);
-        if (hasBgImage) {
+    _highlightDropZone = (ev) => {
+        ev.preventDefault();
+        if (ev.target.className === 'image-uploader__upload-button') {
             this.setState({
-                imageFile: initialImage
+                highlightDropZone: true
             });
         }
     }
+    _diminishDropZone = (ev) => {
+        ev.preventDefault();
+        this.setState({
+            highlightDropZone: false
+        });
+    }
+
     getImage = () => this.state.imageFile;
 
     _handleResizeProgress = (totalProgress) => {
         this.setState({
-            progress: totalProgress + INITIAL_PROGRESS_VALUE
+            progress: Math.round(totalProgress + INITIAL_PROGRESS_VALUE)
         });
         this.forceUpdate();
     }
@@ -80,15 +64,24 @@ class ImageUploader extends Component {
             progressHandler: this._handleResizeProgress,
             maxProgress: (100 - INITIAL_PROGRESS_VALUE)
         });
+        // only support single file for now! (notice the 0 index)
         filePromises[0].then((results) => {
             this.setState({
-                imageFile: results,
                 processingFinished: true,
                 error: null,
+                imageLoaded: false
             }, () => {
                 if (typeof this.props.onChange === 'function') {
-                    this.props.onChange(results);
+                    if (!this.props.useIpfs) {
+                        return this.props.onChange(results);
+                    }
+                    console.log('results', results);
+                    if (results) {
+                        return uploadImage(results)
+                            .then(converted => this.props.onChange(converted));
+                    }
                 }
+                return true;
             });
         }).catch((err) => {
             this.setState({
@@ -99,29 +92,31 @@ class ImageUploader extends Component {
         });
     }
     _handleDialogOpen = () => {
-        if (this.fileInput.files.length === 0) {
-            return this.setState({
-                imageFile: {}
-            });
+        if (typeof this.props.onImageClear === 'function') {
+            this.props.onImageClear();
         }
         return this.setState({
-            imageFile: {},
             processingFinished: false,
-            progress: INITIAL_PROGRESS_VALUE
+            progress: INITIAL_PROGRESS_VALUE,
+            imageLoaded: false,
+            error: null
         }, () => {
             this.forceUpdate();
             this._resizeImages(this.fileInput.files);
             this.fileInput.value = '';
         });
     }
-    _getImageSrc = (imageObj) => {
+    _getImageSrc = (image) => {
+        image = fromJS(image);
         const { baseUrl } = this.props;
-        let { containerSize } = this.props;
-        if (!containerSize && this.container && !R.isEmpty(imageObj)) {
-            containerSize = this.container.clientWidth;
-            const bestKey = findClosestMatch(containerSize, imageObj, 'sm');
+        let { containerSize = 320 } = this.props;
+        if (image.size > 0) {
+            if (this.container) {
+                containerSize = this.container.clientWidth;
+            }
+            const bestKey = findClosestMatch(containerSize, image.toJS(), 'xs');
             if (bestKey) {
-                return imageCreator(imageObj[bestKey].src, baseUrl);
+                return imageCreator(image.getIn([bestKey, 'src']), baseUrl);
             }
             return null;
         }
@@ -133,134 +128,134 @@ class ImageUploader extends Component {
             onImageClear();
         }
         this.setState({
-            imageFile: {},
             processingFinished: true,
             progress: INITIAL_PROGRESS_VALUE,
-            error: null
+            error: null,
+            imageLoaded: false,
+            highlightDropZone: false,
+        });
+    }
+    _handleImageLoad = () => {
+        this.setState({
+            imageLoaded: true,
+            highlightDropZone: false,
         });
     }
     render () {
-        const {
-            clearImageButtonStyle,
-            errorStyle,
-            multiFiles,
-            intl,
-            muiTheme
-        } = this.props;
-        const { imageFile } = this.state;
-        /* eslint-disable react/no-array-index-key, no-console */
-        if (multiFiles) {
-            return console.error('sorry multiple files is not implemented yet!');
-        }
-        // console.log(this._getImageSrc(this.state.imageFile), 'le image file');
+        const { multiFiles, intl, initialImage } = this.props;
+        const { imageLoaded, imageUploaderClose, processingFinished,
+            progress, error, highlightDropZone } = this.state;
+
         return (
           <div
             ref={(container) => { this.container = container; }}
-            style={{ position: 'relative', border: `1px solid ${muiTheme.palette.textColor}` }}
+            className="image-uploader"
+            onDragEnter={this._highlightDropZone}
+            onDragLeave={this._diminishDropZone}
+            onMouseEnter={() => { this.setState({ imageUploaderClose: true }); }}
+            onMouseLeave={() => { this.setState({ imageUploaderClose: false }); }}
           >
+            {imageLoaded && processingFinished && imageUploaderClose &&
+              <div className="image-uploader__clear-image-button">
+                <Button
+                  type="standard"
+                  icon="close-circle"
+                  onClick={this._handleClearImage}
+                />
+              </div>
+              }
             <div>
-              {this.state.processingFinished && !R.isEmpty(imageFile) &&
+              {processingFinished && initialImage && initialImage.size !== 0 &&
                 <img
-                  src={this._getImageSrc(this.state.imageFile)}
-                  className={`${styles.image}`}
+                  src={this._getImageSrc(initialImage)}
+                  className={`image-uploader__img image-uploader__img${imageLoaded && '_loaded'}`}
+                  onLoad={this._handleImageLoad}
                   alt=""
                 />
               }
-              {!this.state.processingFinished && R.isEmpty(imageFile) &&
+              {processingFinished && initialImage && initialImage.size !== 0 && !imageLoaded &&
                 <div
-                  className={`${styles.emptyContainer} ${styles.processingLoader}`}
+                  className="image-uploader__generating-preview"
                 >
-                  <div className={`${styles.processingLoaderText}`}>Processing image...</div>
-                  <div className={`${styles.loadingBar}`}>
-                    <LinearProgress
-                      mode="determinate"
-                      style={{ display: 'inline-block' }}
-                      value={this.state.progress}
+                  {intl.formatMessage(generalMessages.generatingPreview)}...
+                </div>
+              }
+              {!processingFinished &&
+                <div
+                  className="image-uploader__empty-container image-uploader__processing-loader"
+                >
+                  <div
+                    className="image-uploader__processing-loader-text"
+                  >
+                    {intl.formatMessage(generalMessages.processingImage)}...
+                  </div>
+                  <div className="image-uploader__loading-bar">
+                    <Progress
+                      className="image-uploader__progress-bar"
+                      strokeWidth={5}
+                      percent={progress}
+                      status="active"
                     />
                   </div>
                 </div>
               }
-              {this.state.processingFinished && !R.isEmpty(imageFile) &&
-                <div className={`${styles.clearImageButton}`} style={clearImageButtonStyle}>
-                  <RaisedButton
-                    fullWidth
-                    secondary
-                    icon={<DeleteIcon />}
-                    style={{ width: '100%' }}
-                    onClick={this._handleClearImage}
-                  />
-                </div>
-              }
             </div>
-            {R.isEmpty(imageFile) && this.state.processingFinished &&
+            {(initialImage && initialImage.size === 0) && processingFinished &&
               <div
-                className={`${styles.emptyContainer}`}
+                className={
+                    `image-uploader__empty-container
+                    image-uploader__empty-container${highlightDropZone ? '_dragEnter' : ''}`
+                }
               >
-                <SvgIcon
-                  style={{ height: '42px', width: '100%' }}
-                  viewBox="0 0 36 36"
-                  color={this.context.muiTheme.palette.textColor}
-                >
-                  <AddImage />
-                </SvgIcon>
-                <text style={{ display: 'block' }}>
-                  {intl.formatMessage(generalMessages.addImage)}
-                </text>
+                <Icon className="image-uploader__add-image-icon" type="photoImage" />
+                <div className="image-uploader__helper-text">
+                  {!highlightDropZone && intl.formatMessage(generalMessages.addImage)}
+                  {highlightDropZone && intl.formatMessage(generalMessages.addImageDragged)}
+                </div>
               </div>
-              }
+            }
             <input
               ref={(fileInput) => { this.fileInput = fileInput; }}
               type="file"
-              className={`${styles.uploadButton}`}
+              className="image-uploader__upload-button"
               onChange={this._handleDialogOpen}
               multiple={multiFiles}
               accept="image/*"
+              title={(!initialImage || (initialImage.size === 0)) ?
+                intl.formatMessage(generalMessages.chooseImage) :
+                intl.formatMessage(generalMessages.chooseAnotherImage)}
             />
             {this.state.error &&
-              <div style={errorStyle}>{this.state.error}</div>
+              <div className="image-uploader__error">{error}</div>
             }
           </div>
         );
     }
 }
-ImageUploader.defaultProps = {
-    errorStyle: {
-        position: 'absolute',
-        width: '80%',
-        bottom: '8px',
-        left: '10%',
-        padding: '8px 16px',
-        backgroundColor: '#FFF',
-        color: '#D40202',
-        boxShadow: '0px 0px 3px 0 rgba(0,0,0,0.6)'
-    },
-};
+
+ImageUploader.defaultProps = {};
+
 ImageUploader.propTypes = {
     // used in profile update
     baseUrl: PropTypes.string,
     // pass the container width
     containerSize: PropTypes.number,
+    // pass an image object from ipfs
+    initialImage: PropTypes.shape(),
+    // internationalization
+    intl: PropTypes.shape().isRequired,
     // minimum accepted image width
     minWidth: PropTypes.number,
     // min accepted image height
     minHeight: PropTypes.number,
     // support multiple files
     multiFiles: PropTypes.bool,
-    // internationalization
-    intl: PropTypes.shape().isRequired,
-    // theme
-    muiTheme: PropTypes.shape().isRequired,
-    // pass an image object from ipfs
-    initialImage: PropTypes.shape(),
-    // @todo: investigate the usage of this prop
-    initialImageLink: PropTypes.string,
+    // change event for updates
+    onChange: PropTypes.func,
     // handler when remove image is pressed
     onImageClear: PropTypes.func,
-    // styles..
-    clearImageButtonStyle: PropTypes.shape(),
-    errorStyle: PropTypes.shape(),
-};
-ImageUploader.contextTypes = {
-    muiTheme: PropTypes.shape()
+    // when true, image sources will be ipfs hashes
+    useIpfs: PropTypes.bool,
+
 };
 export default ImageUploader;

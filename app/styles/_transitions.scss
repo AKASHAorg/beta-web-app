@@ -1,0 +1,51 @@
+.loginForm-enter {
+    height: 0px;
+}
+
+.loginForm-enter.loginForm-enter-active {
+    height: 258px;
+    transition: height 200ms ease-in-out;
+}
+
+.loginForm-leave {
+    height: 258px;
+}
+
+.loginForm-leave.loginForm-leave-active {
+    height: 0px;
+    transition: height 200ms ease-in-out;    
+}
+
+.walletPanel-enter {
+    position: fixed;
+    top: 50px;
+    bottom: 0px;
+    right: 0px;
+    width: 0px;
+}
+
+.walletPanel-enter.walletPanel-enter-active {    
+    position: fixed;
+    top: 50px;
+    bottom: 0px;
+    right: 0px;
+    width: 620px;
+    transition: width 2000ms ease-in-out;
+}
+
+.walletPanel-leave {
+    position: fixed;
+    top: 50px;
+    bottom: 0px;
+    right: 0px;
+    width: 620px;
+}
+
+.walletPanel-leave.walletPanel-leave-active {
+    position: fixed;
+    top: 50px;
+    bottom: 0px;
+    right: 0px;
+    width: 0px;
+    transition: width 2000ms ease-in-out;    
+}
