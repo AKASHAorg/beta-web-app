@@ -3,7 +3,7 @@ import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import { profileAddress } from '../profile/helpers';
 import queue from './queue';
-import GethConnector from '@akashaproject/geth-connector/lib/GethConnector';
+import { web3Api } from '../../services';
 
 
 const watchDonate = {
@@ -32,9 +32,9 @@ export const execute = Promise.coroutine(function* (data: { ethAddress?: string,
                     type: EVENT_TYPE,
                     payload: {
                         from: ev.args.from,
-                        aeth: (GethConnector.getInstance().web3.fromWei(ev.args.aeth, 'ether')).toFormat(5),
-                        eth: (GethConnector.getInstance().web3.fromWei(ev.args.eth, 'ether')).toFormat(5),
-                        message: GethConnector.getInstance().web3.toUtf8(ev.args.extraData)
+                        aeth: (web3Api.instance.fromWei(ev.args.aeth, 'ether')).toFormat(5),
+                        eth: (web3Api.instance.fromWei(ev.args.eth, 'ether')).toFormat(5),
+                        message: web3Api.instance.toUtf8(ev.args.extraData)
                     },
                     blockNumber: ev.blockNumber
                 }

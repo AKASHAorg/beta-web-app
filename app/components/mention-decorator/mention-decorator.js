@@ -2,18 +2,19 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ProfileHoverCard } from '../../components';
 
-const Channel = global.Channel;
-const existsClient = Channel.client.registry.profileExists;
-const existsServer = Channel.server.registry.profileExists;
-const addressOfClient = Channel.client.registry.addressOf;
-const addressOfServer = Channel.server.registry.addressOf;
-const getProfileDataClient = Channel.client.profile.getProfileData;
-const getProfileDataServer = Channel.server.profile.getProfileData;
+let Channel, existsClient, existsServer ,addressOfClient, addressOfServer, getProfileDataClient, getProfileDataServer;
 
 class MentionComponent extends Component {
 
     constructor (props) {
         super(props);
+        Channel = global.Channel;
+        existsClient = Channel.client.registry.profileExists;
+        existsServer = Channel.server.registry.profileExists;
+        addressOfClient = Channel.client.registry.addressOf;
+        addressOfServer = Channel.server.registry.addressOf;
+        getProfileDataClient = Channel.client.profile.getProfileData;
+        getProfileDataServer = Channel.server.profile.getProfileData;
         existsServer.enable();
         addressOfServer.enable();
         this.state = {

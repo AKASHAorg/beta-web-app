@@ -1,10 +1,8 @@
 import Storage from './Storage';
-import { app } from 'electron';
-import { join as pathJoin } from 'path';
 
 export const dbs = {
     entry: {
-        path: pathJoin(app.getPath('userData'), 'entry-index'),
+        path: 'akasha#beta/entry-index',
         additional: {
             fieldOptions: {
                 excerpt: {
@@ -20,12 +18,12 @@ export const dbs = {
         searchIndex: null
     },
     tags: {
-        path: pathJoin(app.getPath('userData'), 'tags-index'),
+        path: 'akasha#beta/tags-index',
         searchIndex: null,
         additional: {}
     },
     profiles: {
-        path: pathJoin(app.getPath('userData'), 'profileID-index'),
+        path: 'akasha#beta/profileID-index',
         searchIndex: null,
         additional: {}
     }

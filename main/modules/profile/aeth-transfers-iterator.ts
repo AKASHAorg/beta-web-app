@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 import { resolveEthAddress } from './helpers';
@@ -36,7 +36,7 @@ const execute = Promise.coroutine(function* (
 
         collection.push({
             from,
-            amount: (GethConnector.getInstance().web3.fromWei(event.args.value, 'ether')).toFormat(5),
+            amount: (web3Api.instance.fromWei(event.args.value, 'ether')).toFormat(5),
             blockNumber: event.blockNumber
         });
 

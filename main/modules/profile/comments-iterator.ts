@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import contracts from '../../contracts/index';
 import { profileAddress } from './helpers';
 import schema from '../utils/jsonschema';
@@ -30,7 +30,7 @@ const execute = Promise.coroutine(function* (data: {
     const collection = [];
     const maxResults = data.limit || 5;
     const address = yield profileAddress(data);
-    const toBlock = (!data.lastBlock) ? yield GethConnector.getInstance().web3.eth.getBlockNumberAsync() : data.lastBlock;
+    const toBlock = (!data.lastBlock) ? yield web3Api.instance.eth.getBlockNumberAsync() : data.lastBlock;
     const fetched = yield contracts.fromEvent(
         contracts.instance.Comments.Publish,
         { author: address },

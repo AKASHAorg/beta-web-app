@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 export const karmaRanking = {
     'id': '/karmaRanking',
@@ -28,10 +28,10 @@ const execute = Promise.coroutine(function* (data: { following: string[] }) {
         return {};
     }
     const collection = [];
-    data.following.push(GethConnector.getInstance().web3.eth.defaultAccount);
+    data.following.push(web3Api.instance.eth.defaultAccount);
     for (let i = 0; i < data.following.length; i++) {
         const [karma, ] = yield contracts.instance.Essence.getCollected(data.following[i]);
-        collection.push({ethAddress: data.following[i], karma: (GethConnector.getInstance().web3.fromWei(karma)).toNumber()});
+        collection.push({ethAddress: data.following[i], karma: (web3Api.instance.fromWei(karma)).toNumber()});
     }
 
     collection.sort((first, second) => {
@@ -43,7 +43,7 @@ const execute = Promise.coroutine(function* (data: { following: string[] }) {
     });
 
     const myRanking = collection.findIndex((profile) => {
-      return profile.ethAddress === GethConnector.getInstance().web3.eth.defaultAccount;
+      return profile.ethAddress === web3Api.instance.eth.defaultAccount;
     });
 
     return { collection: rankedCollection, myRanking };

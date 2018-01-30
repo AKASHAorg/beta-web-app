@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 
 class RoomFactory {
     public rooms: any[] = [];

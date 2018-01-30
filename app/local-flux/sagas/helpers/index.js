@@ -3,7 +3,6 @@ import { put, select, take } from 'redux-saga/effects';
 import { tap } from 'ramda';
 import { selectAction, selectLoggedEthAddress } from '../../selectors';
 
-const Channel = global.Channel;
 export const actionChannels = {};
 export const enabledChannels = [];
 
@@ -24,12 +23,12 @@ export function createActionChannel (channel) {
 }
 
 export function createActionChannels () {
-    const modules = Object.keys(Channel.client);
+    const modules = Object.keys(global.Channel.client);
     modules.forEach((module) => {
-        const channels = Object.keys(Channel.client[module]);
+        const channels = Object.keys(global.Channel.client[module]);
         actionChannels[module] = {};
         channels.forEach((channel) => {
-            actionChannels[module][channel] = createActionChannel(Channel.client[module][channel]);
+            actionChannels[module][channel] = createActionChannel(global.Channel.client[module][channel]);
         });
     });
 }

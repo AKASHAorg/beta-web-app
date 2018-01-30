@@ -1,6 +1,5 @@
 import { Cipher, createCipher, createDecipher, Decipher, randomBytes } from 'crypto';
-import { addHexPrefix, hashPersonalMessage, stripHexPrefix, unpad } from 'ethereumjs-util';
-import contracts from '../../contracts/index';
+import { addHexPrefix, stripHexPrefix } from 'ethereumjs-util';
 import * as Promise from 'bluebird';
 import { web3Api } from '../../services';
 import { gethStatus } from '../../event/responses';
@@ -73,25 +72,13 @@ export class Auth {
      */
     public login(acc: string, timer: number = 30, registering = false) {
 
-        return contracts.instance
-            .registry
-            .getByAddress(acc)
-            .then((address: string) => {
-                if (!unpad(address) && !registering) {
-                    throw new Error(`eth key: ${acc} has no profile attached`);
-                }
-                gethStatus.akashaKey = address;
-                // return gethHelper.hasKey(acc);
-                return true;
-            })
-            .then(() => {
-                return randomBytesAsync(40);
-            })
+        return randomBytesAsync(40)
             .then((buff: Buffer) => {
                 const token = addHexPrefix(buff.toString('hex'));
                 return this._signSession(token, acc)
                     .then((signedString: string) => {
                         const expiration = new Date();
+                        gethStatus.akashaKey = acc;
                         expiration.setMinutes(expiration.getMinutes() + timer);
                         web3Api.instance.eth.defaultAccount = acc;
                         this._session = {
@@ -174,6 +161,18 @@ export class Auth {
                     throw new Error('Token is not valid!');
                 }
                 return web3Api.instance.eth.sendTransactionAsync(data);
+            });
+    }
+
+    public signMessage(data: {}, token: string) {
+        return this.isLogged(token)
+            .then(function (logged) {
+                if (!logged) {
+                    throw new Error('Token is not valid!');
+                }
+                return web3Api.instance
+                    .personal
+                    .signAsync(data, web3Api.instance.eth.defaultAccount);
             });
     }
 }

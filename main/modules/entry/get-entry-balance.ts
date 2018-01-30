@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 export const getEntryBalance = {
     'id': '/getEntryBalance',
@@ -34,7 +34,7 @@ const execute = Promise.coroutine(
                     totalVotes: _totalVotes.toString(10),
                     score: _score.toString(10),
                     endPeriod: (new Date(_endPeriod.toNumber() * 1000)).toISOString(),
-                    totalKarma: (GethConnector.getInstance().web3.fromWei(_totalKarma, 'ether')).toString(10),
+                    totalKarma: (web3Api.instance.fromWei(_totalKarma, 'ether')).toString(10),
                     claimed: _claimed
                 });
             });

@@ -1,6 +1,5 @@
 import notifications from './notifications/index';
 import ModuleEmitter from '../event/ModuleEmitter';
-import WebContents = Electron.WebContents;
 
 class NotificationsIPC extends ModuleEmitter {
 
@@ -10,8 +9,7 @@ class NotificationsIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['subscribe'];
     }
 
-    public initListeners(webContents: WebContents) {
-        this.webContents = webContents;
+    public initListeners() {
         this._initMethods(notifications);
         this._manager();
     }

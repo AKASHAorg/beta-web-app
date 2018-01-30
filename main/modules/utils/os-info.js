@@ -1,16 +1,6 @@
 import * as Promise from 'bluebird';
-import { arch, platform, type } from 'os';
 const execute = Promise.coroutine(function* () {
-    return Promise.resolve({
-        platform: {
-            platform: platform(),
-            arch: arch(),
-            type: type()
-        },
-        resources: {
-            memoryUsage: process.getProcessMemoryInfo()
-        }
-    });
+    return Promise.resolve({});
 });
 export default { execute, name: 'osInfo' };
 //# sourceMappingURL=os-info.js.map

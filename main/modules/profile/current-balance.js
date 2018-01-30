@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 export const getBalance = {
@@ -13,10 +13,10 @@ export const getBalance = {
 const execute = Promise.coroutine(function* (data) {
     const v = new schema.Validator();
     v.validate(data, getBalance, { throwError: true });
-    const etherBase = (data.ethAddress) ? data.ethAddress : GethConnector.getInstance().web3.eth.defaultAccount;
+    const etherBase = (data.ethAddress) ? data.ethAddress : web3Api.instance.eth.defaultAccount;
     const unit = (data.unit) ? data.unit : 'ether';
-    const fromWei = GethConnector.getInstance().web3.fromWei;
-    const weiAmount = yield GethConnector.getInstance().web3.eth.getBalanceAsync(etherBase);
+    const fromWei = web3Api.instance.fromWei;
+    const weiAmount = yield web3Api.instance.eth.getBalanceAsync(etherBase);
     const [free, bonded, cycling] = yield contracts.instance.AETH.getTokenRecords(etherBase);
     const [manaTotal, manaSpent, manaRemaining] = yield contracts.instance.Essence.mana(etherBase);
     const [karma, essence] = yield contracts.instance.Essence.getCollected(etherBase);

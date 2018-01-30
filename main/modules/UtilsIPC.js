@@ -6,8 +6,7 @@ class UtilsIPC extends ModuleEmitter {
         this.MODULE_NAME = 'utils';
         this.DEFAULT_MANAGED = ['manaCosts', 'checkUpdate'];
     }
-    initListeners(webContents) {
-        this.webContents = webContents;
+    initListeners() {
         this._initMethods(utils);
         this._manager();
     }

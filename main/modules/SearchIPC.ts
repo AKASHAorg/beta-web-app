@@ -1,7 +1,6 @@
 /// <reference path="../typings/main.d.ts" />
 import ModuleEmitter from '../event/ModuleEmitter';
 import search from './search/index';
-import WebContents = Electron.WebContents;
 
 class SearchIPC extends ModuleEmitter {
 
@@ -15,8 +14,7 @@ class SearchIPC extends ModuleEmitter {
      *
      * @param webContents
      */
-    public initListeners(webContents: WebContents) {
-        this.webContents = webContents;
+    public initListeners() {
         this._initMethods(search);
         this._manager();
     }

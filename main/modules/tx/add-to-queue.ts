@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { gethHelper } from '@akashaproject/geth-connector';
+import web3Helper from '../helpers/web3-helper';
 import schema from '../utils/jsonschema';
 
 const addToQueue = {
@@ -19,10 +19,10 @@ const execute = Promise.coroutine(function* (data: AddToQueueRequest[]) {
     v.validate(data, addToQueue, { throwError: true });
 
     data.forEach((hash) => {
-        gethHelper.addTxToWatch(hash.tx, false);
+        web3Helper.addTxToWatch(hash.tx, false);
     });
-    gethHelper.startTxWatch();
-    return { watching: gethHelper.watching };
+    web3Helper.startTxWatch();
+    return { watching: web3Helper.watching };
 });
 
 export default { execute, name: 'addToQueue' };

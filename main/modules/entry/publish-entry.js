@@ -4,7 +4,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import entriesCache from '../notifications/entries';
-import GethConnector from '@akashaproject/geth-connector/lib/GethConnector';
+import { web3Api } from '../../services';
 const publish = {
     'id': '/publish',
     'type': 'object',
@@ -55,7 +55,7 @@ const execute = Promise.coroutine(function* (data, cb) {
     delete data.tags;
     const transaction = yield contracts.send(txData, data.token, cb);
     const fetched = yield contracts
-        .fromEvent(contracts.instance.Entries.Publish, { author: GethConnector.getInstance().web3.eth.defaultAccount }, transaction.receipt.blockNumber, 1, {});
+        .fromEvent(contracts.instance.Entries.Publish, { author: web3Api.instance.eth.defaultAccount }, transaction.receipt.blockNumber, 1, {});
     const entryId = (fetched.results.length) ? fetched.results[0].args.entryId : null;
     yield entriesCache.push(entryId);
     return { tx: transaction.tx, receipt: transaction.receipt, entryId };

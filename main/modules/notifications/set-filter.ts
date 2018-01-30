@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import currentProfile from '../registry/current-profile';
 import getFollowingList from '../profile/following-list';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import { mixed } from '../models/records';
 import { FOLLOWING_LIST } from '../../config/settings';
 
@@ -48,7 +48,7 @@ export const filter = {
  * @returns {Bluebird<{done: boolean, watching: any}>}
  */
 const execute = Promise.coroutine(function* (data: { profiles: string[], exclude?: string[], blockNr?: number }) {
-    const blockNr = (data.blockNr) ? data.blockNr : yield GethConnector.getInstance().web3.eth.getBlockNumberAsync();
+    const blockNr = (data.blockNr) ? data.blockNr : yield web3Api.instance.eth.getBlockNumberAsync();
     const myProfile = yield currentProfile.execute();
     let objectFilter = {};
     let temp;

@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from './jsonschema';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 const manaCosts = {
     'id': '/manaCosts',
@@ -26,7 +26,7 @@ const execute = Promise.coroutine(function* (data: { ethAddress: string }) {
     const comments = publishComment.minus(collected.div(discountComment));
 
     const oneVote = yield contracts.instance.Votes.required_essence();
-    const fromWei = GethConnector.getInstance().web3.fromWei;
+    const fromWei = web3Api.instance.fromWei;
     const costs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((val) => {
         return { weight: val, cost: (fromWei(oneVote.times(val), 'ether')).toFormat(5) };
     });

@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import contracts from '../../contracts/index';
 import { unpad } from 'ethereumjs-util';
 import { encodeHash } from '../ipfs/helpers';

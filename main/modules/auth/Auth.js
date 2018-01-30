@@ -1,6 +1,5 @@
 import { createCipher, createDecipher, randomBytes } from 'crypto';
-import { addHexPrefix, stripHexPrefix, unpad } from 'ethereumjs-util';
-import contracts from '../../contracts/index';
+import { addHexPrefix, stripHexPrefix } from 'ethereumjs-util';
 import * as Promise from 'bluebird';
 import { web3Api } from '../../services';
 import { gethStatus } from '../../event/responses';
@@ -45,24 +44,13 @@ export class Auth {
         this._decipher = createDecipher('aes-256-ctr', token);
     }
     login(acc, timer = 30, registering = false) {
-        return contracts.instance
-            .registry
-            .getByAddress(acc)
-            .then((address) => {
-            if (!unpad(address) && !registering) {
-                throw new Error(`eth key: ${acc} has no profile attached`);
-            }
-            gethStatus.akashaKey = address;
-            return true;
-        })
-            .then(() => {
-            return randomBytesAsync(40);
-        })
+        return randomBytesAsync(40)
             .then((buff) => {
             const token = addHexPrefix(buff.toString('hex'));
             return this._signSession(token, acc)
                 .then((signedString) => {
                 const expiration = new Date();
+                gethStatus.akashaKey = acc;
                 expiration.setMinutes(expiration.getMinutes() + timer);
                 web3Api.instance.eth.defaultAccount = acc;
                 this._session = {
@@ -111,6 +99,17 @@ export class Auth {
                 throw new Error('Token is not valid!');
             }
             return web3Api.instance.eth.sendTransactionAsync(data);
+        });
+    }
+    signMessage(data, token) {
+        return this.isLogged(token)
+            .then(function (logged) {
+            if (!logged) {
+                throw new Error('Token is not valid!');
+            }
+            return web3Api.instance
+                .personal
+                .signAsync(data, web3Api.instance.eth.defaultAccount);
         });
     }
 }

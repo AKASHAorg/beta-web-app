@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const initContracts = require('@akashaproject/contracts.js');
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../services';
 import { descend, filter, last, prop, sortWith, take, uniq, head } from 'ramda';
 import * as BlPromise from 'bluebird';
 import auth from '../modules/auth/Auth';
@@ -17,7 +17,7 @@ export class Contracts {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.instance = yield initContracts(GethConnector.getInstance().web3.currentProvider);
+            this.instance = yield initContracts(web3Api.instance.currentProvider);
             return this.instance;
         });
     }
@@ -36,7 +36,8 @@ export class Contracts {
         const start = new Date().getTime();
         return new Promise((resolve, reject) => {
             const getReceipt = function () {
-                GethConnector.getInstance().web3
+                web3Api
+                    .instance
                     .eth.getTransactionReceipt(tx, (err, receipt) => {
                     if (receipt != null) {
                         return resolve({

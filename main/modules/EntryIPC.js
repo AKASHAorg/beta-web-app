@@ -6,8 +6,7 @@ class EntryIPC extends ModuleEmitter {
         this.MODULE_NAME = 'entry';
         this.DEFAULT_MANAGED = ['getScore', 'getEntry', 'getVoteOf', 'getVoteRatio', 'getVoteEndPeriod'];
     }
-    initListeners(webContents) {
-        this.webContents = webContents;
+    initListeners() {
         this._initMethods(entry);
         this._manager();
     }

@@ -1,6 +1,6 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import resolve from '../registry/resolve-ethaddress';
 
 export const fetchFromPublish = Promise.coroutine(function* (data: {
@@ -18,7 +18,7 @@ export const fetchFromPublish = Promise.coroutine(function* (data: {
                 data.toBlock, 10, {});
 
         const tags = captureIndex.results.map(function (ev) {
-            return GethConnector.getInstance().web3.toUtf8(ev.args.tagName);
+            return web3Api.instance.toUtf8(ev.args.tagName);
         });
 
         const author = yield resolve.execute({ ethAddress: event.args.author });
@@ -56,7 +56,7 @@ export const fetchFromTagIndex = Promise.coroutine(function* (data: {
                 data.toBlock, 10, {});
 
         const tags = captureIndex.results.map(function (ev) {
-            return GethConnector.getInstance().web3.toUtf8(ev.args.tagName);
+            return web3Api.instance.toUtf8(ev.args.tagName);
         });
 
         const author = fetchedPublish.results.length ?

@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 
@@ -20,7 +20,7 @@ const execute = Promise.coroutine(function* (data: { amount: string, token: stri
     const v = new schema.Validator();
     v.validate(data, cycleAeth, { throwError: true });
 
-    const bnAmount = GethConnector.getInstance().web3.toWei(data.amount, 'ether');
+    const bnAmount = web3Api.instance.toWei(data.amount, 'ether');
     const txData = contracts.instance.AETH.cycleAeth.request(bnAmount, { gas: 160000 });
     const transaction = yield contracts.send(txData, data.token, cb);
     return { tx: transaction.tx, receipt: transaction.receipt };

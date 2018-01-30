@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import { mixed } from '../models/records';
 import schema from '../utils/jsonschema';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 const searchTag = {
     'id': '/searchTag',
@@ -28,7 +28,7 @@ const execute = Promise.coroutine(function* (data: { tagName: string, limit: num
         const filter = contracts.instance.Tags.TagCreate({}, { fromBlock: 0, toBlock: 'latest' });
         yield Promise.fromCallback((cb) => filter.get(cb)).then((collection) => {
             const tags = collection.map((el) => {
-               return  GethConnector.getInstance().web3.toUtf8(el.args.tag);
+               return  web3Api.instance.toUtf8(el.args.tag);
             });
             mixed.setFull(cacheKey, tags);
             return true;

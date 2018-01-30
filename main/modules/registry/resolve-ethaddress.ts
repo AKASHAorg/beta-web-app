@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import { unpad } from 'ethereumjs-util';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 
 export const getByAddress = {
@@ -27,7 +27,7 @@ const execute = Promise.coroutine(function* (data: ProfileByAddressRequest) {
         resolved = yield contracts.instance.ProfileResolver.resolve(profileHex);
     }
 
-    const akashaId = (profileHex) ? GethConnector.getInstance().web3.toUtf8(resolved[0]) : '';
+    const akashaId = (profileHex) ? web3Api.instance.toUtf8(resolved[0]) : '';
     return { ethAddress: data.ethAddress, akashaId, raw: profileHex };
 });
 

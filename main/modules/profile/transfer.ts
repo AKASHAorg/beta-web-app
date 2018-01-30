@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import { profileAddress } from './helpers';
 import schema from '../utils/jsonschema';
-import GethConnector from '@akashaproject/geth-connector/lib/GethConnector';
+import { web3Api } from '../../services';
 
 export const transfer = {
     'id': '/transfer',
@@ -32,13 +32,13 @@ const execute = Promise.coroutine(
             throw new Error('Can only send eth or aeth token individually, not combined');
         }
         const address = yield profileAddress(data);
-        const tokenAmount = GethConnector.getInstance().web3.toWei(data.tokenAmount || 0, 'ether');
-        const ethAmount = GethConnector.getInstance().web3.toWei(data.value || 0, 'ether');
+        const tokenAmount = web3Api.instance.toWei(data.tokenAmount || 0, 'ether');
+        const ethAmount = web3Api.instance.toWei(data.value || 0, 'ether');
         let txData;
         if (data.tokenAmount) {
             txData = contracts.instance.AETH.transfer.request(address, tokenAmount, { gas: 200000 });
         } else if (data.value) {
-            txData = GethConnector.getInstance().web3.eth.sendTransaction.request({ to: address, value: ethAmount, gas: 50000 });
+            txData = web3Api.instance.eth.sendTransaction.request({ to: address, value: ethAmount, gas: 50000 });
         }
         const transaction = yield contracts.send(txData, data.token, cb);
         return {

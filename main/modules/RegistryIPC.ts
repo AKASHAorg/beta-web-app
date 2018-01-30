@@ -1,7 +1,6 @@
 /// <reference path="../typings/main.d.ts" />
 import ModuleEmitter from '../event/ModuleEmitter';
 import registry from './registry/index';
-import WebContents = Electron.WebContents;
 
 class RegistryIPC extends ModuleEmitter {
 
@@ -11,8 +10,7 @@ class RegistryIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['getCurrentProfile', 'getByAddress'];
     }
 
-    public initListeners(webContents: WebContents) {
-        this.webContents = webContents;
+    public initListeners() {
         this._initMethods(registry);
         this._manager();
     }

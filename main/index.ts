@@ -34,6 +34,7 @@ const startApp = (web3) => {
         });
     initModules();
     channel.instance = getChannels();
+    console.log(channel.instance);
     // for dev only
     Object.defineProperty(window, 'Channel', { value: channel.instance });
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });

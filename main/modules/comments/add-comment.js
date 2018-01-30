@@ -1,10 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const ipfs_1 = require("./ipfs");
-const helpers_1 = require("../ipfs/helpers");
-const Promise = require("bluebird");
-const index_1 = require("../../contracts/index");
-const jsonschema_1 = require("../utils/jsonschema");
+import { create } from './ipfs';
+import { decodeHash } from '../ipfs/helpers';
+import * as Promise from 'bluebird';
+import contracts from '../../contracts/index';
+import schema from '../utils/jsonschema';
 const comment = {
     'id': '/comment',
     'type': 'object',
@@ -17,15 +15,15 @@ const comment = {
     'required': ['ethAddress', 'entryId', 'token']
 };
 const execute = Promise.coroutine(function* (data, cb) {
-    const v = new jsonschema_1.default.Validator();
+    const v = new schema.Validator();
     v.validate(data, comment, { throwError: true });
-    const ipfsHash = yield ipfs_1.create(data.content);
-    const decodedHash = helpers_1.decodeHash(ipfsHash);
+    const ipfsHash = yield create(data.content);
+    const decodedHash = decodeHash(ipfsHash);
     const replyTo = data.parent || '0';
-    const txData = index_1.default.instance
+    const txData = contracts.instance
         .Comments.publish.request(data.entryId, data.ethAddress, replyTo, ...decodedHash, { gas: 250000 });
-    const transaction = yield index_1.default.send(txData, data.token, cb);
+    const transaction = yield contracts.send(txData, data.token, cb);
     return { tx: transaction.tx, receipt: transaction.receipt };
 });
-exports.default = { execute, name: 'comment', hasStream: true };
+export default { execute, name: 'comment', hasStream: true };
 //# sourceMappingURL=add-comment.js.map

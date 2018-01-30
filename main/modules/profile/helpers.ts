@@ -2,7 +2,7 @@ import * as uts46 from 'idna-uts46';
 import contracts from '../../contracts/index';
 import * as Promise from 'bluebird';
 import { unpad } from 'ethereumjs-util';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 
 export const normaliseId = function(name: string) {
@@ -27,8 +27,8 @@ export const profileAddress = Promise.coroutine(function* (data) {
 export const resolveEthAddress = Promise.coroutine(function* (ethAddress: string) {
     const nameHash = yield contracts.instance.ProfileResolver.reverse(ethAddress);
     if (!!unpad(nameHash)) {
-        const [akashaId, , , , ,] = yield contracts.instance.ProfileResolver.resolve(nameHash);
-        return { akashaId: normaliseId(GethConnector.getInstance().web3.toUtf8(akashaId)), ethAddress };
+        const [akashaId, , , , , ] = yield contracts.instance.ProfileResolver.resolve(nameHash);
+        return { akashaId: normaliseId(web3Api.instance.toUtf8(akashaId)), ethAddress };
     }
     return { ethAddress };
 });

@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 import { profileAddress } from './helpers';
@@ -19,7 +19,7 @@ export const manaBurned = {
 const execute = Promise.coroutine(function* (data: { akashaId?: string, ethAddress?: string }) {
     const v = new schema.Validator();
     v.validate(data, manaBurned, { throwError: true });
-    const BN = GethConnector.getInstance().web3.BigNumber;
+    const BN = web3Api.instance.BigNumber;
     const address = yield profileAddress(data);
     const totalEntries = yield contracts.instance.Entries.getEntryCount(address);
     const entryCost = yield contracts.instance.Entries.required_essence();
@@ -36,15 +36,15 @@ const execute = Promise.coroutine(function* (data: { akashaId?: string, ethAddre
     return {
         entries: {
             totalEntries: totalEntries.toNumber(),
-            manaCost: (GethConnector.getInstance().web3.fromWei(totalEntriesMana, 'ether')).toFormat(5)
+            manaCost: (web3Api.instance.fromWei(totalEntriesMana, 'ether')).toFormat(5)
         },
         comments: {
             totalComments: totalComments.toNumber(),
-            manaCost: (GethConnector.getInstance().web3.fromWei(totalCommentsMana, 'ether')).toFormat(5)
+            manaCost: (web3Api.instance.fromWei(totalCommentsMana, 'ether')).toFormat(5)
         },
         votes: {
             totalVotes: (totalVotes[0].times(totalVotes[1])).toNumber(),
-            manaCost: (GethConnector.getInstance().web3.fromWei(votesMana, 'ether')).toFormat(5)
+            manaCost: (web3Api.instance.fromWei(votesMana, 'ether')).toFormat(5)
         }
     };
 });

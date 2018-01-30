@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 import { profileAddress } from '../profile/helpers';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import resolve from '../registry/resolve-ethaddress';
 const followingStreamIterator = {
     'id': '/followingStreamIterator',
@@ -36,7 +36,7 @@ const execute = Promise.coroutine(function* (data) {
         const captureIndex = yield contracts
             .fromEvent(contracts.instance.Entries.TagIndex, { entryId: event.args.entryId }, data.toBlock, 10, {});
         const tags = captureIndex.results.map(function (ev) {
-            return GethConnector.getInstance().web3.toUtf8(ev.args.tagName);
+            return web3Api.instance.toUtf8(ev.args.tagName);
         });
         const author = yield resolve.execute({ ethAddress: event.args.author });
         collection.push({

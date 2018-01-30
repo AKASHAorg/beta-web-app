@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { gethHelper } from '@akashaproject/geth-connector';
+import web3Helper from '../helpers/web3-helper';
 import schema from '../utils/jsonschema';
 const emitMined = {
     'id': '/emitMined',
@@ -12,8 +12,8 @@ const emitMined = {
 const execute = Promise.coroutine(function* (data) {
     const v = new schema.Validator();
     v.validate(data, emitMined, { throwError: true });
-    (data.watch) ? gethHelper.startTxWatch() : gethHelper.stopTxWatch();
-    return { watching: gethHelper.watching };
+    (data.watch) ? web3Helper.startTxWatch() : web3Helper.stopTxWatch();
+    return { watching: web3Helper.watching };
 });
 export default { execute, name: 'emitMined' };
 //# sourceMappingURL=emit-mined.js.map

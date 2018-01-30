@@ -68,11 +68,26 @@ export default merge(baseConfig, {
                             localIdentName: '[name]__[local]__[hash:base64:5]',
                         }
                     },
-                    {loader: 'sass-loader', options: {sourceMap: true}}
+                    { loader: 'sass-loader', options: { sourceMap: true } }
                 ]
             },
             {
-                test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+                test: /^((?!\.global).)*\.less$/,
+                use: [
+                    { loader: 'style-loader' },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true,
+                            importLoaders: 1,
+                            localIdentName: '[name]__[local]__[hash:base64:5]',
+                        }
+                    },
+                    { loader: 'less-loader', options: { sourceMap: true } }
+                ]
+            },
+            {
+                test: /\.woff(\?[a-z0-9-=]+)?$/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -82,7 +97,7 @@ export default merge(baseConfig, {
                 },
             },
             {
-                test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.woff2(\?[a-z0-9-=]+)?$/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -92,7 +107,7 @@ export default merge(baseConfig, {
                 }
             },
             {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.ttf(\?[a-z0-9-=]+)?$/,
                 use: {
                     loader: 'url-loader',
                     options: {
@@ -102,11 +117,11 @@ export default merge(baseConfig, {
                 }
             },
             {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.eot(\?[a-z0-9-=]+)?$/,
                 use: 'file-loader',
             },
             {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.svg(\?[a-z0-9-=]+)?$/,
                 use: {
                     loader: 'url-loader',
                     options: {

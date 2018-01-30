@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 
 const execute = Promise.coroutine(function* (data: { source: Buffer, size?: string }[]) {
 

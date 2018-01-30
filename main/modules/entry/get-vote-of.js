@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import { profileAddress } from '../profile/helpers';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 export const getVoteOf = {
     'id': '/getVoteOf',
     'type': 'array',
@@ -28,7 +28,7 @@ const execute = Promise.coroutine(function* (data) {
                 contracts.instance.Votes.karmaOf(ethAddress, req.entryId)
             ]);
         }).spread((vote, karma) => {
-            return Object.assign({}, req, { vote: vote.toString(), essence: (GethConnector.getInstance().web3.fromWei(karma[0])).toFormat(10), claimed: karma[1] });
+            return Object.assign({}, req, { vote: vote.toString(), essence: (web3Api.instance.fromWei(karma[0])).toFormat(10), claimed: karma[1] });
         });
     });
     const collection = yield Promise.all(requests);

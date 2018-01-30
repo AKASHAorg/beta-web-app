@@ -10,7 +10,7 @@ import { unpad } from 'ethereumjs-util';
 import entryCountProfile from '../entry/entry-count-profile';
 import resolveEthAddress from '../registry/resolve-ethaddress';
 import schema from '../utils/jsonschema';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import { dbs } from '../search/indexes';
 
 export const getProfileData = {
@@ -80,8 +80,8 @@ const execute = Promise.coroutine(function* (data: ProfileDataRequest) {
             commentsCount: commentsCount.toString(10),
             [BASE_URL]: generalSettings.get(BASE_URL),
             profile: profileAddress,
-            karma: (GethConnector.getInstance().web3.fromWei(karma, 'ether')).toFormat(5),
-            essence: (GethConnector.getInstance().web3.fromWei(essence, 'ether')).toFormat(5)
+            karma: (web3Api.instance.fromWei(karma, 'ether')).toFormat(5),
+            essence: (web3Api.instance.fromWei(essence, 'ether')).toFormat(5)
         },
         profile);
 

@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import getEntryHash from './get-entry-ipfs-hash';
 const execute = Promise.coroutine(function* (data) {
     const entryEth = yield getEntryHash.execute(data);

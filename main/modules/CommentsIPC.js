@@ -6,8 +6,7 @@ class CommentsIPC extends ModuleEmitter {
         this.MODULE_NAME = 'comments';
         this.DEFAULT_MANAGED = ['comment'];
     }
-    initListeners(webContents) {
-        this.webContents = webContents;
+    initListeners() {
         this._initMethods(comments);
         this._manager();
     }

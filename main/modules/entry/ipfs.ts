@@ -1,4 +1,4 @@
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import * as Promise from 'bluebird';
 import { is, isEmpty, values } from 'ramda';
 import { entries } from '../models/records';

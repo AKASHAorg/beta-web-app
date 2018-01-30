@@ -1,6 +1,5 @@
 import ModuleEmitter from '../event/ModuleEmitter';
 import chat from './chat/index';
-import WebContents = Electron.WebContents;
 
 class ChatIPC extends ModuleEmitter {
 
@@ -10,8 +9,7 @@ class ChatIPC extends ModuleEmitter {
         this.DEFAULT_MANAGED = ['join', 'post', 'leave', 'peerCount', 'getRooms'];
     }
 
-    public initListeners(webContents: WebContents) {
-        this.webContents = webContents;
+    public initListeners() {
         this._initMethods(chat);
         this._manager();
     }

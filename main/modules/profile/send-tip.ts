@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import { profileAddress } from './helpers';
 import schema from '../utils/jsonschema';
-import GethConnector from '@akashaproject/geth-connector/lib/GethConnector';
+import { web3Api } from '../../services';
 
 export const tip = {
     'id': '/tip',
@@ -30,8 +30,8 @@ const execute = Promise.coroutine(
         const v = new schema.Validator();
         v.validate(data, tip, { throwError: true });
 
-        const tokenAmount = GethConnector.getInstance().web3.toWei(data.tokenAmount || 0, 'ether');
-        const ethAmount = GethConnector.getInstance().web3.toWei(data.value || 0, 'ether');
+        const tokenAmount = web3Api.instance.toWei(data.tokenAmount || 0, 'ether');
+        const ethAmount = web3Api.instance.toWei(data.value || 0, 'ether');
         const address = yield profileAddress(data);
         const txData = contracts.instance.AETH.donate.request(address, tokenAmount, data.message || '', {
             value: ethAmount,

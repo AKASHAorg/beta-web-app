@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 const tagIterator = {
     'id': '/tagIterator',
@@ -25,7 +25,7 @@ const execute = Promise.coroutine(function* (data: { toBlock: number, limit?: nu
     const maxResults = data.limit || 5;
     const fetched = yield contracts.fromEvent(contracts.instance.Tags.TagCreate, {}, data.toBlock, maxResults, {});
     for (let event of fetched.results) {
-        collection.push({ tag: GethConnector.getInstance().web3.toUtf8(event.args.tag) });
+        collection.push({ tag: web3Api.instance.toUtf8(event.args.tag) });
         if (collection.length === maxResults) {
             break;
         }

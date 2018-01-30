@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import schema from '../utils/jsonschema';
 import contracts from '../../contracts/index';
 import { profileAddress } from './helpers';
@@ -32,7 +32,7 @@ const execute = Promise.coroutine(function* (data: { akashaId?: string, ethAddre
             continue;
         }
         collection.push({
-            amount: (GethConnector.getInstance().web3.fromWei(_amount, 'ether')).toFormat(5),
+            amount: (web3Api.instance.fromWei(_amount, 'ether')).toFormat(5),
             unlockDate: _unlockDate.toNumber()
         });
         currentIndex = _index.toNumber() + 1;
@@ -44,11 +44,11 @@ const execute = Promise.coroutine(function* (data: { akashaId?: string, ethAddre
     const available = filter(rule, sorted);
     const totalAvailable = available.reduce((acc, curr) => {
         return acc.plus(curr.amount);
-    }, new (GethConnector.getInstance()).web3.BigNumber(0));
+    }, new web3Api.instance.BigNumber(0));
     const pending = difference(sorted, available);
     const totalPending = pending.reduce((acc, curr) => {
         return acc.plus(curr.amount);
-    }, new (GethConnector.getInstance()).web3.BigNumber(0));
+    }, new web3Api.instance.BigNumber(0));
     return {
         available: { collection: available, total: totalAvailable.toFormat(5) },
         pending: { collection: pending, total: totalPending.toFormat(5) }

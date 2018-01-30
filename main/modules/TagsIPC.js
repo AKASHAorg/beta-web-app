@@ -6,8 +6,7 @@ class TagsIPC extends ModuleEmitter {
         this.MODULE_NAME = 'tags';
         this.DEFAULT_MANAGED = ['exists', 'getTagId', 'getTagName', 'searchTag'];
     }
-    initListeners(webContents) {
-        this.webContents = webContents;
+    initListeners() {
         this._initMethods(tags);
         this._manager();
     }

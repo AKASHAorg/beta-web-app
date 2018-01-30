@@ -7,7 +7,7 @@ import { unpad } from 'ethereumjs-util';
 import { profileAddress } from '../profile/helpers';
 import { getFullContent, getShortContent } from './ipfs';
 import commentsCount from '../comments/comments-count';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 import { dbs } from '../search/indexes';
 
 export const getEntry = {
@@ -80,7 +80,7 @@ const execute = Promise.coroutine(function* (data: EntryGetRequest) {
         score: _score.toString(10),
         publishDate: (_endPeriod.minus(votingPeriod)).toNumber(),
         endPeriod: _endPeriod.toNumber(),
-        totalKarma: (GethConnector.getInstance().web3.fromWei(_totalKarma, 'ether')).toString(10),
+        totalKarma: (web3Api.instance.fromWei(_totalKarma, 'ether')).toString(10),
         content: entry,
         claimed: _claimed,
         commentsCount: cCount.collection.length ? cCount.collection[0].count : 0,

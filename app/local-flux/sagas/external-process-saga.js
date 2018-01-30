@@ -8,8 +8,6 @@ import * as types from '../constants';
 import { selectGethStatus, selectGethSyncActionId, selectLastGethLog,
     selectLastIpfsLog } from '../selectors';
 
-const Channel = global.Channel;
-
 let gethSyncInterval = null;
 
 function* gethResetBusyState () {
@@ -23,8 +21,8 @@ function* ipfsResetBusyState () {
 }
 
 function* gethStartLogger () {
-    const channel = Channel.server.geth.logs;
-    yield call(enableChannel, channel, Channel.client.geth.manager);
+    const channel = global.Channel.server.geth.logs;
+    yield call(enableChannel, channel, global.Channel.client.geth.manager);
     while (true) {
         yield put(actions.gethGetLogs());
         yield apply(channel, channel.send, [{}]);
@@ -33,8 +31,8 @@ function* gethStartLogger () {
 }
 
 function* ipfsStartLogger () {
-    const channel = Channel.server.ipfs.logs;
-    yield call(enableChannel, channel, Channel.client.ipfs.manager);
+    const channel = global.Channel.server.ipfs.logs;
+    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
     while (true) {
         yield put(actions.ipfsGetLogs());
         yield apply(channel, channel.send, [{}]);
@@ -43,31 +41,31 @@ function* ipfsStartLogger () {
 }
 
 export function* gethGetOptions () {
-    const channel = Channel.server.geth.options;
-    yield call(enableChannel, channel, Channel.client.geth.manager);
+    const channel = global.Channel.server.geth.options;
+    yield call(enableChannel, channel, global.Channel.client.geth.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* ipfsGetConfig () {
-    const channel = Channel.server.ipfs.getConfig;
-    yield call(enableChannel, channel, Channel.client.ipfs.manager);
+    const channel = global.Channel.server.ipfs.getConfig;
+    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* ipfsGetPorts () {
-    const channel = Channel.server.ipfs.getPorts;
+    const channel = global.Channel.server.ipfs.getPorts;
     yield call(enableChannel, channel, Channel.client.ipfs.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 function* ipfsSetPorts ({ ports, restart }) {
-    const channel = Channel.server.ipfs.setPorts;
-    yield call(enableChannel, channel, Channel.client.ipfs.manager);
+    const channel = global.Channel.server.ipfs.setPorts;
+    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
     yield apply(channel, channel.send, [{ ports, restart }]);
 }
 
 function* gethStart () {
-    const channel = Channel.server.geth.startService;
+    const channel = global.Channel.server.geth.startService;
     const gethOptions = yield select(state => state.settingsState.get('geth').toJS());
     // filter out the null and false options
     const options = {};
@@ -83,12 +81,12 @@ function* gethStart () {
 }
 
 function* gethStop () {
-    const channel = Channel.server.geth.stopService;
+    const channel = global.Channel.server.geth.stopService;
     yield apply(channel, channel.send, [{}]);
 }
 
 function* ipfsStart () {
-    const channel = Channel.server.ipfs.startService;
+    const channel = global.Channel.server.ipfs.startService;
     const storagePath = yield select(state => state.settingsState.getIn(['ipfs', 'storagePath']));
     yield apply(channel, channel.send, [{ storagePath }]);
 }
@@ -409,7 +407,6 @@ export function* registerEProcListeners () {
     yield fork(watchIpfsGetPortsChannel);
     yield fork(watchIpfsSetPortsChannel);
     yield fork(watchGethSyncStatusChannel);
-    yield fork(watchGethLogsChannel);
     yield fork(watchIpfsLogsChannel);
 }
 

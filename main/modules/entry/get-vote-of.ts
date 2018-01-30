@@ -2,7 +2,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import { profileAddress } from '../profile/helpers';
-import { GethConnector } from '@akashaproject/geth-connector';
+import { web3Api } from '../../services';
 
 export const getVoteOf = {
     'id': '/getVoteOf',
@@ -43,7 +43,7 @@ const execute = Promise.coroutine(
             }).spread((vote, karma) => {
                 return { ...req,
                     vote: vote.toString(),
-                    essence: (GethConnector.getInstance().web3.fromWei(karma[0])).toFormat(10),
+                    essence: (web3Api.instance.fromWei(karma[0])).toFormat(10),
                     claimed: karma[1]
                 };
             });

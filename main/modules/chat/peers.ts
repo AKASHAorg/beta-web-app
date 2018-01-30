@@ -1,6 +1,6 @@
 import * as Promise from 'bluebird';
 import { roomFactory } from './join';
-import { IpfsConnector } from '@akashaproject/ipfs-connector';
+import IpfsConnector from '@akashaproject/ipfs-js-connector';
 
 const execute = Promise.coroutine(function* (data: { roomName: string }) {
     const room = roomFactory.getChanPrefix() + data.roomName;
