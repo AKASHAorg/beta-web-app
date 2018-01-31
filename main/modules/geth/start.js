@@ -1,6 +1,7 @@
 import * as Promise from 'bluebird';
 import { regenWeb3, web3Api } from '../../services';
 import { gethStatus } from '../../event/responses';
+import contracts from '../../contracts';
 const execute = Promise.coroutine(function* () {
     let connected = web3Api.instance.isConnected();
     console.log('web3 connected', connected);
@@ -18,6 +19,7 @@ const execute = Promise.coroutine(function* () {
         gethStatus.networkID = yield web3Api.instance.version.getNetworkAsync();
         gethStatus.ethKey = web3Api.instance.eth.accounts[0];
     }
+    yield contracts.init();
     return { started: connected };
 });
 export default { execute, name: 'startService' };

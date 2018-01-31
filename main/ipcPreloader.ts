@@ -25,13 +25,15 @@ export class ApiListener extends GenericApi {
     }
 
     public on(listener) {
-        this.subscribers.set(listener, this.pipe.subscribe(listener));
+        this.subscribers.set(listener, this.pipe.subscribe({ next: data => listener(data) }));
     }
 
     public once(listener) {
-        let sub = this.pipe.subscribe((data) => {
-            listener(data);
-            sub.unsubscribe();
+        let sub = this.pipe.subscribe({
+            next: (data) => {
+                listener(data);
+                sub.unsubscribe();
+            }
         });
     }
 

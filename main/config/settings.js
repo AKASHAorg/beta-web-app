@@ -13,7 +13,7 @@ export const FAUCET_TOKEN = '0x7016aec60a8cb208833d8cd9a05f5705a3600b2c279618050
 export const FAUCET_URL = 'https://akasha.fun/get/faucet';
 export const GETH_LOGGER = 'geth';
 export const IPFS_LOGGER = 'ipfs';
-export const defaultPath = 'ipfs/akasha-alpha';
+export const defaultPath = 'ipfs#akasha-beta';
 export const IPFS_PEER_ID = [
     '/ip4/46.101.103.114/tcp/4001/ipfs/QmYfXRuVWMWFRJxUSFPHtScTNR9CU2samRsTK15VFJPpvh',
     '/ip4/46.101.222.96/tcp/4001/ipfs/QmWfVX1MTacGQ1to1u17MtHPpgANR1UJk9h6JqtbYaRKre',

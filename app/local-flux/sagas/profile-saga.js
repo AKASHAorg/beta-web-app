@@ -18,7 +18,6 @@ import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
 import { getDisplayName } from '../../utils/dataModule';
 
-const Channel = global.Channel;
 const TRANSFERS_ITERATOR_LIMIT = 20;
 const FOLLOWERS_ITERATOR_LIMIT = 3;
 const FOLLOWINGS_ITERATOR_LIMIT = 3;

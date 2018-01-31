@@ -20,7 +20,7 @@ export const FAUCET_URL = 'https://akasha.fun/get/faucet';
 export const GETH_LOGGER = 'geth';
 export const IPFS_LOGGER = 'ipfs';
 
-export const defaultPath = 'ipfs/akasha-alpha';
+export const defaultPath = 'ipfs#akasha-beta';
 
 export const IPFS_PEER_ID = [
     '/ip4/46.101.103.114/tcp/4001/ipfs/QmYfXRuVWMWFRJxUSFPHtScTNR9CU2samRsTK15VFJPpvh',

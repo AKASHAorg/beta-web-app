@@ -1,4 +1,4 @@
-import * as LRU from 'lru-cache';
+import LRU from 'lru-cache';
 
 class Entries {
 
@@ -20,7 +20,7 @@ class Entries {
         if (this._entries) {
             this._entries.reset();
         }
-        this._entries = LRU.default(this.options);
+        this._entries = LRU(this.options);
     }
 
     setFull(hash, data) {

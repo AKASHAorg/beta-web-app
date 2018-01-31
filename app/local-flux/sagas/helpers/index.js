@@ -9,7 +9,7 @@ export const enabledChannels = [];
 // this function creates an event channel from a given ipc client channel
 export function createActionChannel (channel) {
     return eventChannel((emit) => {
-        const handler = (ev, resp) => {
+        const handler = (resp) => {
             tap(emit, resp);
         };
         channel.on(handler);
@@ -33,19 +33,15 @@ export function createActionChannels () {
     });
 }
 
-export function enableChannel (channel, mananger) {
-    const promise = new Promise((resolve) => {
+export function enableChannel (channel) {
+    return new Promise((resolve) => {
         if (enabledChannels.indexOf(channel.channel) !== -1) {
-            resolve();
-            return;
+            return resolve();
         }
-        mananger.once(() => {
-            enabledChannels.push(channel.channel);
-            resolve();
-        });
+        enabledChannels.push(channel.channel);
         channel.enable();
+        return resolve();
     });
-    return promise;
 }
 
 export function* isLoggedProfileRequest (actionId) {
