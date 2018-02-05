@@ -61,7 +61,7 @@ export class Auth {
                 this._generateCipher(stripHexPrefix(token));
                 localStorage.setItem(this._key, JSON.stringify(Buffer.concat([this._cipher.update(Buffer.from(JSON.stringify(this._session))),
                     this._cipher.final()])));
-                return { token: token, expiration, account: acc };
+                return { token, expiration, ethAddress: acc };
             });
         });
     }

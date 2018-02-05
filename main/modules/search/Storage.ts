@@ -1,4 +1,4 @@
-import * as SearchIndex from 'search-index';
+import SearchIndex from 'search-index';
 import * as Promise from 'bluebird';
 
 export default class StorageIndex {

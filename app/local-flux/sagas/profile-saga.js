@@ -254,7 +254,7 @@ function* profileLogin ({ data }) {
     const { ...payload } = data;
     const channel = Channel.server.auth.login;
     payload.password = new global.TextEncoder('utf-8').encode(payload.password);
-    yield apply(channel, channel.send, [payload]);
+    yield apply(channel, channel.send, [{ethAddress: payload.ethAddress, rememberTime: payload.rememberTime}]);
 }
 
 function* profileLogout () {
@@ -817,7 +817,7 @@ function* watchProfileLoginChannel () {
     const resp = yield take(actionChannels.auth.login);
     if (resp.error) {
         yield put(actions.profileLoginError(resp.error));
-    } else if (resp.request.account === resp.data.account) {
+    } else if (resp.request.ethAddress === resp.data.account) {
         const { akashaId, ethAddress, reauthenticate } = resp.request;
         if (!reauthenticate && akashaId) {
             resp.data.akashaId = akashaId;

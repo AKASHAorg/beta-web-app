@@ -12,8 +12,6 @@ import { selectSearchEntryOffset, selectSearchQuery, selectSearchQueryAutocomple
     selectLoggedEthAddress } from '../selectors';
 import * as searchService from '../services/search-service';
 
-const Channel = global.Channel;
-
 function* searchMoreQuery () {
     const channel = Channel.server.search.query;
     const text = yield select(selectSearchQuery);

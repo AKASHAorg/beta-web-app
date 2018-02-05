@@ -94,7 +94,7 @@ export class Auth {
                                 )
                             )
                         );
-                        return { token: token, expiration, account: acc };
+                        return { token, expiration, ethAddress: acc };
                     });
             });
     }

@@ -79,7 +79,6 @@ const execute = Promise.coroutine(function* (data: ProfileDataRequest) {
             entriesCount: entriesCount.count,
             commentsCount: commentsCount.toString(10),
             [BASE_URL]: generalSettings.get(BASE_URL),
-            profile: profileAddress,
             karma: (web3Api.instance.fromWei(karma, 'ether')).toFormat(5),
             essence: (web3Api.instance.fromWei(essence, 'ether')).toFormat(5)
         },
