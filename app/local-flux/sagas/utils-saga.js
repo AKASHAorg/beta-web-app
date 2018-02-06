@@ -4,8 +4,6 @@ import * as actions from '../actions/utils-actions';
 import * as appActions from '../actions/app-actions';
 import * as types from '../constants';
 
-const Channel = global.Channel;
-
 function* backupKeysRequest () {
     const channel = Channel.server.utils.backupKeys;
     yield call(enableChannel, channel, Channel.client.utils.manager);

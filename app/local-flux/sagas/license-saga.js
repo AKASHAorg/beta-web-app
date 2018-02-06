@@ -3,7 +3,6 @@ import { actionChannels, enableChannel } from './helpers';
 import * as actions from '../actions/license-actions';
 import * as types from '../constants';
 
-const Channel = global.Channel;
 
 export function* licenseGetAll () {
     const channel = Channel.server.licenses.getLicenses;

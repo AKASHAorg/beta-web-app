@@ -23,12 +23,13 @@ export function createActionChannel (channel) {
 }
 
 export function createActionChannels () {
-    const modules = Object.keys(global.Channel.client);
+    const modules = Object.keys(Channel.client);
+    console.log('modules', modules);
     modules.forEach((module) => {
-        const channels = Object.keys(global.Channel.client[module]);
+        const channels = Object.keys(Channel.client[module]);
         actionChannels[module] = {};
         channels.forEach((channel) => {
-            actionChannels[module][channel] = createActionChannel(global.Channel.client[module][channel]);
+            actionChannels[module][channel] = createActionChannel(Channel.client[module][channel]);
         });
     });
 }

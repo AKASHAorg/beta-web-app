@@ -25,9 +25,12 @@ export const profileGetSuggestions = akashaId =>
             .catch(err => reject(err))
     );
 
-export const profileSaveLogged = profile =>
-    profileDB.loggedProfile.clear()
+export const profileSaveLogged = profile => {
+    console.log('saving', profile);
+    return profileDB.loggedProfile.clear()
         .then(() => profileDB.loggedProfile.put(profile));
+};
+
 
 export const profileUpdateLogged = profile =>
     new Promise((resolve, reject) =>

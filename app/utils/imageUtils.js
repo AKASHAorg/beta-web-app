@@ -58,6 +58,7 @@ function getBestAvailableImage (files) {
 }
 
 function imageCreator (arrayBuffer, baseUrl) {
+    console.log('imageCreator', arrayBuffer, baseUrl);
     // if arrayBuffer is string it means that it comes from ipfs
     if (baseUrl && is(String, arrayBuffer)) {
         if (arrayBuffer.includes(`${baseUrl}`) && arrayBuffer !== `${baseUrl}/`) {

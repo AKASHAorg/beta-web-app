@@ -9,7 +9,6 @@ import * as actionStatus from '../../constants/action-status';
 import { selectBlockNumber, selectCommentLastBlock, selectCommentLastIndex, selectLoggedEthAddress,
     selectNewCommentsBlock, selectNewestCommentBlock, selectToken } from '../selectors';
 
-const Channel = global.Channel;
 const COMMENT_FETCH_LIMIT = 50;
 const REPLIES_FETCH_LIMIT = 25;
 

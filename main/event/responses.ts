@@ -1,5 +1,6 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { web3Api } from '../services';
+import { BASE_URL, generalSettings } from '../config/settings';
 
 class GethStatus {
     public shouldLogout: boolean = false;
@@ -78,7 +79,8 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
         return {
             data: {},
             services: {
-                ipfs: IpfsConnector.getInstance().serviceStatus,
+                ipfs: Object.assign(IpfsConnector.getInstance().serviceStatus,
+                    { [BASE_URL]: generalSettings.get(BASE_URL) }),
                 geth: {
                     process: gethStatus.process,
                     api: gethStatus.api,
@@ -95,7 +97,8 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
     return {
         data: rawData,
         services: {
-            ipfs: IpfsConnector.getInstance().serviceStatus,
+            ipfs: Object.assign(IpfsConnector.getInstance().serviceStatus,
+                { [BASE_URL]: generalSettings.get(BASE_URL) }),
             geth: {
                 process: gethStatus.process,
                 api: gethStatus.api,

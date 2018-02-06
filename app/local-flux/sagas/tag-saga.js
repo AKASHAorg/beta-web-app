@@ -7,7 +7,6 @@ import * as types from '../constants';
 import * as actionStatus from '../../constants/action-status';
 import * as draftActions from '../actions/draft-actions';
 
-const Channel = global.Channel;
 const TAG_SEARCH_LIMIT = 10;
 
 function* tagCreate ({ data }) {

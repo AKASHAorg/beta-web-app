@@ -815,9 +815,10 @@ function* watchProfileKarmaRankingChannel () {
 
 function* watchProfileLoginChannel () {
     const resp = yield take(actionChannels.auth.login);
+    console.log('response login', resp);
     if (resp.error) {
         yield put(actions.profileLoginError(resp.error));
-    } else if (resp.request.ethAddress === resp.data.account) {
+    } else if (resp.request.ethAddress === resp.data.ethAddress) {
         const { akashaId, ethAddress, reauthenticate } = resp.request;
         if (!reauthenticate && akashaId) {
             resp.data.akashaId = akashaId;

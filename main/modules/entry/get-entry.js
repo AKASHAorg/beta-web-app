@@ -60,6 +60,7 @@ const execute = Promise.coroutine(function* (data) {
     }
     const [_totalVotes, _score, _endPeriod, _totalKarma, _claimed] = yield contracts.instance.Votes.getRecord(data.entryId);
     const cCount = yield commentsCount.execute([data.entryId]);
+    console.log('content', entry);
     return {
         [BASE_URL]: generalSettings.get(BASE_URL),
         ethAddress: ethAddress,

@@ -5,7 +5,6 @@ import * as actions from '../actions/transaction-actions';
 import * as types from '../constants';
 import * as actionStatus from '../../constants/action-status';
 
-const Channel = global.Channel;
 
 export function* transactionGetStatus ({ txs, ids }) {
     const channel = Channel.server.tx.getTransaction;

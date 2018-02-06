@@ -32,5 +32,5 @@ export const IPFS_CIRCUIT_RELAYS = [
     '/p2p-circuit/ipfs/QmTMSgsyw3zzVbcQnkoN5SRZk7WYUMorJ7EqkqVBLgn13i',
     '/p2p-circuit/ipfs/QmYfXRuVWMWFRJxUSFPHtScTNR9CU2samRsTK15VFJPpvh'
 ];
-generalSettings.set(BASE_URL, '');
+generalSettings.set(BASE_URL, 'https://ipfs.io/ipfs');
 //# sourceMappingURL=settings.js.map
