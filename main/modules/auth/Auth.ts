@@ -3,7 +3,7 @@ import { addHexPrefix, stripHexPrefix } from 'ethereumjs-util';
 import * as Promise from 'bluebird';
 import { web3Api } from '../../services';
 import { gethStatus } from '../../event/responses';
-
+const Buffer = require('safe-buffer').Buffer;
 export const randomBytesAsync = Promise.promisify(randomBytes);
 
 export class Auth {

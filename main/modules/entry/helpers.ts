@@ -15,14 +15,12 @@ export const fetchFromPublish = Promise.coroutine(function* (data: {
 
         const captureIndex = yield contracts
             .fromEvent(contracts.instance.Entries.TagIndex, { entryId: event.args.entryId },
-                data.toBlock, 10, {});
-
+                data.toBlock, 10, { stopOnFirst: true });
         const tags = captureIndex.results.map(function (ev) {
             return web3Api.instance.toUtf8(ev.args.tagName);
         });
 
         const author = yield resolve.execute({ ethAddress: event.args.author });
-
         collection.push({
             entryType: captureIndex.results.length ? captureIndex.results[0].args.entryType.toNumber() : -1,
             entryId: event.args.entryId,
@@ -53,7 +51,7 @@ export const fetchFromTagIndex = Promise.coroutine(function* (data: {
 
         const captureIndex = yield contracts
             .fromEvent(contracts.instance.Entries.TagIndex, { entryId: event.args.entryId },
-                data.toBlock, 10, {});
+                data.toBlock, 10, { stopOnFirst: true });
 
         const tags = captureIndex.results.map(function (ev) {
             return web3Api.instance.toUtf8(ev.args.tagName);

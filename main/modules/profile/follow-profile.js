@@ -1,6 +1,5 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import pinner, { ObjectType, OperationType } from '../pinner/runner';
 import { mixed } from '../models/records';
 import { profileAddress } from './helpers';
 import schema from '../utils/jsonschema';
@@ -21,7 +20,6 @@ const execute = Promise.coroutine(function* (data, cb) {
     const txData = contracts.instance.Feed.follow.request(address, { gas: 400000 });
     const transaction = yield contracts.send(txData, data.token, cb);
     mixed.flush();
-    pinner.execute({ type: ObjectType.PROFILE, id: address, operation: OperationType.ADD }).then(() => { });
     return { tx: transaction.tx, receipt: transaction.receipt };
 });
 export default { execute, name: 'followProfile', hasStream: true };

@@ -98,7 +98,9 @@ export class Contracts {
                     const filteredData = (options.lastIndex) ? filter(filterIndex, data) : data;
                     results = uniq(results.concat(filteredData));
                     if (results.length < limit && fromBlock > 0 && !options.reversed) {
-                        return fetch(fromBlock);
+                        if (!options.stopOnFirst || !results.length) {
+                            return fetch(fromBlock);
+                        }
                     }
                     const sortedResults = take(limit, sortWith([descend(prop('blockNumber')),
                         descend(prop('logIndex'))], results));

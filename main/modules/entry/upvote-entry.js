@@ -1,6 +1,5 @@
 import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
-import pinner, { ObjectType, OperationType } from '../pinner/runner';
 import schema from '../utils/jsonschema';
 import { downvote as upvote } from './downvote-entry';
 const execute = Promise.coroutine(function* (data, cb) {
@@ -11,11 +10,6 @@ const execute = Promise.coroutine(function* (data, cb) {
     }
     const txData = contracts.instance.Votes.voteEntry.request(data.weight, data.entryId, false, data.ethAddress, { gas: 200000 });
     const transaction = yield contracts.send(txData, data.token, cb);
-    pinner.execute({
-        type: ObjectType.ENTRY,
-        id: { entryId: data.entryId, ethAddress: data.ethAddress },
-        operation: OperationType.ADD
-    }).then(() => { });
     return { tx: transaction.tx, receipt: transaction.receipt };
 });
 export default { execute, name: 'upvote', hasStream: true };

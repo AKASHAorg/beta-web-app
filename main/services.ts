@@ -1,6 +1,5 @@
 import Web3 from 'web3';
 import * as Promise from 'bluebird';
-import contracts from './contracts';
 declare const web3;
 
 class Service {

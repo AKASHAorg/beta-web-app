@@ -3,6 +3,7 @@ import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { web3Api } from '../../services';
 import auth from '../auth/Auth';
 import { roomFactory } from './join';
+const Buffer = require('safe-buffer').Buffer;
 
 const execute = Promise.coroutine(function* (data: { roomName: string, message: string, token: string }, cb) {
     if (!roomFactory.getRoom(data.roomName)) {

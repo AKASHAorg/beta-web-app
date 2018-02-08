@@ -34,7 +34,7 @@ const execute = Promise.coroutine(function* (data) {
         .fromEventFilter(contracts.instance.Entries.Publish, {}, data.toBlock, maxResults, { lastIndex: data.lastIndex, reversed: data.reversed || false }, aditionalFilter);
     for (let event of fetched.results) {
         const captureIndex = yield contracts
-            .fromEvent(contracts.instance.Entries.TagIndex, { entryId: event.args.entryId }, data.toBlock, 10, {});
+            .fromEvent(contracts.instance.Entries.TagIndex, { entryId: event.args.entryId }, data.toBlock, 10, { stopOnFirst: true });
         const tags = captureIndex.results.map(function (ev) {
             return web3Api.instance.toUtf8(ev.args.tagName);
         });

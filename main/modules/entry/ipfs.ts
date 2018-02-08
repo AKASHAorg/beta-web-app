@@ -2,6 +2,7 @@ import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import * as Promise from 'bluebird';
 import { is, isEmpty, values } from 'ramda';
 import { entries } from '../models/records';
+const Buffer = require('safe-buffer').Buffer;
 
 export const DRAFT_BLOCKS = 'blocks';
 export const ATOMIC_TYPE = 'atomic';

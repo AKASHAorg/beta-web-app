@@ -93,7 +93,6 @@ class EntryCard extends Component {
         const { baseUrl, large } = this.props;
         const baseWidth = large ? largeCard : smallCard;
         const bestMatch = findClosestMatch(baseWidth || 700, imageObj, Object.keys(imageObj)[0]);
-        console.log('getImageSrc', imageObj, bestMatch);
         if (bestMatch) {
             return imageCreator(imageObj[bestMatch].src, baseUrl);
         }

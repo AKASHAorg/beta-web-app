@@ -1,6 +1,6 @@
 const bs58 = require('bs58');
 import { addHexPrefix, stripHexPrefix } from 'ethereumjs-util';
-
+const Buffer = require('safe-buffer').Buffer;
 // takes an ipfs hash like QmVSzbxYSvztu2YRfEDGjeGR7J7coTQhBR83DYRBXSoWyn
 // transforms it into [0x12, 0x20, 0x69a1c99d0af1da500ff363069c4e8c819c518bde34b3d6f8063cd6361eb4fdf1]
 export const decodeHash = function (ipfsHash: string): string[] {

@@ -41,8 +41,8 @@ const execute = Promise.coroutine(function* (data: {
 
     for (let event of fetched.results) {
         collection.push({
-            amount: (web3Api.instance.eth.fromWei(event.args.amount, 'ether')).toFormat(5),
-            action: web3Api.instance.eth.toUtf8(addHexPrefix(unpad(event.args.action))),
+            amount: (web3Api.instance.fromWei(event.args.amount, 'ether')).toFormat(5),
+            action: web3Api.instance.toUtf8(addHexPrefix(unpad(event.args.action))),
             sourceId: event.args.source,
             blockNumber: event.blockNumber
         });

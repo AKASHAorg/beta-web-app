@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema';
 import {isValidAddress, isValidChecksumAddress} from 'ethereumjs-util';
 import { multihash } from 'is-ipfs';
-
+const Buffer = require('safe-buffer').Buffer;
 Validator.prototype.customFormats['address'] = function(input) {
     if (input) {
         return isValidAddress(input);
