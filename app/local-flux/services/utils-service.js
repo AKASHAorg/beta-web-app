@@ -1,5 +1,3 @@
-const Channel = global.Channel;
-
 // export const backupKeys = ({ target, onSuccess, onError }) => {
 //     const clientChannel = Channel.client.utils.backupKeys;
 //     const serverChannel = Channel.server.utils.backupKeys;
@@ -18,13 +16,12 @@ const Channel = global.Channel;
 // };
 
 export const uploadImage = (files, imgId) => {
-    const serverChannel = window.Channel.server.utils.uploadImage;
-    const clientChannel = window.Channel.client.utils.uploadImage;
-    const managerChannel = window.Channel.client.utils.manager;
-    // console.log(files, 'the files to convert');
+    const serverChannel = Channel.server.utils.uploadImage;
+    const clientChannel = Channel.client.utils.uploadImage;
+    Channel.server.utils.uploadImage.enable();
 
     return new Promise((resolve, reject) => {
-        clientChannel.once((ev, { data }) => {
+        clientChannel.once(({ data }) => {
             if (data.error) return reject(data.error);
             if (files instanceof Uint8Array) {
                 return resolve(data.collection[0].hash);
@@ -36,10 +33,9 @@ export const uploadImage = (files, imgId) => {
             // console.log(files, 'the new files with ipfs hash');
             return resolve(files);
         });
-        managerChannel.once(() => {
-            if (files instanceof Uint8Array) {
+        if (files instanceof Uint8Array) {
                 serverChannel.send([{ source: files }]);
-            } else {
+        } else {
                 serverChannel.send(
                     Object.keys(files)
                         .map(fileKey => ({
@@ -48,7 +44,5 @@ export const uploadImage = (files, imgId) => {
                             source: files[fileKey].src
                         })));
             }
-        });
-        serverChannel.enable();
     });
 };

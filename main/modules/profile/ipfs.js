@@ -123,7 +123,7 @@ export const getShortProfile = Promise.coroutine(function* (hash, resolveAvatar)
         }
     }
     if (about.length) {
-        aboutPath[ProfileSchema.ABOUT] = yield IpfsConnector.getInstance().api.get(about[0].multihash);
+        aboutPath[ProfileSchema.ABOUT] = yield IpfsConnector.getInstance().api.get(about[0].multihash).catch(() => null);
     }
     const fetched = Object.assign({}, profileBase, avatarPath, aboutPath);
     v.validate(fetched, JSONprofile, { throwError: true });
@@ -142,7 +142,7 @@ export const resolveProfile = Promise.coroutine(function* (hash, resolveImages) 
     const pool = yield IpfsConnector.getInstance()
         .api.findLinks(hash, [ProfileSchema.LINKS, ProfileSchema.BACKGROUND_IMAGE]);
     for (let i = 0; i < pool.length; i++) {
-        constructed[pool[i].name] = yield IpfsConnector.getInstance().api.get(pool[i].multihash);
+        constructed[pool[i].name] = yield IpfsConnector.getInstance().api.get(pool[i].multihash).catch(() => null);
     }
     const returned = Object.assign({}, shortProfile, constructed);
     v.validate(returned, JSONprofile, { throwError: true });

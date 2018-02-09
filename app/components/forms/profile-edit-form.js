@@ -256,7 +256,7 @@ class ProfileEditForm extends Component {
                 return;
             }
             this.isSubmitting = true;
-            if (this.state.akashaIdIsValid && !this.state.akashaIdExists) {
+            if (isUpdate || (this.state.akashaIdIsValid && !this.state.akashaIdExists)) {
                 const actionType = isUpdate ?
                     actionTypes.profileUpdate :
                     actionTypes.profileRegister;

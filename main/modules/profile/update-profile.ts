@@ -45,8 +45,9 @@ export const updateProfileData = {
 const execute = Promise.coroutine(function* (data: ProfileUpdateRequest, cb) {
     const v = new schema.Validator();
     v.validate(data, updateProfileData, { throwError: true });
-
+    console.log('mainData', data);
     const ipfsHash = yield create(data.ipfs);
+    console.log('mainipfsHash', ipfsHash);
     const decodedHash = decodeHash(ipfsHash);
     const currentProfile = yield getCurrentProfile.execute();
     if (!currentProfile.raw) {
