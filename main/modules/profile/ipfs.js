@@ -3,6 +3,7 @@ import { profiles } from '../models/records';
 import { is, isEmpty } from 'ramda';
 import * as Promise from 'bluebird';
 import schema from '../utils/jsonschema';
+import { OP_WAIT_TIME } from '../../config/settings';
 export const imageSize = {
     'id': '/imgSize',
     'type': 'object',
@@ -111,19 +112,24 @@ export const getShortProfile = Promise.coroutine(function* (hash, resolveAvatar)
     }
     const avatarPath = { [ProfileSchema.AVATAR]: '' };
     const aboutPath = { [ProfileSchema.ABOUT]: '' };
-    const profileBase = yield IpfsConnector.getInstance().api.get(hash);
-    const avatar = yield IpfsConnector.getInstance().api.findLinks(hash, [ProfileSchema.AVATAR]);
-    const about = yield IpfsConnector.getInstance().api.findLinks(hash, [ProfileSchema.ABOUT]);
+    const profileBase = yield IpfsConnector.getInstance()
+        .api.get(hash).timeout(OP_WAIT_TIME).catch(() => null);
+    const avatar = yield IpfsConnector.getInstance()
+        .api.findLinks(hash, [ProfileSchema.AVATAR]).timeout(OP_WAIT_TIME).catch(() => '');
+    const about = yield IpfsConnector.getInstance()
+        .api.findLinks(hash, [ProfileSchema.ABOUT]).timeout(OP_WAIT_TIME).catch(() => '');
     if (avatar.length) {
         if (!resolveAvatar) {
             avatarPath[ProfileSchema.AVATAR] = avatar[0].multihash;
         }
         else {
-            avatarPath[ProfileSchema.AVATAR] = yield IpfsConnector.getInstance().api.getFile(avatar[0].multihash);
+            avatarPath[ProfileSchema.AVATAR] = yield IpfsConnector.getInstance()
+                .api.getFile(avatar[0].multihash).timeout(OP_WAIT_TIME).catch(() => '');
         }
     }
     if (about.length) {
-        aboutPath[ProfileSchema.ABOUT] = yield IpfsConnector.getInstance().api.get(about[0].multihash).catch(() => null);
+        aboutPath[ProfileSchema.ABOUT] = yield IpfsConnector.getInstance()
+            .api.get(about[0].multihash).timeout(OP_WAIT_TIME).catch(() => '');
     }
     const fetched = Object.assign({}, profileBase, avatarPath, aboutPath);
     v.validate(fetched, JSONprofile, { throwError: true });
@@ -140,9 +146,9 @@ export const resolveProfile = Promise.coroutine(function* (hash, resolveImages) 
     };
     const shortProfile = yield getShortProfile(hash, resolveImages);
     const pool = yield IpfsConnector.getInstance()
-        .api.findLinks(hash, [ProfileSchema.LINKS, ProfileSchema.BACKGROUND_IMAGE]);
+        .api.findLinks(hash, [ProfileSchema.LINKS, ProfileSchema.BACKGROUND_IMAGE]).timeout(OP_WAIT_TIME).catch(() => []);
     for (let i = 0; i < pool.length; i++) {
-        constructed[pool[i].name] = yield IpfsConnector.getInstance().api.get(pool[i].multihash).catch(() => null);
+        constructed[pool[i].name] = yield IpfsConnector.getInstance().api.get(pool[i].multihash).timeout(OP_WAIT_TIME).catch(() => '');
     }
     const returned = Object.assign({}, shortProfile, constructed);
     v.validate(returned, JSONprofile, { throwError: true });

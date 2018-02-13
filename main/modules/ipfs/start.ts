@@ -7,7 +7,6 @@ const execute = Promise.coroutine(function*(data: IpfsStartRequest) {
     if (IpfsConnector.getInstance().serviceStatus.process) {
         throw new Error('IPFS is already running');
     }
-    console.log(data);
     IpfsConnector.getInstance().setIpfsFolder(data.hasOwnProperty('storagePath') ? data.storagePath : defaultPath);
     yield initSearchDbs();
     yield IpfsConnector.getInstance().start();

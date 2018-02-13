@@ -10,7 +10,8 @@
   ],
   "plugins": [
     "add-module-exports",
-    "transform-runtime"
+    "transform-runtime",
+    "syntax-dynamic-import"
   ],
   "env": {
     "development": {
