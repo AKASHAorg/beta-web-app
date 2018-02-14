@@ -18,7 +18,7 @@ if (process.env.DARK_THEME) {
     require('./styles/ant-vars/extract-default-theme.less');
 }
 
-export const bootstrap = (web3Enabled = false) => {
+export const bootstrap = (web3Enabled = false, vault = false) => {
     const history = createHashHistory();
     const store = configureStore();
     sagaMiddleware.run(rootSaga);
@@ -27,7 +27,7 @@ export const bootstrap = (web3Enabled = false) => {
         <Provider store={store}>
             <ConnectedIntlProvider>
                 <ConnectedRouter history={history}>
-                    <Route render={ (props) => <AppContainer web3={web3Enabled} {...props} />}/>
+                    <Route render={ (props) => <AppContainer unlocked={vault} web3={web3Enabled} {...props} />}/>
                 </ConnectedRouter>
             </ConnectedIntlProvider>
         </Provider>,

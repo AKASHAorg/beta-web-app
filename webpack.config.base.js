@@ -32,7 +32,8 @@ export default {
             'node_modules',
         ],
         alias: {
-            joi: 'joi-browser'
+            joi: 'joi-browser',
+            "akasha-channels$": path.resolve(__dirname, 'main/channels.js')
         }
     },
 

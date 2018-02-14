@@ -4,6 +4,7 @@ import { injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
 import classNames from 'classnames';
+import getChannels from 'akasha-channels';
 import { entryMessages } from '../../locale-data/messages';
 import { DataLoader, Icon } from '../';
 import { getDisplayName } from '../../utils/dataModule';
@@ -14,8 +15,8 @@ let serverChannel, clientChannel;
 class EntryVotesModal extends Component {
     constructor (props) {
         super(props);
-        serverChannel = global.Channel.server.entry.votesIterator;
-        clientChannel = global.Channel.client.entry.votesIterator;
+        serverChannel = getChannels().server.entry.votesIterator;
+        clientChannel = getChannels().client.entry.votesIterator;
         serverChannel.enable();
         clientChannel.on(this.updateVotes);
         this.state = {

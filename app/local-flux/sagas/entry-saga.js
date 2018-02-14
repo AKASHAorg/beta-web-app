@@ -1,5 +1,6 @@
 import { all, apply, call, fork, put, select, take, takeEvery,
     takeLatest } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
 import * as actionActions from '../actions/action-actions';
 import * as appActions from '../actions/app-actions';
@@ -21,30 +22,30 @@ const ENTRY_LIST_ITERATOR_LIMIT = 3;
 /* eslint-disable no-use-before-define */
 
 function* enableExtraChannels () {
-    const { canClaim, getEntryBalance, getVoteOf } = Channel.server.entry;
+    const { canClaim, getEntryBalance, getVoteOf } = getChannels().server.entry;
     yield all([
-        call(enableChannel, getVoteOf, Channel.client.entry.manager),
-        call(enableChannel, getEntryBalance, Channel.client.entry.manager),
-        call(enableChannel, canClaim, Channel.client.entry.manager),
+        call(enableChannel, getVoteOf, getChannels().client.entry.manager),
+        call(enableChannel, getEntryBalance, getChannels().client.entry.manager),
+        call(enableChannel, canClaim, getChannels().client.entry.manager),
     ]);
 }
 
 function* entryCanClaim ({ entryIds }) {
-    const channel = Channel.server.entry.canClaim;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.canClaim;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(channel, channel.send, [{ entryId: entryIds }]);
 }
 
 function* entryCanClaimVote ({ entryIds }) {
-    const channel = Channel.server.entry.canClaimVote;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.canClaimVote;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(channel, channel.send, [{ entries: entryIds, ethAddress }]);
 }
 
 function* entryClaim ({ actionId, entryId, entryTitle }) {
-    const channel = Channel.server.entry.claim;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.claim;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, token, entryId, entryTitle }]);
 }
@@ -62,8 +63,8 @@ function* entryClaimSuccess ({ data }) {
 }
 
 function* entryClaimVote ({ actionId, entryId, entryTitle }) {
-    const channel = Channel.server.entry.claimVote;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.claimVote;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, token, entryId, entryTitle }]);
 }
@@ -81,8 +82,8 @@ function* entryClaimVoteSuccess ({ data }) {
 }
 
 function* entryDownvote ({ actionId, entryId, entryTitle, ethAddress, weight, value }) {
-    const channel = Channel.server.entry.downvote;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.downvote;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const token = yield select(selectToken);
     yield apply(
         channel,
@@ -92,7 +93,7 @@ function* entryDownvote ({ actionId, entryId, entryTitle, ethAddress, weight, va
 }
 
 function* entryDownvoteSuccess ({ data }) {
-    const { getVoteRatio } = Channel.server.entry;
+    const { getVoteRatio } = getChannels().server.entry;
     yield call(entryVoteSuccess, data.entryId); // eslint-disable-line no-use-before-define
     yield put(appActions.showNotification({
         id: 'downvoteEntrySuccess',
@@ -103,13 +104,13 @@ function* entryDownvoteSuccess ({ data }) {
 }
 
 function* entryGetBalance ({ entryIds }) {
-    const channel = Channel.server.entry.getEntryBalance;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.getEntryBalance;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(channel, channel.send, [entryIds]);
 }
 
 function* entryGetExtraOfEntry (entryId, ethAddress) {
-    const { canClaim, getEntryBalance, getVoteOf, getVoteRatio } = Channel.server.entry;
+    const { canClaim, getEntryBalance, getVoteOf, getVoteRatio } = getChannels().server.entry;
     yield call(enableExtraChannels);
     const loggedEthAddress = yield select(selectLoggedEthAddress);
     const isOwnEntry = ethAddress && loggedEthAddress === ethAddress;
@@ -127,7 +128,7 @@ function* entryGetExtraOfEntry (entryId, ethAddress) {
 }
 
 export function* entryGetExtraOfList (collection, columnId, asDrafts) { // eslint-disable-line
-    const { canClaim, getEntryBalance, getVoteOf } = Channel.server.entry;
+    const { canClaim, getEntryBalance, getVoteOf } = getChannels().server.entry;
     yield call(enableExtraChannels);
     const loggedEthAddress = yield select(selectLoggedEthAddress);
     const allEntries = [];
@@ -169,8 +170,8 @@ function* entryGetFull ({
     akashaId, entryId, ethAddress, version, asDraft, revert,
     publishedDateOnly, latestVersion
 }) {
-    const channel = Channel.server.entry.getEntry;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.getEntry;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(channel, channel.send, [{
         akashaId,
         entryId,
@@ -188,23 +189,23 @@ function* entryGetFull ({
 }
 
 function* entryGetLatestVersion ({ entryId }) {
-    const channel = Channel.server.entry.getEntry;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.getEntry;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(channel, channel.send, [{ entryId, full: true, latestVersion: true }]);
 }
 
 function* entryGetScore ({ entryId }) {
-    const channel = Channel.server.entry.getScore;
+    const channel = getChannels().server.entry.getScore;
     yield apply(channel, channel.send, [{ entryId }]);
 }
 
 function* entryGetShort ({ context, entryId, ethAddress }) {
-    const channel = Channel.server.entry.getEntry;
+    const channel = getChannels().server.entry.getEntry;
     yield apply(channel, channel.send, [{ context, entryId, ethAddress }]);
 }
 
 function* entryGetVoteOf ({ entryIds }) {
-    const channel = Channel.server.entry.getVoteOf;
+    const channel = getChannels().server.entry.getVoteOf;
     const ethAddress = yield select(selectLoggedEthAddress);
     const request = entryIds.map(id => ({ entryId: id, ethAddress }));
     yield apply(channel, channel.send, [request]);
@@ -223,7 +224,7 @@ function* entryMoreListIterator ({ columnId, value, limit = ENTRY_LIST_ITERATOR_
 }
 
 function* entryMoreNewestIterator ({ columnId }) {
-    const channel = Channel.server.entry.allStreamIterator;
+    const channel = getChannels().server.entry.allStreamIterator;
     const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
     const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
     yield apply(
@@ -234,7 +235,7 @@ function* entryMoreNewestIterator ({ columnId }) {
 }
 
 function* entryMoreProfileIterator ({ columnId, value }) {
-    const channel = Channel.server.entry.entryProfileIterator;
+    const channel = getChannels().server.entry.entryProfileIterator;
     const isProfileEntries = columnId === 'profileEntries';
     const toBlock = !isProfileEntries ?
         yield select(state => selectColumnLastBlock(state, columnId)) :
@@ -256,7 +257,7 @@ function* entryMoreProfileIterator ({ columnId, value }) {
 }
 
 function* entryMoreStreamIterator ({ columnId }) {
-    const channel = Channel.server.entry.followingStreamIterator;
+    const channel = getChannels().server.entry.followingStreamIterator;
     const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
     const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
     const ethAddress = yield select(selectLoggedEthAddress);
@@ -268,7 +269,7 @@ function* entryMoreStreamIterator ({ columnId }) {
 }
 
 function* entryMoreTagIterator ({ columnId, value }) {
-    const channel = Channel.server.entry.entryTagIterator;
+    const channel = getChannels().server.entry.entryTagIterator;
     const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
     const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
     yield apply(
@@ -279,8 +280,8 @@ function* entryMoreTagIterator ({ columnId, value }) {
 }
 
 function* entryNewestIterator ({ columnId, reversed }) {
-    const channel = Channel.server.entry.allStreamIterator;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.allStreamIterator;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
         yield select(state => selectColumnFirstBlock(state, columnId)) :
         yield select(selectBlockNumber);
@@ -291,8 +292,8 @@ function* entryProfileIterator ({ columnId, value, limit = ENTRY_ITERATOR_LIMIT,
     if (value && !isEthAddress(value)) {
         yield put(profileActions.profileExists(value));
     }
-    const channel = Channel.server.entry.entryProfileIterator;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.entryProfileIterator;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
         yield select(state => selectColumnFirstBlock(state, columnId)) :
         yield select(selectBlockNumber);
@@ -310,8 +311,8 @@ function* entryProfileIterator ({ columnId, value, limit = ENTRY_ITERATOR_LIMIT,
 }
 
 function* entryResolveIpfsHash ({ entryId, ipfsHash }) {
-    const channel = Channel.server.entry.resolveEntriesIpfsHash;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.resolveEntriesIpfsHash;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(
         channel,
         channel.send,
@@ -320,8 +321,8 @@ function* entryResolveIpfsHash ({ entryId, ipfsHash }) {
 }
 
 function* entryStreamIterator ({ columnId, reversed }) {
-    const channel = Channel.server.entry.followingStreamIterator;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.followingStreamIterator;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
         yield select(state => selectColumnFirstBlock(state, columnId)) :
         yield select(selectBlockNumber);
@@ -335,8 +336,8 @@ function* entryStreamIterator ({ columnId, reversed }) {
 
 function* entryTagIterator ({ columnId, value, reversed }) {
     yield put(tagActions.tagExists(value));
-    const channel = Channel.server.entry.entryTagIterator;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.entryTagIterator;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
         yield select(state => selectColumnFirstBlock(state, columnId)) :
         yield select(selectBlockNumber);
@@ -353,8 +354,8 @@ function* entryVoteSuccess (entryId) {
 }
 
 function* entryUpvote ({ actionId, entryId, entryTitle, ethAddress, weight, value }) {
-    const channel = Channel.server.entry.upvote;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.upvote;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const token = yield select(selectToken);
     yield apply(
         channel,
@@ -364,7 +365,7 @@ function* entryUpvote ({ actionId, entryId, entryTitle, ethAddress, weight, valu
 }
 
 function* entryUpvoteSuccess ({ data }) {
-    const { getVoteRatio } = Channel.server.entry;
+    const { getVoteRatio } = getChannels().server.entry;
     yield call(entryVoteSuccess, data.entryId);
     yield put(appActions.showNotification({
         id: 'upvoteEntrySuccess',
@@ -375,8 +376,8 @@ function* entryUpvoteSuccess ({ data }) {
 }
 
 function* entryVoteCost () {
-    const channel = Channel.server.entry.voteCost;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.voteCost;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     const weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     yield apply(channel, channel.send, [weights]);
 }

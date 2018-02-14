@@ -1,4 +1,5 @@
 import { apply, fork, put, take, takeEvery } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels } from './helpers';
 import * as actionActions from '../actions/action-actions';
 import * as actions from '../actions/transaction-actions';
@@ -7,7 +8,7 @@ import * as actionStatus from '../../constants/action-status';
 
 
 export function* transactionGetStatus ({ txs, ids }) {
-    const channel = Channel.server.tx.getTransaction;
+    const channel = getChannels().server.tx.getTransaction;
     yield apply(channel, channel.send, [{ transactionHash: txs, actionIds: ids }]);
 }
 

@@ -1,12 +1,13 @@
 import { apply, call, fork, put, take } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel } from './helpers';
 import * as actions from '../actions/utils-actions';
 import * as appActions from '../actions/app-actions';
 import * as types from '../constants';
 
 function* backupKeysRequest () {
-    const channel = Channel.server.utils.backupKeys;
-    yield call(enableChannel, channel, Channel.client.utils.manager);
+    const channel = getChannels().server.utils.backupKeys;
+    yield call(enableChannel, channel, getChannels().client.utils.manager);
     yield apply(channel, channel.send, [{}]);
 }
 

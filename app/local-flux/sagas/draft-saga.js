@@ -1,4 +1,5 @@
 import { call, fork, put, select, takeEvery, takeLatest, take, throttle } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { DraftJS, editorStateToJSON, editorStateFromRaw } from 'megadraft';
 import { Map, OrderedMap } from 'immutable';
 import { isEmpty } from 'ramda';
@@ -145,7 +146,7 @@ function* draftDelete ({ data }) {
 }
 /* eslint-disable max-statements */
 function* draftPublish ({ actionId, draft }) {
-    const channel = Channel.server.entry.publish;
+    const channel = getChannels().server.entry.publish;
     const { id } = draft;
     const draftFromState = yield select(state => selectDraftById(state, id));
     const token = yield select(selectToken);
@@ -159,7 +160,7 @@ function* draftPublish ({ actionId, draft }) {
         if (draftToPublish.content.entryType === 'link' && draftToPublish.content.excerpt.length === 0) {
             draftToPublish.content.excerpt = draftToPublish.content.cardInfo.title;
         }
-        yield call(enableChannel, channel, Channel.client.entry.manager);
+        yield call(enableChannel, channel, getChannels().client.entry.manager);
         if (
             draftToPublish.content.entryType === 'article' &&
             isEmpty(draftToPublish.content.featuredImage)
@@ -205,7 +206,7 @@ function* draftPublishSuccess ({ data }) {
 }
 
 function* draftPublishUpdate ({ actionId, draft }) {
-    const channel = Channel.server.entry.editEntry;
+    const channel = getChannels().server.entry.editEntry;
     const { id } = draft;
     const draftFromState = yield select(state => selectDraftById(state, id));
     const token = yield select(selectToken);
@@ -215,7 +216,7 @@ function* draftPublishUpdate ({ actionId, draft }) {
         draftToPublish.content.draft = JSON.parse(
             editorStateToJSON(draftFromState.getIn(['content', 'draft']))
         );
-        yield call(enableChannel, channel, Channel.client.entry.manager);
+        yield call(enableChannel, channel, getChannels().client.entry.manager);
         yield call([channel, channel.send], {
             ethAddress,
             actionId,

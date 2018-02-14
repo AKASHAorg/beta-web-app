@@ -1,20 +1,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import getChannels from 'akasha-channels';
 import { ProfileHoverCard } from '../../components';
 
-let Channel, existsClient, existsServer ,addressOfClient, addressOfServer, getProfileDataClient, getProfileDataServer;
+let existsClient, existsServer ,addressOfClient, addressOfServer, getProfileDataClient, getProfileDataServer;
 
 class MentionComponent extends Component {
 
     constructor (props) {
         super(props);
-        Channel = global.Channel;
-        existsClient = Channel.client.registry.profileExists;
-        existsServer = Channel.server.registry.profileExists;
-        addressOfClient = Channel.client.registry.addressOf;
-        addressOfServer = Channel.server.registry.addressOf;
-        getProfileDataClient = Channel.client.profile.getProfileData;
-        getProfileDataServer = Channel.server.profile.getProfileData;
+        existsClient = getChannels().client.registry.profileExists;
+        existsServer = getChannels().server.registry.profileExists;
+        addressOfClient = getChannels().client.registry.addressOf;
+        addressOfServer = getChannels().server.registry.addressOf;
+        getProfileDataClient = getChannels().client.profile.getProfileData;
+        getProfileDataServer = getChannels().server.profile.getProfileData;
         existsServer.enable();
         addressOfServer.enable();
         this.state = {

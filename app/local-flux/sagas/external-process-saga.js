@@ -1,5 +1,6 @@
 import * as reduxSaga from 'redux-saga';
 import { apply, call, cancel, fork, put, select, take, takeEvery } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel } from './helpers';
 import * as actions from '../actions/external-process-actions';
 import * as appActions from '../actions/app-actions';
@@ -21,8 +22,8 @@ function* ipfsResetBusyState () {
 }
 
 function* gethStartLogger () {
-    const channel = global.Channel.server.geth.logs;
-    yield call(enableChannel, channel, global.Channel.client.geth.manager);
+    const channel = getChannels().server.geth.logs;
+    yield call(enableChannel, channel, getChannels().client.geth.manager);
     while (true) {
         yield put(actions.gethGetLogs());
         yield apply(channel, channel.send, [{}]);
@@ -31,8 +32,8 @@ function* gethStartLogger () {
 }
 
 function* ipfsStartLogger () {
-    const channel = global.Channel.server.ipfs.logs;
-    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
+    const channel = getChannels().server.ipfs.logs;
+    yield call(enableChannel, channel, getChannels().client.ipfs.manager);
     while (true) {
         yield put(actions.ipfsGetLogs());
         yield apply(channel, channel.send, [{}]);
@@ -41,31 +42,31 @@ function* ipfsStartLogger () {
 }
 
 export function* gethGetOptions () {
-    const channel = global.Channel.server.geth.options;
-    yield call(enableChannel, channel, global.Channel.client.geth.manager);
+    const channel = getChannels().server.geth.options;
+    yield call(enableChannel, channel, getChannels().client.geth.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* ipfsGetConfig () {
-    const channel = global.Channel.server.ipfs.getConfig;
-    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
+    const channel = getChannels().server.ipfs.getConfig;
+    yield call(enableChannel, channel, getChannels().client.ipfs.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* ipfsGetPorts () {
-    const channel = global.Channel.server.ipfs.getPorts;
-    yield call(enableChannel, channel, Channel.client.ipfs.manager);
+    const channel = getChannels().server.ipfs.getPorts;
+    yield call(enableChannel, channel, getChannels().client.ipfs.manager);
     yield apply(channel, channel.send, [{}]);
 }
 
 function* ipfsSetPorts ({ ports, restart }) {
-    const channel = global.Channel.server.ipfs.setPorts;
-    yield call(enableChannel, channel, global.Channel.client.ipfs.manager);
+    const channel = getChannels().server.ipfs.setPorts;
+    yield call(enableChannel, channel, getChannels().client.ipfs.manager);
     yield apply(channel, channel.send, [{ ports, restart }]);
 }
 
 function* gethStart () {
-    const channel = global.Channel.server.geth.startService;
+    const channel = getChannels().server.geth.startService;
     const gethOptions = yield select(state => state.settingsState.get('geth').toJS());
     // filter out the null and false options
     const options = {};
@@ -81,33 +82,33 @@ function* gethStart () {
 }
 
 function* gethStop () {
-    const channel = global.Channel.server.geth.stopService;
+    const channel = getChannels().server.geth.stopService;
     yield apply(channel, channel.send, [{}]);
 }
 
 function* ipfsStart () {
-    const channel = global.Channel.server.ipfs.startService;
+    const channel = getChannels().server.ipfs.startService;
     const storagePath = yield select(state => state.settingsState.getIn(['ipfs', 'storagePath']));
     yield apply(channel, channel.send, [{ storagePath }]);
 }
 
 function* ipfsStop () {
-    const channel = Channel.server.ipfs.stopService;
+    const channel = getChannels().server.ipfs.stopService;
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* gethGetStatus () {
-    const channel = Channel.server.geth.status;
+    const channel = getChannels().server.geth.status;
     yield apply(channel, channel.send, [{}]);
 }
 
 export function* ipfsGetStatus () {
-    const channel = Channel.server.ipfs.status;
+    const channel = getChannels().server.ipfs.status;
     yield apply(channel, channel.send, [{}]);
 }
 
 function* gethGetSyncStatus () {
-    const channel = Channel.server.geth.syncStatus;
+    const channel = getChannels().server.geth.syncStatus;
     const syncActionId = yield select(selectGethSyncActionId);
     if (!gethSyncInterval) {
         gethSyncInterval = setInterval(() => {

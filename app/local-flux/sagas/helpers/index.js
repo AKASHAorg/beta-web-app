@@ -1,4 +1,5 @@
 import { eventChannel } from 'redux-saga';
+import getChannels from 'akasha-channels';
 import { put, select, take } from 'redux-saga/effects';
 import { tap } from 'ramda';
 import { selectAction, selectLoggedEthAddress } from '../../selectors';
@@ -23,13 +24,13 @@ export function createActionChannel (channel) {
 }
 
 export function createActionChannels () {
-    const modules = Object.keys(Channel.client);
+    const modules = Object.keys(getChannels().client);
     console.log('modules', modules);
     modules.forEach((module) => {
-        const channels = Object.keys(Channel.client[module]);
+        const channels = Object.keys(getChannels().client[module]);
         actionChannels[module] = {};
         channels.forEach((channel) => {
-            actionChannels[module][channel] = createActionChannel(Channel.client[module][channel]);
+            actionChannels[module][channel] = createActionChannel(getChannels().client[module][channel]);
         });
     });
 }

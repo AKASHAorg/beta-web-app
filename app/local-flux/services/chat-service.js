@@ -1,35 +1,36 @@
 import BaseService from './base-service';
+import getChannels from 'akasha-channels';
 import chatDB from './db/chat';
 
 class ChatService extends BaseService {
     joinChannels = ({ channels, onSuccess = () => {}, onError = () => {} }) =>
         this.openChannel({
-            clientManager: Channel.client.chat.manager,
-            serverChannel: Channel.server.chat.join,
-            clientChannel: Channel.client.chat.join,
+            clientManager: getChannels().client.chat.manager,
+            serverChannel: getChannels().server.chat.join,
+            clientChannel: getChannels().client.chat.join,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            Channel.server.chat.join.send({ channels })
+            getChannels().server.chat.join.send({ channels })
         );
 
     leaveChannels = ({ channels, onSuccess = () => {}, onError = () => {} }) =>
         this.openChannel({
-            clientManager: Channel.client.chat.manager,
-            serverChannel: Channel.server.chat.leave,
-            clientChannel: Channel.client.chat.leave,
+            clientManager: getChannels().client.chat.manager,
+            serverChannel: getChannels().server.chat.leave,
+            clientChannel: getChannels().client.chat.leave,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            Channel.server.chat.leave.send({ channels })
+            getChannels().server.chat.leave.send({ channels })
         );
 
     getCurrentChannels = ({ onSuccess, onError }) =>
         this.openChannel({
-            clientManager: Channel.client.chat.manager,
-            serverChannel: Channel.server.chat.getCurrentChannels,
-            clientChannel: Channel.client.chat.getCurrentChannels,
+            clientManager: getChannels().client.chat.manager,
+            serverChannel: getChannels().server.chat.getCurrentChannels,
+            clientChannel: getChannels().client.chat.getCurrentChannels,
             listenerCb: this.createListener(onError, onSuccess)
         }, () =>
-            Channel.server.chat.getCurrentChannels.send()
+            getChannels().server.chat.getCurrentChannels.send()
         );
 
     getJoinedChannels = ({ akashaId, onSuccess, onError }) =>

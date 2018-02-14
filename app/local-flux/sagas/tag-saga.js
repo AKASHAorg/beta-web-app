@@ -1,4 +1,5 @@
 import { apply, call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel } from './helpers';
 import { selectToken } from '../selectors';
 import * as actions from '../actions/tag-actions';
@@ -10,9 +11,9 @@ import * as draftActions from '../actions/draft-actions';
 const TAG_SEARCH_LIMIT = 10;
 
 function* tagCreate ({ data }) {
-    const channel = Channel.server.tags.create;
+    const channel = getChannels().server.tags.create;
     const token = yield select(selectToken);
-    yield call(enableChannel, channel, Channel.client.tags.manager);
+    yield call(enableChannel, channel, getChannels().client.tags.manager);
     yield call([channel, channel.send], {
         ...data,
         token,
@@ -20,26 +21,26 @@ function* tagCreate ({ data }) {
 }
 
 function* tagCanCreateCheck ({ data }) {
-    const channel = Channel.server.tags.canCreate;
+    const channel = getChannels().server.tags.canCreate;
     const { ethAddress } = data;
-    yield call(enableChannel, channel, Channel.client.tags.manager);
+    yield call(enableChannel, channel, getChannels().client.tags.manager);
     yield call([channel, channel.send], { ethAddress });
 }
 
 function* tagExists ({ data }) {
-    const channel = Channel.server.tags.exists;
+    const channel = getChannels().server.tags.exists;
     yield apply(channel, channel.send, [data]);
 }
 
 function* tagGetEntriesCount ({ tags }) {
-    const channel = Channel.server.entry.getTagEntriesCount;
-    yield call(enableChannel, channel, Channel.client.entry.manager);
+    const channel = getChannels().server.entry.getTagEntriesCount;
+    yield call(enableChannel, channel, getChannels().client.entry.manager);
     yield apply(channel, channel.send, [tags]);
 }
 
 function* tagSearch ({ tagName }) {
-    const channel = Channel.server.tags.searchTag;
-    yield call(enableChannel, channel, Channel.client.tags.manager);
+    const channel = getChannels().server.tags.searchTag;
+    yield call(enableChannel, channel, getChannels().client.tags.manager);
     yield apply(channel, channel.send, [{ tagName, limit: TAG_SEARCH_LIMIT }]);
 }
 

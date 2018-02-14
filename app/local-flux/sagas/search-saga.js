@@ -1,4 +1,5 @@
 import { take, put, call, apply, fork, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import * as profileActions from '../actions/profile-actions';
 import * as actions from '../actions/search-actions';
 import * as tagActions from '../actions/tag-actions';
@@ -13,26 +14,26 @@ import { selectSearchEntryOffset, selectSearchQuery, selectSearchQueryAutocomple
 import * as searchService from '../services/search-service';
 
 function* searchMoreQuery () {
-    const channel = Channel.server.search.query;
+    const channel = getChannels().server.search.query;
     const text = yield select(selectSearchQuery);
     const offset = yield select(selectSearchEntryOffset);
     yield apply(channel, channel.send, [{ text, pageSize: entrySearchLimit, offset }]);
 }
 
 function* searchQuery ({ text }) {
-    const channel = Channel.server.search.query;
-    yield call(enableChannel, channel, Channel.client.search.manager);
+    const channel = getChannels().server.search.query;
+    yield call(enableChannel, channel, getChannels().client.search.manager);
     yield apply(channel, channel.send, [{ text, pageSize: entrySearchLimit }]);
 }
 
 function* searchProfiles ({ query, autocomplete }) {
-    const channel = Channel.server.search.findProfiles;
+    const channel = getChannels().server.search.findProfiles;
     const limit = autocomplete ? autocompleteLimit : profileSearchLimit;
     yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit, autocomplete }]);
 }
 
 function* searchSyncEntries ({ following }) {
-    const channel = Channel.server.search.syncEntries;
+    const channel = getChannels().server.search.syncEntries;
     const ethAddress = yield select(selectLoggedEthAddress);
     if (ethAddress) {
         let fromBlock;
@@ -47,7 +48,7 @@ function* searchSyncEntries ({ following }) {
 }
 
 function* searchSyncTags () {
-    const channel = Channel.server.search.syncTags;
+    const channel = getChannels().server.search.syncTags;
     let fromBlock;
     try {
         fromBlock = yield apply(searchService, searchService.getLastTagsBlock, ['tags']);
@@ -59,7 +60,7 @@ function* searchSyncTags () {
 }
 
 function* searchTags ({ query, autocomplete }) {
-    const channel = Channel.server.search.findTags;
+    const channel = getChannels().server.search.findTags;
     const limit = autocomplete ? autocompleteLimit : tagSearchLimit;
     yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit }]);
 }

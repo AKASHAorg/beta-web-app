@@ -1,7 +1,7 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
 import { bootstrap } from '../app/';
 import initModules from './init-modules';
-import { channel, ipfsApi, regenWeb3, web3Api } from './services';
+import { ipfsApi, regenWeb3, web3Api } from './services';
 import web3Helper from './modules/helpers/web3-helper';
 import getChannels from './channels';
 import contracts from './contracts';
@@ -12,15 +12,17 @@ window.addEventListener('load', function () {
     let web3Local;
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
+        if (web3Local.eth.accounts.length) {
+            return startApp(web3Local, false);
+        }
     }
-    console.log(web3, web3Local);
-    startApp(web3Local);
+    startApp(web3Local, true);
 });
 
 
-const startApp = (web3) => {
+const startApp = (web3, vault) => {
     if (!web3) {
-        return bootstrap();
+        return bootstrap(false, false);
     }
     web3Api.instance = web3;
     ipfsApi.instance = IpfsConnector.getInstance();
@@ -61,15 +63,13 @@ const startApp = (web3) => {
         });
     IpfsConnector.getInstance().setOption('repo', 'ipfs#akasha-beta');
     initModules();
-    channel.instance = getChannels();
-    console.log(channel.instance);
     // for dev only
-    Object.defineProperty(window, 'Channel', { value: channel.instance });
+    Object.defineProperty(window, 'Channel', { value: getChannels() });
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
     Object.defineProperty(window, 'contracts', { value: contracts });
     // end
 
-    web3Helper.setChannel(channel.instance.client.tx.emitMined);
+    web3Helper.setChannel(getChannels().client.tx.emitMined);
     console.timeEnd('bootstrap');
-    bootstrap(true);
+    bootstrap(true, vault);
 };

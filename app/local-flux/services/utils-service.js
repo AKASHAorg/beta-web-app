@@ -1,3 +1,5 @@
+import getChannels from 'akasha-channels';
+
 // export const backupKeys = ({ target, onSuccess, onError }) => {
 //     const clientChannel = Channel.client.utils.backupKeys;
 //     const serverChannel = Channel.server.utils.backupKeys;
@@ -16,9 +18,9 @@
 // };
 
 export const uploadImage = (files, imgId) => {
-    const serverChannel = Channel.server.utils.uploadImage;
-    const clientChannel = Channel.client.utils.uploadImage;
-    Channel.server.utils.uploadImage.enable();
+    const serverChannel = getChannels().server.utils.uploadImage;
+    const clientChannel = getChannels().client.utils.uploadImage;
+    getChannels().server.utils.uploadImage.enable();
 
     return new Promise((resolve, reject) => {
         clientChannel.once(({ data }) => {

@@ -4,6 +4,7 @@ import { BASE_URL, generalSettings } from '../config/settings';
 
 class GethStatus {
     public shouldLogout: boolean = false;
+    public shouldUnlockVault: boolean = false;
     private _process: boolean;
     private _api: boolean;
     private _networkID: number;
@@ -46,7 +47,17 @@ class GethStatus {
     public get ethKey() {
         if (web3Api.instance.eth.accounts[0] !== this._ethKey) {
             console.log('default account changed');
+            if (this._ethKey) {
+                location.reload();
+            }
+
+            if (!web3Api.instance.eth.accounts[0]) {
+                this.shouldUnlockVault = true;
+            }
             this._ethKey = web3Api.instance.eth.accounts[0];
+            if (this.shouldUnlockVault && this._ethKey) {
+               this.shouldUnlockVault = false;
+            }
             this.shouldLogout = true;
         }
         return this._ethKey;
@@ -85,10 +96,10 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
                     process: gethStatus.process,
                     api: gethStatus.api,
                     networkID: gethStatus.networkID,
-                    ethKey: gethStatus.ethKey,
-                    akashaKey: gethStatus.akashaKey,
+                    ethAddress: gethStatus.ethKey,
                     version: gethStatus.version,
-                    shouldLogout: gethStatus.shouldLogout
+                    shouldLogout: gethStatus.shouldLogout,
+                    shouldUnlockVault: gethStatus.shouldUnlockVault
                 }
             },
             error: { message: rawData.error.message }, request
@@ -103,10 +114,10 @@ export const mainResponse = (rawData: any, request: any): MainResponse => {
                 process: gethStatus.process,
                 api: gethStatus.api,
                 networkID: gethStatus.networkID,
-                ethKey: gethStatus.ethKey,
-                akashaKey: gethStatus.akashaKey,
+                ethAddress: gethStatus.ethKey,
                 version: gethStatus.version,
-                shouldLogout: gethStatus.shouldLogout
+                shouldLogout: gethStatus.shouldLogout,
+                shouldUnlockVault: gethStatus.shouldUnlockVault
             }
         }, request
     };

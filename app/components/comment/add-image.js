@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { AtomicBlockUtils } from 'draft-js';
+import getChannels from 'akasha-channels';
 import { getResizedImages, findClosestMatch } from '../../utils/imageUtils';
 import { genId } from '../../utils/dataModule';
 import { Icon } from '../index';
@@ -14,9 +15,9 @@ class AddImage extends Component {
     };
 
     convertToIpfs = (files, imgId) => {
-        const serverChannel = window.Channel.server.utils.uploadImage;
-        const clientChannel = window.Channel.client.utils.uploadImage;
-        const managerChannel = window.Channel.client.utils.manager;
+        const serverChannel = getChannels().server.utils.uploadImage;
+        const clientChannel = getChannels().client.utils.uploadImage;
+        const managerChannel = getChannels().client.utils.manager;
         return new Promise((resolve, reject) => {
             clientChannel.once((ev, { data }) => {
                 if (data.error) return reject(data.error);

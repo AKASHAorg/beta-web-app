@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Popover, Button } from 'antd';
+import getChannels from 'akasha-channels';
 import * as actionTypes from '../constants/action-types';
 import { tagMessages, generalMessages } from '../locale-data/messages';
 import { Icon } from './';
@@ -41,9 +42,9 @@ class TagEditor extends Component {
     }
     _addChannelListener = () => {
         const { onTagError } = this.props;
-        const clientChannel = self.Channel.client.tags.canCreate;
-        const manager = self.Channel.client.tags.manager;
-        const serverChannel = self.Channel.server.tags.canCreate;
+        const clientChannel = getChannels().client.tags.canCreate;
+        const manager = getChannels().client.tags.manager;
+        const serverChannel = getChannels().server.tags.canCreate;
         this.openChannel(serverChannel, manager, () => {
             clientChannel.on((ev, res) => {
                 this.setState({
@@ -133,13 +134,13 @@ class TagEditor extends Component {
 
     _checkTagCreationAllowance = () => {
         const { ethAddress } = this.props;
-        const serverChannel = self.Channel.server.tags.canCreate;
+        const serverChannel = getChannels().server.tags.canCreate;
         serverChannel.send({ ethAddress });
     }
 
     _checkTagExistence = (tagList) => {
-        const serverChannel = window.Channel.server.tags.exists;
-        const clientChannel = window.Channel.client.tags.exists;
+        const serverChannel = getChannels().server.tags.exists;
+        const clientChannel = getChannels().client.tags.exists;
         if (!this.channelCb) {
             this.channelCb = (ev, response) => {
                 if (response.data.exists) {
@@ -161,7 +162,7 @@ class TagEditor extends Component {
     }
 
     removeExistsListener = () => {
-        self.Channel.client.tags.exists.removeAllListeners();
+        getChannels().client.tags.exists.removeAllListeners();
     }
 
     componentWillUnmount () {

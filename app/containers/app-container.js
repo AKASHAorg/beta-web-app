@@ -130,13 +130,21 @@ class AppContainer extends Component {
     render () {
         /* eslint-disable no-shadow */
         const { activeDashboard, appState, hideTerms, history, intl,
-            location, needAuth, needEth, needAeth, needMana, web3 } = this.props;
+            location, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
 
         if(!web3) {
             return (
                 <h1>
-                    {'Waiting for web3 provider'}
+                    {'No web3 provider found.'}
+                    <a target={"_blank"} href={"https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"}>
+                        {'Install MetaMask'}
+                    </a>
                 </h1>
+            )
+        }
+        if(!unlocked) {
+            return (
+                <h2>{'Please unlock vault from MetaMask.'}</h2>
             )
         }
         /* eslint-enable no-shadow */
@@ -258,7 +266,8 @@ AppContainer.propTypes = {
     toggleOutsideNavigation: PropTypes.func,
     navForwardCounterReset: PropTypes.func,
     navCounterIncrement: PropTypes.func,
-    web3: PropTypes.bool
+    web3: PropTypes.bool,
+    unlocked: PropTypes.bool
 };
 
 function mapStateToProps (state) {

@@ -1,4 +1,5 @@
 import { apply, call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { reject, isNil } from 'ramda';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
 import * as actionActions from '../actions/action-actions';
@@ -23,16 +24,16 @@ const FOLLOWERS_ITERATOR_LIMIT = 3;
 const FOLLOWINGS_ITERATOR_LIMIT = 3;
 
 function* profileAethTransfersIterator () {
-    const channel = Channel.server.profile.transfersIterator;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.transfersIterator;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     const toBlock = yield select(selectBlockNumber);
     yield apply(channel, channel.send, [{ ethAddress, toBlock, limit: TRANSFERS_ITERATOR_LIMIT }]);
 }
 
 function* profileEssenceIterator () {
-    const channel = self.Channel.server.profile.essenceIterator;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.essenceIterator;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     const essenceStep = yield select(selectEssenceIterator);
     const lastBlock = (essenceStep.lastBlock === null) ?
@@ -44,8 +45,8 @@ function* profileEssenceIterator () {
 }
 
 function* profileBondAeth ({ actionId, amount }) {
-    const channel = Channel.server.profile.bondAeth;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.bondAeth;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, amount, token }]);
 }
@@ -59,14 +60,14 @@ function* profileBondAethSuccess ({ data }) {
 }
 
 function* profileCreateEthAddress ({ passphrase, passphrase1 }) {
-    const channel = Channel.server.auth.generateEthKey;
-    yield call(enableChannel, channel, Channel.client.auth.manager);
+    const channel = getChannels().server.auth.generateEthKey;
+    yield call(enableChannel, channel, getChannels().client.auth.manager);
     yield apply(channel, channel.send, [{ password: passphrase, password1: passphrase1 }]);
 }
 
 function* profileCycleAeth ({ actionId, amount }) {
-    const channel = Channel.server.profile.cycleAeth;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.cycleAeth;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, amount, token }]);
 }
@@ -80,8 +81,8 @@ function* profileCycleAethSuccess ({ data }) {
 }
 
 function* profileCyclingStates () {
-    const channel = Channel.server.profile.cyclingStates;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.cyclingStates;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(channel, channel.send, [{ ethAddress }]);
 }
@@ -96,27 +97,27 @@ function* profileDeleteLogged () {
 }
 
 function* profileExists ({ akashaId }) {
-    const channel = Channel.server.registry.profileExists;
+    const channel = getChannels().server.registry.profileExists;
     if (akashaId.length === 1) {
         yield put(actions.profileExistsSuccess({ akashaId, exists: false, idValid: false }));
     } else {
-        yield call(enableChannel, channel, Channel.client.registry.manager);
+        yield call(enableChannel, channel, getChannels().client.registry.manager);
         yield apply(channel, channel.send, [{ akashaId }]);
     }
 }
 
 function* profileFaucet ({ actionId, ethAddress, withNotification }) {
-    const channel = Channel.server.auth.requestEther;
+    const channel = getChannels().server.auth.requestEther;
     if (!ethAddress) {
         ethAddress = yield select(selectLoggedEthAddress);
     }
-    yield call(enableChannel, channel, Channel.client.auth.manager);
+    yield call(enableChannel, channel, getChannels().client.auth.manager);
     yield apply(channel, channel.send, [{ address: ethAddress, actionId, withNotification }]);
 }
 
 function* profileFollow ({ actionId, ethAddress }) {
-    const channel = Channel.server.profile.followProfile;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.followProfile;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ token, actionId, ethAddress }]);
 }
@@ -131,16 +132,16 @@ function* profileFollowSuccess ({ data }) {
 }
 
 function* profileFollowersIterator ({ context, ethAddress }) {
-    const channel = Channel.server.profile.followersIterator;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.followersIterator;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(channel, channel.send, [{ context, ethAddress, limit: FOLLOWERS_ITERATOR_LIMIT }]);
 }
 
 function* profileFollowingsIterator ({
     context, ethAddress, limit = FOLLOWINGS_ITERATOR_LIMIT, allFollowings
 }) {
-    const channel = Channel.server.profile.followingIterator;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.followingIterator;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(
         channel,
         channel.send,
@@ -149,8 +150,8 @@ function* profileFollowingsIterator ({
 }
 
 function* profileFreeAeth ({ actionId, amount }) {
-    const channel = Channel.server.profile.freeAeth;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.freeAeth;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, amount, token }]);
 }
@@ -160,22 +161,22 @@ function* profileFreeAethSuccess () {
 }
 
 function* profileGetBalance ({ unit = 'ether' }) {
-    const channel = Channel.server.profile.getBalance;
+    const channel = getChannels().server.profile.getBalance;
     const ethAddress = yield select(state => state.profileState.getIn(['loggedProfile', 'ethAddress']));
     if (!ethAddress) {
         return;
     }
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(channel, channel.send, [{ etherBase: ethAddress, unit }]);
 }
 
 function* profileGetByAddress ({ ethAddress }) {
-    const channel = Channel.server.registry.getByAddress;
+    const channel = getChannels().server.registry.getByAddress;
     yield apply(channel, channel.send, [{ ethAddress }]);
 }
 
 function* profileGetData ({ akashaId, context, ethAddress, full = false }) {
-    const channel = Channel.server.profile.getProfileData;
+    const channel = getChannels().server.profile.getProfileData;
     yield apply(channel, channel.send, [{ akashaId, context, ethAddress, full }]);
 }
 
@@ -196,15 +197,15 @@ export function* profileGetExtraOfList (collection, context) {
 }
 
 function* profileGetList ({ ethAddresses }) {
-    const channel = Channel.server.profile.getProfileList;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.getProfileList;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(channel, channel.send, [ethAddresses]);
 }
 
 function* profileGetLocal ({ polling }) {
-    const channel = Channel.server.auth.getLocalIdentities;
-    const checkUpdate = Channel.server.utils.checkUpdate;
-    yield call(enableChannel, channel, Channel.client.auth.manager);
+    const channel = getChannels().server.auth.getLocalIdentities;
+    const checkUpdate = getChannels().server.utils.checkUpdate;
+    yield call(enableChannel, channel, getChannels().client.auth.manager);
     yield apply(checkUpdate, checkUpdate.send, [{}]);
     yield apply(channel, channel.send, [{ polling }]);
 }
@@ -228,9 +229,9 @@ export function* profileGetLogged () {
 
 export function* profileGetPublishingCost () {
     try {
-        const channel = Channel.server.utils.manaCosts;
+        const channel = getChannels().server.utils.manaCosts;
         const loggedProfile = yield select(state => state.profileState.get('loggedProfile'));
-        yield call(enableChannel, channel, Channel.client.utils.manager);
+        yield call(enableChannel, channel, getChannels().client.utils.manager);
         yield apply(channel, channel.send, [{ ethAddress: loggedProfile.get('ethAddress') }]);
     } catch (ex) {
         yield call(actions.profileGetPublishingCostError(ex));
@@ -238,8 +239,8 @@ export function* profileGetPublishingCost () {
 }
 
 function* profileIsFollower ({ followings, ethAddress }) {
-    const channel = Channel.server.profile.isFollower;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.isFollower;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     if (!ethAddress) {
         ethAddress = yield select(selectLoggedEthAddress);
     }
@@ -252,32 +253,32 @@ function* profileIsFollower ({ followings, ethAddress }) {
 function* profileLogin ({ data }) {
     yield fork(watchProfileLoginChannel); // eslint-disable-line no-use-before-define
     const { ...payload } = data;
-    const channel = Channel.server.auth.login;
+    const channel = getChannels().server.auth.login;
     payload.password = new global.TextEncoder('utf-8').encode(payload.password);
     yield apply(channel, channel.send, [{ethAddress: payload.ethAddress, rememberTime: payload.rememberTime}]);
 }
 
 function* profileLogout () {
-    const channel = Channel.server.auth.logout;
+    const channel = getChannels().server.auth.logout;
     yield apply(channel, channel.send, [{}]);
 }
 
 function* profileKarmaRanking () {
-    const channel = Channel.server.profile.karmaRanking;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.karmaRanking;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const following = yield select(selectAllFollowings);
     yield apply(channel, channel.send, [{ following }]);
 }
 
 function* profileManaBurned () {
-    const channel = Channel.server.profile.manaBurned;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.manaBurned;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(channel, channel.send, [{ ethAddress }]);
 }
 
 function* profileMoreFollowersIterator ({ ethAddress }) {
-    const channel = Channel.server.profile.followersIterator;
+    const channel = getChannels().server.profile.followersIterator;
     const last = yield select(state => selectLastFollower(state, ethAddress));
     const payload = {
         ethAddress,
@@ -289,7 +290,7 @@ function* profileMoreFollowersIterator ({ ethAddress }) {
 }
 
 function* profileMoreFollowingsIterator ({ ethAddress }) {
-    const channel = Channel.server.profile.followingIterator;
+    const channel = getChannels().server.profile.followingIterator;
     const last = yield select(state => selectLastFollowing(state, ethAddress));
     const payload = {
         ethAddress,
@@ -301,8 +302,8 @@ function* profileMoreFollowingsIterator ({ ethAddress }) {
 }
 
 function* profileResolveIpfsHash ({ ipfsHash, columnId, akashaIds }) {
-    const channel = Channel.server.profile.resolveProfileIpfsHash;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.resolveProfileIpfsHash;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(channel, channel.send, [{ ipfsHash, columnId, akashaIds }]);
 }
 
@@ -315,8 +316,8 @@ function* profileSaveLogged (loggedProfile) {
 }
 
 function* profileSendTip ({ actionId, akashaId, ethAddress, receiver, value, tokenAmount }) {
-    const channel = Channel.server.profile.tip;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.tip;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{
         token,
@@ -339,8 +340,8 @@ function* profileSendTipSuccess ({ data }) {
 }
 
 function* profileToggleDonations ({ actionId, status }) {
-    const channel = Channel.server.profile.toggleDonations;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.toggleDonations;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ token, actionId, status }]);
 }
@@ -357,8 +358,8 @@ function* profileToggleDonationsSuccess () {
 }
 
 function* profileTransferAeth ({ actionId, akashaId, ethAddress, tokenAmount }) {
-    const channel = Channel.server.profile.transfer;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.transfer;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ token, actionId, akashaId, ethAddress, tokenAmount }]);
 }
@@ -373,8 +374,8 @@ function* profileTransferAethSuccess ({ data }) {
 }
 
 function* profileTransferEth ({ actionId, akashaId, ethAddress, value }) {
-    const channel = Channel.server.profile.transfer;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.transfer;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ token, actionId, akashaId, ethAddress, value }]);
 }
@@ -389,8 +390,8 @@ function* profileTransferEthSuccess ({ data }) {
 }
 
 function* profileTransformEssence ({ actionId, amount }) {
-    const channel = Channel.server.profile.transformEssence;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.transformEssence;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, amount, token }]);
 }
@@ -404,8 +405,8 @@ function* profileTransformEssenceSuccess ({ data }) {
 }
 
 function* profileUnfollow ({ actionId, ethAddress }) {
-    const channel = Channel.server.profile.unFollowProfile;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.unFollowProfile;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ token, actionId, ethAddress }]);
 }
@@ -424,8 +425,8 @@ function* profileUpdate ({ actionId, about, avatar, backgroundImage, firstName, 
     if (isProfileEdit) {
         yield put(appActions.profileEditToggle());
     }
-    const channel = Channel.server.profile.updateProfileData;
-    yield call(enableChannel, channel, Channel.client.profile.manager);
+    const channel = getChannels().server.profile.updateProfileData;
+    yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
     const ipfs = { about, avatar, backgroundImage, firstName, lastName, links };
     yield apply(channel, channel.send, [{ token, actionId, ipfs }]);
@@ -457,8 +458,8 @@ function* profileRegister ({ actionId, akashaId, address, about, avatar, backgro
     if (isProfileEdit) {
         yield put(appActions.profileEditToggle());
     }
-    const channel = Channel.server.registry.registerProfile;
-    yield call(enableChannel, channel, Channel.client.registry.manager);
+    const channel = getChannels().server.registry.registerProfile;
+    yield call(enableChannel, channel, getChannels().client.registry.manager);
     const token = yield select(selectToken);
     const ipfs = { avatar, address, about, backgroundImage, firstName, lastName, links };
     yield apply(channel, channel.send, [{ token, actionId, akashaId, donationsEnabled, ethAddress, ipfs }]);

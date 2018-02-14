@@ -1,4 +1,5 @@
 import { apply, call, fork, put, select, take, takeEvery } from 'redux-saga/effects';
+import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
 import * as actionActions from '../actions/action-actions';
 import * as actions from '../actions/comments-actions';
@@ -18,8 +19,8 @@ function* commentsCheckNew ({ entryId }) {
 }
 
 function* commentsDownvote ({ actionId, commentId, entryId, weight }) {
-    const channel = Channel.server.comments.downvote;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.downvote;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     const token = yield select(selectToken);
     yield apply(
         channel,
@@ -34,8 +35,8 @@ function* commentsDownvoteSuccess ({ data }) {
 }
 
 function* commentsGetCount ({ entryId }) {
-    const channel = Channel.server.comments.commentsCount;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.commentsCount;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     yield apply(channel, channel.send, [{ entryId }]);
 }
 
@@ -70,20 +71,20 @@ function* commentsGetExtra (collection, request) {
 }
 
 function* commentsGetScore ({ commentId }) {
-    const channel = Channel.server.comments.getScore;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.getScore;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     yield apply(channel, channel.send, [{ commentId }]);
 }
 
 function* commentsGetVoteOf ({ data }) {
-    const channel = Channel.server.comments.getVoteOf;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.getVoteOf;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     yield apply(channel, channel.send, [data]);
 }
 
 function* commentsIterator ({ entryId, parent, reversed, toBlock, more, checkNew }) {
-    const channel = Channel.server.comments.commentsIterator;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.commentsIterator;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     let block;
     if (toBlock) {
         block = toBlock;
@@ -100,7 +101,7 @@ function* commentsIterator ({ entryId, parent, reversed, toBlock, more, checkNew
 }
 
 function* commentsMoreIterator ({ entryId, parent }) {
-    const channel = Channel.server.comments.commentsIterator;
+    const channel = getChannels().server.comments.commentsIterator;
     const toBlock = yield select(state => selectCommentLastBlock(state, parent));
     const lastIndex = yield select(state => selectCommentLastIndex(state, parent));
     yield apply(
@@ -111,8 +112,8 @@ function* commentsMoreIterator ({ entryId, parent }) {
 }
 
 function* commentsPublish ({ actionId, ...payload }) {
-    const channel = Channel.server.comments.comment;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.comment;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     const token = yield select(selectToken);
     yield apply(channel, channel.send, [{ actionId, token, ...payload }]);
 }
@@ -129,14 +130,14 @@ function* commentsPublishSuccess ({ data }) {
 }
 
 function* commentsResolveIpfsHash ({ ipfsHashes, commentIds }) {
-    const channel = Channel.server.comments.resolveCommentsIpfsHash;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.resolveCommentsIpfsHash;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     yield apply(channel, channel.send, [ipfsHashes, commentIds]);
 }
 
 function* commentsUpvote ({ actionId, commentId, entryId, weight }) {
-    const channel = Channel.server.comments.upvote;
-    yield call(enableChannel, channel, Channel.client.comments.manager);
+    const channel = getChannels().server.comments.upvote;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
     const token = yield select(selectToken);
     yield apply(
         channel,

@@ -1,6 +1,5 @@
 import BaseService from './base-service';
-
-const Channel = global.Channel;
+import getChannels from 'akasha-channels';
 /**
  * Ipfs process management
  * default open channels => ['startService', 'stopService', 'status', 'resolve']
@@ -9,7 +8,7 @@ const Channel = global.Channel;
 class IpfsService extends BaseService {
     constructor () {
         super();
-        this.clientManager = Channel.client.ipfs.manager;
+        this.clientManager = getChannels().client.ipfs.manager;
         this.ipfsLoggerInterval = null;
     }
 
@@ -19,8 +18,8 @@ class IpfsService extends BaseService {
      * @return promise
      */
     start = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const serverChannel = Channel.server.ipfs.startService;
-        const clientChannel = Channel.client.ipfs.startService;
+        const serverChannel = getChannels().server.ipfs.startService;
+        const clientChannel = getChannels().client.ipfs.startService;
 
         this.registerListener(
             clientChannel,
@@ -32,7 +31,7 @@ class IpfsService extends BaseService {
      * Register stop ipfs listener
      */
     registerStopListener = ({ onError = () => {}, onSuccess }) => {
-        const clientChannel = Channel.client.ipfs.stopService;
+        const clientChannel = getChannels().client.ipfs.stopService;
         this.registerListener(
             clientChannel,
             this.createListener(onError, onSuccess, clientChannel.channelName)
@@ -42,7 +41,7 @@ class IpfsService extends BaseService {
      * Stop ipfs service
      */
     stop = ({ options = {} }) => {
-        const serverChannel = Channel.server.ipfs.stopService;
+        const serverChannel = getChannels().server.ipfs.stopService;
         serverChannel.send(options);
     };
     /**
@@ -56,8 +55,8 @@ class IpfsService extends BaseService {
      * }
      */
     getStatus = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const serverChannel = Channel.server.ipfs.status;
-        const clientChannel = Channel.client.ipfs.status;
+        const serverChannel = getChannels().server.ipfs.status;
+        const clientChannel = getChannels().client.ipfs.status;
         this.registerListener(
             clientChannel,
             this.createListener(onError, onSuccess, clientChannel.channelName)
@@ -66,8 +65,8 @@ class IpfsService extends BaseService {
     };
 
     resolve = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const serverChannel = Channel.server.ipfs.resolve;
-        const clientChannel = Channel.client.ipfs.resolve;
+        const serverChannel = getChannels().server.ipfs.resolve;
+        const clientChannel = getChannels().client.ipfs.resolve;
         this.registerListener(
             clientChannel,
             this.createListener(onError, onSuccess, clientChannel.channelName)
@@ -78,8 +77,8 @@ class IpfsService extends BaseService {
      * Retrieve config used by ipfs
      */
     getConfig = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const clientChannel = Channel.client.ipfs.getConfig;
-        const serverChannel = Channel.server.ipfs.getConfig;
+        const clientChannel = getChannels().client.ipfs.getConfig;
+        const serverChannel = getChannels().server.ipfs.getConfig;
 
         return this.openChannel({
             clientManager: this.clientManager,
@@ -95,8 +94,8 @@ class IpfsService extends BaseService {
      * Retrieve ports used by ipfs
      */
     getPorts = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const clientChannel = Channel.client.ipfs.getPorts;
-        const serverChannel = Channel.server.ipfs.getPorts;
+        const clientChannel = getChannels().client.ipfs.getPorts;
+        const serverChannel = getChannels().server.ipfs.getPorts;
 
         return this.openChannel({
             clientManager: this.clientManager,
@@ -109,8 +108,8 @@ class IpfsService extends BaseService {
     };
 
     setPorts = ({ ports, restart = false, onError = () => {}, onSuccess }) => {
-        const clientChannel = Channel.client.ipfs.setPorts;
-        const serverChannel = Channel.server.ipfs.setPorts;
+        const clientChannel = getChannels().client.ipfs.setPorts;
+        const serverChannel = getChannels().server.ipfs.setPorts;
         const portsObj = { api: ports.apiPort, gateway: ports.gatewayPort, swarm: ports.swarmPort };
         return this.openChannel({
             clientManager: this.clientManager,
@@ -126,8 +125,8 @@ class IpfsService extends BaseService {
      *  Retrieve IPFS logs
      */
     getLogs = ({ options = {}, onError = () => {}, onSuccess }) => {
-        const serverChannel = Channel.server.ipfs.logs;
-        const clientChannel = Channel.client.ipfs.logs;
+        const serverChannel = getChannels().server.ipfs.logs;
+        const clientChannel = getChannels().client.ipfs.logs;
 
         this.openChannel({
             clientManager: this.clientManager,
@@ -142,8 +141,8 @@ class IpfsService extends BaseService {
     };
 
     stopLogger = () => {
-        const serverChannel = Channel.server.ipfs.logs;
-        const clientChannel = Channel.client.ipfs.logs;
+        const serverChannel = getChannels().server.ipfs.logs;
+        const clientChannel = getChannels().client.ipfs.logs;
 
         clearInterval(this.ipfsLoggerInterval);
         this.closeChannel(serverChannel, clientChannel);
