@@ -12,7 +12,7 @@ window.addEventListener('load', function () {
     let web3Local;
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
-        if (web3Local.eth.accounts.length) {
+        if (!web3Local.eth.accounts.length) {
             return startApp(web3Local, false);
         }
     }
