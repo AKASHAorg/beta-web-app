@@ -3,7 +3,6 @@ import webpack from 'webpack';
 import merge from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import ExtractTextPlugin from "extract-text-webpack-plugin";
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const port = process.env.PORT || 3000;
 const publicPath = `https://localhost:${port}/dist`;
@@ -160,7 +159,6 @@ export default merge(baseConfig, {
             'process.env.DARK_THEME': JSON.stringify(process.env.DARK_THEME),
             'process.env.AKASHA_VERSION': JSON.stringify('beta#0')
         }),
-        new CleanWebpackPlugin(['dist']),
 
         new HtmlWebpackPlugin({
             template: './app/hot-dev-app.html'

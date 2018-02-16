@@ -33,7 +33,8 @@ export default {
         ],
         alias: {
             joi: 'joi-browser',
-            "akasha-channels$": path.resolve(__dirname, 'main/channels.js')
+            "akasha-channels$": path.resolve(__dirname, 'main/channels.js'),
+            zlib: 'browserify-zlib-next'
         }
     },
 

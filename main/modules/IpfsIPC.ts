@@ -9,7 +9,7 @@ class IpfsIPC extends ModuleEmitter {
     constructor() {
         super();
         this.MODULE_NAME = 'ipfs';
-        this.DEFAULT_MANAGED = ['startService', 'stopService', 'status', 'resolve'];
+        this.DEFAULT_MANAGED = ['startService', 'stopService', 'status', 'resolve', 'setPorts', 'getPorts'];
     }
 
     public initListeners() {

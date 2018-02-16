@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "tsc -p tsconfig.json",
     "start": "cross-env NODE_ENV=development node -r babel-register ./node_modules/webpack-dev-server/bin/webpack-dev-server --config ./webpack.config.development.js",
-    "production": "tsc -p tsconfig.json && cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors"
+    "production": "tsc -p tsconfig.json && cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
+    "build-worker": "cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.worker.js --progress --profile --colors"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "@types/mocha": "2.2.48",
     "@types/node": "9.4.5",
     "@types/rimraf": "2.0.2",
+    "@types/sharedworker": "0.0.27",
     "antd": "3.2.1",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
