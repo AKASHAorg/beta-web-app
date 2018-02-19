@@ -28,6 +28,8 @@ const appState = createReducer(initialState, {
 
     [types.HIDE_TERMS]: state => state.set('showTerms', false),
 
+    [types.HIDE_NOTIFICATIONS_PANEL]: state => state.set('showNotificationsPanel', false),
+
     [types.HIDE_TRANSACTIONS_LOG]: state => state.set('showTransactionsLog', false),
 
     [types.NAV_COUNTER_INCREMENT]: (state, { navType }) => {
@@ -91,6 +93,8 @@ const appState = createReducer(initialState, {
 
     [types.SHOW_TERMS]: state => state.set('showTerms', true),
 
+    [types.SHOW_NOTIFICATIONS_PANEL]: state => state.set('showNotificationsPanel', true),
+
     [types.SHOW_TRANSACTIONS_LOG]: state => state.set('showTransactionsLog', true),
 
     [types.TOGGLE_AETH_WALLET]: state =>
@@ -111,10 +115,17 @@ const appState = createReducer(initialState, {
     [types.TOGGLE_NAVIGATION_MODAL]: state =>
         state.set('showNavigationModal', !state.get('showNavigationModal')),
 
-    [types.TOGGLE_OUTSIDE_NAVIGATION_MODAL]: (state, { url }) =>
+    [types.TOGGLE_OUTSIDE_NAVIGATION_MODAL_SUCCESS]: (state, { url }) =>
         state.mergeIn(['outsideNavigation'], {
             isVisible: !!url,
             url,
+            isTrusted: false
+        }),
+    [types.TOGGLE_OUTSIDE_NAVIGATION_MODAL_REDIRECT]: (state, { url }) =>
+        state.mergeIn(['outsideNavigation'], {
+            isVisible: !!url,
+            url,
+            isTrusted: true
         }),
     '@@router/LOCATION_CHANGE': (state, { payload }) => {
         const { pathname } = payload;

@@ -159,6 +159,17 @@ class NewEntryPage extends Component {
                     })
                 );
             }
+            return this.props.draftUpdate(
+                draftObj.merge({
+                    ethAddress: loggedProfile.get('ethAddress'),
+                        content: draftObj.get('content').merge({
+                            licence: draftObj.getIn(['content', 'licence']).merge({
+                                parent: licence,
+                                id: null,
+                            })
+                        })
+                })
+            );
         }
         return this.props.draftUpdate(
             draftObj.merge({
@@ -251,7 +262,6 @@ class NewEntryPage extends Component {
                     { draft: publishPayload, entryId: draftObj.id }
                 );
             }).catch((errors) => {
-                console.log(errors, 'the errors');
                 this.setState({ errors });
             });
         }, 100);
@@ -327,6 +337,11 @@ class NewEntryPage extends Component {
             return true;
         }
         return false;
+    }
+    _handleTitleKeyPress = (ev) => {
+        if (ev.keyCode === 13) {
+            this.editor.focus();
+        }
     }
     /* eslint-disable complexity */
     render () {
@@ -426,6 +441,7 @@ class NewEntryPage extends Component {
                       }
                       placeholder={intl.formatMessage(entryMessages.title)}
                       onChange={this._handleTitleChange}
+                      onKeyDown={this._handleTitleKeyPress}
                       value={title}
                     />
                     {errors.title &&
@@ -511,6 +527,7 @@ class NewEntryPage extends Component {
                         <EntryVersionTimeline
                           draftObj={draftObj}
                           onRevertConfirm={this._showRevertConfirm}
+                          intl={intl}
                         />
                       </div>
                     }

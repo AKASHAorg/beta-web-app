@@ -240,11 +240,6 @@
     "defaultMessage": "Geth service ON"
   },
   {
-    "id": "app.general.go",
-    "description": "go",
-    "defaultMessage": "Go"
-  },
-  {
     "id": "app.general.help",
     "description": "Help button label",
     "defaultMessage": "Help"
@@ -317,7 +312,7 @@
   {
     "id": "app.general.manaPool",
     "description": "mana pool",
-    "defaultMessage": "Mana Pool Info"
+    "defaultMessage": "Total Mana Consumed"
   },
   {
     "id": "app.general.manafied",
@@ -328,11 +323,6 @@
     "id": "app.general.minutesCount",
     "description": "short form of minutes count",
     "defaultMessage": "{minutes, number} min"
-  },
-  {
-    "id": "app.general.navigateToLink",
-    "description": "tooltip for navigate to link button",
-    "defaultMessage": "Navigate to link"
   },
   {
     "id": "app.general.next",
@@ -362,7 +352,7 @@
   {
     "id": "app.general.notifications",
     "description": "notifications",
-    "defaultMessage": "Notifications (coming soon)"
+    "defaultMessage": "Notifications"
   },
   {
     "id": "app.general.ok",
@@ -518,11 +508,6 @@
     "id": "app.general.settings",
     "description": "settings button label",
     "defaultMessage": "Settings"
-  },
-  {
-    "id": "app.general.share",
-    "description": "share",
-    "defaultMessage": "Share"
   },
   {
     "id": "app.general.sidebarTooltipDashboard",
@@ -732,7 +717,7 @@
   {
     "id": "app.general.noFollowings",
     "description": "info when user is not following anyone",
-    "defaultMessage": "You are not following anyone."
+    "defaultMessage": "Follow someone to see your proto-reputation network"
   },
   {
     "id": "app.general.sidebarEntryTypeArticle",
@@ -768,5 +753,70 @@
     "id": "app.general.collectAll",
     "description": "collect all Essence",
     "defaultMessage": "Collect all"
+  },
+  {
+    "id": "app.general.noTransactionsTitle",
+    "description": "no transactions message title",
+    "defaultMessage": "No transactions yet"
+  },
+  {
+    "id": "app.general.noTransactionsDescription",
+    "description": "no transaction message description",
+    "defaultMessage": "Your transactions will be displayed here"
+  },
+  {
+    "id": "app.general.noEssenceToCollectTitle",
+    "description": "message title when you don`t have any essence to collect",
+    "defaultMessage": "No essence to collect"
+  },
+  {
+    "id": "app.general.noEssenceToCollectDescription",
+    "description": "message description when you don`t have any essence to collect",
+    "defaultMessage": "Generate Essence by posting and interacting"
+  },
+  {
+    "id": "app.general.noEssenceWasCollectedTitle",
+    "description": "message for essence history popover, when there is not transaction history",
+    "defaultMessage": "No essence collected"
+  },
+  {
+    "id": "app.general.noEssenceWasCollectedDescription",
+    "description": "message for essence history popover, when there is not transaction history",
+    "defaultMessage": "Generate Essence by posting and interacting"
+  },
+  {
+    "id": "app.entry.startTypingToSearch",
+    "description": "start typing to search",
+    "defaultMessage": "Start typing to search"
+  },
+  {
+    "id": "app.entry.searchingNoResults",
+    "description": "searching for a term returned no results message",
+    "defaultMessage": "Searching for \"{searchTerm}\" returned 0 {resource}. Please try another word!"
+  },
+  {
+    "id": "app.general.go",
+    "description": "go",
+    "defaultMessage": "Go"
+  },
+  {
+    "id": "app.general.navigateToLink",
+    "description": "tooltip for navigate to link button",
+    "defaultMessage": "Navigate to link"
+  },
+  {
+    "id": "app.general.share",
+    "description": "share",
+    "defaultMessage": "Share"
+  },
+  {
+    "id": "app.general.trustedDomain",
+    "description": "title for external navigation modal checkbox for trusted domains",
+    "defaultMessage": "Trusted Domain"
+  },
+  {
+    "id": "app.general.viewAll",
+    "description": "view all",
+    "defaultMessage": "View All"
   }
 ]

@@ -201,6 +201,11 @@ export const ErrorNotification = Loadable({
     loading: Loading,
 });
 
+export const EssenceHistory = Loadable({
+    loader: () => import( /* webpackChunkName: "EssenceHistory" */'./essence-history'),
+    loading: Loading,
+});
+
 export const EssencePopover = Loadable({
     loader: () => import( /* webpackChunkName: "EssencePopover" */'./popovers/essence-popover'),
     loading: Loading,
@@ -423,6 +428,16 @@ export const Notification = Loadable({
 
 export const NotificationHighlightNote = Loadable({
     loader: () => import( /* webpackChunkName: "NotificationHighlightNote" */'./notifications/notification-highlight-note'),
+    loading: Loading,
+});
+
+export const NotificationLog = Loadable({
+    loader: () => import( /* webpackChunkName: "NotificationLog" */'./panels/notification-log'),
+    loading: Loading,
+});
+
+export const NotificationsPanel = Loadable({
+    loader: () => import( /* webpackChunkName: "NotificationsPanel" */'./panels/notifications-panel'),
     loading: Loading,
 });
 
@@ -723,6 +738,11 @@ export const TipPopover = Loadable({
 
 export const TopBar = Loadable({
     loader: () => import( /* webpackChunkName: "TopBar" */'./top-bars/top-bar'),
+    loading: Loading,
+});
+
+export const TopBarIcon = Loadable({
+    loader: () => import( /* webpackChunkName: "TopBarIcon" */'./top-bars/dashboard-top-bar-icon'),
     loading: Loading,
 });
 

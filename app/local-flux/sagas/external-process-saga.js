@@ -4,10 +4,11 @@ import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel } from './helpers';
 import * as actions from '../actions/external-process-actions';
 import * as appActions from '../actions/app-actions';
+import * as profileActions from '../actions/profile-actions';
 import * as searchActions from '../actions/search-actions';
 import * as types from '../constants';
 import { selectGethStatus, selectGethSyncActionId, selectLastGethLog,
-    selectLastIpfsLog } from '../selectors';
+    selectLastIpfsLog, selectLoggedEthAddress } from '../selectors';
 
 let gethSyncInterval = null;
 
@@ -277,6 +278,11 @@ function* watchGethGetStatusChannel () {
             yield put(actions.gethGetStatusError(resp.error));
         } else {
             yield put(actions.gethGetStatusSuccess(resp.data, resp.services));
+            const ethAddress = yield select(selectLoggedEthAddress);
+            const notificationsLoaded = yield select(state => state.notificationsState.notificationsLoaded);
+            if (ethAddress && notificationsLoaded) {
+                yield put(profileActions.profileSaveLastBlockNr());
+            }
         }
     }
 }

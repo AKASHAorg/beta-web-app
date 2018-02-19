@@ -32,16 +32,17 @@ function* profileAethTransfersIterator () {
 }
 
 function* profileEssenceIterator () {
-    const channel = getChannels().server.profile.essenceIterator;
+    const channel = self.getChannels().server.profile.essenceIterator;
     yield call(enableChannel, channel, getChannels().client.profile.manager);
     const ethAddress = yield select(selectLoggedEthAddress);
     const essenceStep = yield select(selectEssenceIterator);
     const lastBlock = (essenceStep.lastBlock === null) ?
         yield select(selectBlockNumber) :
         essenceStep.lastBlock;
+    const moreRequest = !!essenceStep.lastBlock;
     yield apply(channel,
         channel.send,
-        [reject(isNil, { ethAddress, lastBlock, lastIndex: essenceStep.lastIndex, limit: 16 })]);
+        [reject(isNil, { ethAddress, lastBlock, lastIndex: essenceStep.lastIndex, limit: 16, moreRequest })]);
 }
 
 function* profileBondAeth ({ actionId, amount }) {
@@ -255,7 +256,7 @@ function* profileLogin ({ data }) {
     const { ...payload } = data;
     const channel = getChannels().server.auth.login;
     payload.password = new global.TextEncoder('utf-8').encode(payload.password);
-    yield apply(channel, channel.send, [{ethAddress: payload.ethAddress, rememberTime: payload.rememberTime}]);
+    yield apply(channel, channel.send, [payload]);
 }
 
 function* profileLogout () {
@@ -305,6 +306,16 @@ function* profileResolveIpfsHash ({ ipfsHash, columnId, akashaIds }) {
     const channel = getChannels().server.profile.resolveProfileIpfsHash;
     yield call(enableChannel, channel, getChannels().client.profile.manager);
     yield apply(channel, channel.send, [{ ipfsHash, columnId, akashaIds }]);
+}
+
+function* profileSaveLastBlockNr () {
+    const ethAddress = yield select(selectLoggedEthAddress);
+    const blockNr = yield select(selectBlockNumber);
+    try {
+        yield apply(profileService, profileService.profileSaveLastBlockNr, [{ ethAddress, blockNr }]);
+    } catch (error) {
+        yield put(actions.profileSaveLastBlockNrError(error));
+    }
 }
 
 function* profileSaveLogged (loggedProfile) {
@@ -478,7 +489,7 @@ function* profileRegisterSuccess (payload) {
 }
 
 
-// Channel watchers
+// getChannels() watchers
 
 function* watchProfileAethTransfersIteratorChannel () {
     while (true) {
@@ -816,10 +827,9 @@ function* watchProfileKarmaRankingChannel () {
 
 function* watchProfileLoginChannel () {
     const resp = yield take(actionChannels.auth.login);
-    console.log('response login', resp);
     if (resp.error) {
         yield put(actions.profileLoginError(resp.error));
-    } else if (resp.request.ethAddress === resp.data.ethAddress) {
+    } else if (resp.request.account === resp.data.account) {
         const { akashaId, ethAddress, reauthenticate } = resp.request;
         if (!reauthenticate && akashaId) {
             resp.data.akashaId = akashaId;
@@ -1094,6 +1104,7 @@ export function* watchProfileActions () { // eslint-disable-line max-statements
     yield takeEvery(types.PROFILE_MORE_FOLLOWERS_ITERATOR, profileMoreFollowersIterator);
     yield takeEvery(types.PROFILE_MORE_FOLLOWINGS_ITERATOR, profileMoreFollowingsIterator);
     yield takeEvery(types.PROFILE_RESOLVE_IPFS_HASH, profileResolveIpfsHash);
+    yield takeEvery(types.PROFILE_SAVE_LAST_BLOCK_NR, profileSaveLastBlockNr);
     yield takeEvery(types.PROFILE_SEND_TIP, profileSendTip);
     yield takeEvery(types.PROFILE_SEND_TIP_SUCCESS, profileSendTipSuccess);
     yield takeEvery(types.PROFILE_TOGGLE_DONATIONS, profileToggleDonations);

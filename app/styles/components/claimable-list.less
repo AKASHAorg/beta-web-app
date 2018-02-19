@@ -5,12 +5,7 @@
         color: @heading-color;
         font-weight: 500;
         padding: 0px 16px;
-        border-bottom: 1px solid @light-border;
         height: 40px;
-    }
-
-    &__back-icon {
-        margin-right: 10px;
     }
 
     &__counter {
@@ -36,8 +31,10 @@
     }
 
     &__list-wrapper {
-        height: ~'calc(100% - 40px)';
-        margin-right: 4px;        
+        height: ~'calc(100% - 40px - 56px)';
+        border-top: 1px solid @light-border;
+        border-bottom: 1px solid @light-border;
+        margin-right: 4px;
     }
 
     &__list {
@@ -45,6 +42,32 @@
         overflow-y: auto;
         padding-right: 12px;
         padding-left: 16px;
+    }
+    &__list-placeholder-wrapper {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+    &__list-placeholder {
+        width: 100%;
+        &_image {
+            background: @essence-collect-empty-state-bg top center no-repeat;
+            height: 67px;
+            width: 100%;
+        }
+        &_text {
+            width: 100%;
+            flex-grow: 1;
+            color: @text-color-secondary;
+            text-align: center;
+            margin-top: 1.4em;
+            font-size: 0.86em;
+            div:first-child {
+                font-size: 1.2em;
+                font-weight: 500;
+                color: @text-color;
+            }
+        }
     }
 
     &__row {
@@ -69,7 +92,7 @@
         line-height: 22px;
         font-weight: 500;
         display: inline-block;
-        max-width: 212px;  
+        max-width: 212px;
     }
 
     &__entry-title-placeholder {
@@ -105,6 +128,7 @@
     &__collect-in {
         font-size: 12px;
         color: @text-color-secondary;
+        text-align: center;
     }
 
     &__collected {
@@ -113,5 +137,18 @@
 
     &__check-icon {
         color: @success-color;
+    }
+
+    &__actions {
+        height: 56px;
+        padding: 12px 36px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &__button {
+        width: ~'calc(50% - 6px)';
+        padding: 0px 8px;
     }
 }

@@ -54,7 +54,7 @@ export const profileMessages = defineMessages({
     cyclingPlaceholder: {
         id: 'app.profile.cyclingPlaceholder',
         description: 'placeholder for empty cycling AETH table',
-        defaultMessage: 'No Cycling AETH pending'
+        defaultMessage: 'No AETH cycling in progress'
     },
     cyclingProcess: {
         id: 'app.profile.cyclingProcess',
@@ -321,5 +321,15 @@ export const profileMessages = defineMessages({
         id: 'app.profile.yourEthAddress',
         description: 'label for ethereum address input',
         defaultMessage: 'Your ethereum address'
-    }
+    },
+    noNotifications: {
+        id: 'app.profile.noNotifications',
+        description: 'placeholder message for empty notifcations panel log',
+        defaultMessage: 'You have not received any new notifications'
+    },
+    profiles: {
+        id: 'app.profile.profiles',
+        description: 'plural form of profile :)',
+        defaultMessage: 'profiles'
+    },
 });

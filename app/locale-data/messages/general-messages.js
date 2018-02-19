@@ -242,11 +242,6 @@ const generalMessages = defineMessages({
         description: 'geth service is started',
         defaultMessage: 'Geth service ON'
     },
-    go: {
-        id: 'app.general.go',
-        description: 'go',
-        defaultMessage: 'Go'
-    },
     help: {
         id: 'app.general.help',
         description: 'Help button label',
@@ -323,7 +318,7 @@ const generalMessages = defineMessages({
     manaPool: {
         id: 'app.general.manaPool',
         description: 'mana pool',
-        defaultMessage: 'Mana Pool Info'
+        defaultMessage: 'Total Mana Consumed'
     },
     manafied: {
         id: 'app.general.manafied',
@@ -334,11 +329,6 @@ const generalMessages = defineMessages({
         id: 'app.general.minutesCount',
         description: 'short form of minutes count',
         defaultMessage: '{minutes, number} min'
-    },
-    navigateToLink: {
-        id: 'app.general.navigateToLink',
-        description: 'tooltip for navigate to link button',
-        defaultMessage: 'Navigate to link'
     },
     next: {
         id: 'app.general.next',
@@ -368,7 +358,7 @@ const generalMessages = defineMessages({
     notifications: {
         id: 'app.general.notifications',
         description: 'notifications',
-        defaultMessage: 'Notifications (coming soon)'
+        defaultMessage: 'Notifications'
     },
     ok: {
         id: 'app.general.ok',
@@ -524,11 +514,6 @@ const generalMessages = defineMessages({
         id: 'app.general.settings',
         description: 'settings button label',
         defaultMessage: 'Settings'
-    },
-    share: {
-        id: 'app.general.share',
-        description: 'share',
-        defaultMessage: 'Share'
     },
     sidebarTooltipDashboard: {
         id: 'app.general.sidebarTooltipDashboard',
@@ -741,7 +726,7 @@ const generalMessages = defineMessages({
     noFollowings: {
         id: 'app.general.noFollowings',
         description: 'info when user is not following anyone',
-        defaultMessage: 'You are not following anyone.'
+        defaultMessage: 'Follow someone to see your proto-reputation network'
     },
     sidebarEntryTypeArticle: {
         id: 'app.general.sidebarEntryTypeArticle',
@@ -778,5 +763,70 @@ const generalMessages = defineMessages({
         description: 'collect all Essence',
         defaultMessage: 'Collect all'
     },
+    noTransactionsTitle: {
+        id: 'app.general.noTransactionsTitle',
+        description: 'no transactions message title',
+        defaultMessage: 'No transactions yet'
+    },
+    noTransactionsDescription: {
+        id: 'app.general.noTransactionsDescription',
+        description: 'no transaction message description',
+        defaultMessage: 'Your transactions will be displayed here'
+    },
+    noEssenceToCollectTitle: {
+        id: 'app.general.noEssenceToCollectTitle',
+        description: 'message title when you don`t have any essence to collect',
+        defaultMessage: 'No essence to collect'
+    },
+    noEssenceToCollectDescription: {
+        id: 'app.general.noEssenceToCollectDescription',
+        description: 'message description when you don`t have any essence to collect',
+        defaultMessage: 'Generate Essence by posting and interacting'
+    },
+    noEssenceWasCollectedTitle: {
+        id: 'app.general.noEssenceWasCollectedTitle',
+        description: 'message for essence history popover, when there is not transaction history',
+        defaultMessage: 'No essence collected'
+    },
+    noEssenceWasCollectedDescription: {
+        id: 'app.general.noEssenceWasCollectedDescription',
+        description: 'message for essence history popover, when there is not transaction history',
+        defaultMessage: 'Generate Essence by posting and interacting'
+    },
+    startTypingToSearch: {
+        id: 'app.entry.startTypingToSearch',
+        description: 'start typing to search',
+        defaultMessage: 'Start typing to search'
+    },
+    searchingNoResults: {
+        id: 'app.entry.searchingNoResults',
+        description: 'searching for a term returned no results message',
+        defaultMessage: 'Searching for "{searchTerm}" returned 0 {resource}. Please try another word!'
+    },
+    go: {
+        id: 'app.general.go',
+        description: 'go',
+        defaultMessage: 'Go'
+    },
+    navigateToLink: {
+        id: 'app.general.navigateToLink',
+        description: 'tooltip for navigate to link button',
+        defaultMessage: 'Navigate to link'
+    },
+    share: {
+        id: 'app.general.share',
+        description: 'share',
+        defaultMessage: 'Share'
+    },
+    trustedDomain: {
+        id: 'app.general.trustedDomain',
+        description: 'title for external navigation modal checkbox for trusted domains',
+        defaultMessage: 'Trusted Domain'
+    },
+    viewAll: {
+        id: 'app.general.viewAll',
+        description: 'view all',
+        defaultMessage: 'View All'
+    }
 });
 export { generalMessages };

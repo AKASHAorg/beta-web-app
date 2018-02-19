@@ -25,10 +25,12 @@ export const AppRecord = Record({
     outsideNavigation: new Map({
         url: null,
         isVisible: false,
+        isTrusted: false
     }),
     showGethDetailsModal: false,
     showIpfsDetailsModal: false,
     showNavigationModal: false,
+    showNotificationsPanel: false,
     showPreview: null,
     showProfileEditor: false,
     showReportModal: null,

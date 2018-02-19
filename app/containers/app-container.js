@@ -12,16 +12,18 @@ import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
 import { entryVoteCost } from '../local-flux/actions/entry-actions';
 import { gethGetStatus } from '../local-flux/actions/external-process-actions';
 import { licenseGetAll } from '../local-flux/actions/license-actions';
+import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-actions';
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
 import { AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayModal,
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, Highlights, IpfsDetailsModal,
-    Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar, Notification, PageContent,
-    PreviewPanel, ProfileOverview, ProfileOverviewSecondarySidebar, ProfilePage, ProfileEdit,
-    SecondarySidebar, SetupPages, Sidebar, Terms, TopBar, TransactionsLogPanel, ProfileSettings, WalletPanel,
-    FullSizeImageViewer } from '../components';
+    Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar, Notification,
+    NotificationsPanel, PageContent, PreviewPanel, ProfileOverview, ProfileOverviewSecondarySidebar,
+    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar, TransactionsLogPanel,
+    ProfileSettings, WalletPanel, FullSizeImageViewer } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
+import { selectLoggedEthAddress } from '../local-flux/selectors/index';
 
 notification.config({
     top: 60,
@@ -129,8 +131,8 @@ class AppContainer extends Component {
 
     render () {
         /* eslint-disable no-shadow */
-        const { activeDashboard, appState, hideTerms, history, intl,
-            location, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
+        const { activeDashboard, appState, hideTerms, history, intl, location,
+            loggedEthAddress, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
 
         if(!web3) {
             return (
@@ -215,6 +217,9 @@ class AppContainer extends Component {
                       {appState.get('showTransactionsLog') &&
                         <TransactionsLogPanel />
                       }
+                      {appState.get('showNotificationsPanel') &&
+                        <NotificationsPanel />
+                      }
                     </div>
                   </DataLoader>
                 }
@@ -224,6 +229,8 @@ class AppContainer extends Component {
                 <FullSizeImageViewer />
                 <ErrorNotification />
                 <NavigateAwayModal
+                  loggedEthAddress={loggedEthAddress}
+                  userSettingsAddTrustedDomain={this.props.userSettingsAddTrustedDomain}
                   navigation={appState.get('outsideNavigation')}
                   onClick={this.props.toggleOutsideNavigation}
                 />
@@ -256,6 +263,7 @@ AppContainer.propTypes = {
     intl: PropTypes.shape(),
     licenseGetAll: PropTypes.func,
     location: PropTypes.shape().isRequired,
+    loggedEthAddress: PropTypes.string,
     needAuth: PropTypes.string,
     needEth: PropTypes.bool,
     needAeth: PropTypes.bool,
@@ -267,7 +275,8 @@ AppContainer.propTypes = {
     navForwardCounterReset: PropTypes.func,
     navCounterIncrement: PropTypes.func,
     web3: PropTypes.bool,
-    unlocked: PropTypes.bool
+    unlocked: PropTypes.bool,
+    userSettingsAddTrustedDomain: PropTypes.func,
 };
 
 function mapStateToProps (state) {
@@ -276,6 +285,7 @@ function mapStateToProps (state) {
         appState: state.appState,
         errorState: state.errorState,
         faucet: state.profileState.get('faucet'),
+        loggedEthAddress: selectLoggedEthAddress(state),
         needAuth: state.actionState.get('needAuth'),
         needEth: state.actionState.get('needEth'),
         needAeth: state.actionState.get('needAeth'),
@@ -298,6 +308,7 @@ export default DragDropContext(HTML5Backend)(connect(
         toggleNavigationModal,
         toggleOutsideNavigation,
         navCounterIncrement,
-        navForwardCounterReset
+        navForwardCounterReset,
+        userSettingsAddTrustedDomain
     }
 )(injectIntl(AppContainer)));

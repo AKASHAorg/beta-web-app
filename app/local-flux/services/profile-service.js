@@ -25,12 +25,9 @@ export const profileGetSuggestions = akashaId =>
             .catch(err => reject(err))
     );
 
-export const profileSaveLogged = profile => {
-    console.log('saving', profile);
-    return profileDB.loggedProfile.clear()
+export const profileSaveLogged = profile =>
+    profileDB.loggedProfile.clear()
         .then(() => profileDB.loggedProfile.put(profile));
-};
-
 
 export const profileUpdateLogged = profile =>
     new Promise((resolve, reject) =>
@@ -39,3 +36,22 @@ export const profileUpdateLogged = profile =>
             .then(resolve)
             .catch(reject)
     );
+
+export const profileSaveLastBlockNr = payload =>
+    new Promise((resolve, reject) => {
+        profileDB.lastBlockNrs.put({ ...payload })
+            .then(ethAddress => resolve({ ethAddress }))
+            .catch(err => reject(err));
+    });
+export const profileGetLastBlockNr = ethAddress =>
+    new Promise((resolve, reject) => {
+        profileDB.lastBlockNrs
+            .where('ethAddress')
+            .equals(ethAddress)
+            .toArray()
+            .then((data) => {
+                const blockNr = data[0] ? data[0].blockNr : 0;
+                resolve(blockNr);
+            })
+            .catch(reject);
+    });

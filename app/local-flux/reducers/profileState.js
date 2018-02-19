@@ -103,7 +103,7 @@ const profileState = createReducer(initialState, {
         state.set('loggedProfile', new LoggedProfile()),
 
     [types.PROFILE_ESSENCE_ITERATOR]: (state) => {
-        const flag = state.getIn(['essenceIterator', 'lastIndex']) ?
+        const flag = state.getIn(['essenceIterator', 'lastBlock']) ?
             'fetchingMoreEssenceIterator' :
             'fetchingEssenceIterator';
         return state.setIn(['flags', flag], true);
@@ -134,7 +134,7 @@ const profileState = createReducer(initialState, {
 
         const latestSet = Collection.Set(latestIterable);
         latestIterable = essenceEvents.concat(latestSet);
-        const flag = request.lastIndex ? 'fetchingMoreEssenceIterator' : 'fetchingEssenceIterator';
+        const flag = request.moreRequest ? 'fetchingMoreEssenceIterator' : 'fetchingEssenceIterator';
 
         return state.merge({
             essenceEvents: latestIterable,
@@ -145,11 +145,9 @@ const profileState = createReducer(initialState, {
 
     [types.PROFILE_EXISTS_SUCCESS]: (state, { data }) =>
         state.merge({
-            exists: state.get('exists').merge({
-                akashaId: data.akashaId,
-                data: new ProfileExistsRecord(data)
-            })
+            exists: state.get('exists').set(data.akashaId, new ProfileExistsRecord(data))
         }),
+
     [types.PROFILE_FAUCET]: state => state.set('faucet', 'requested'),
     [types.PROFILE_FAUCET_ERROR]: state => state.set('faucet', 'error'),
 

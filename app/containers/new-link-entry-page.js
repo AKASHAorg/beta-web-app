@@ -17,6 +17,7 @@ import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
 import * as actionTypes from '../constants/action-types';
+import { entryTypes } from '../constants/entry-types';
 
 const { EditorState } = DraftJS;
 const { confirm } = Modal;
@@ -32,22 +33,55 @@ class NewLinkEntryPage extends Component {
             infoExtracted: false,
         };
     }
-
+    componentWillMount () {
+        const { draftObj } = this.props;
+        if (draftObj) {
+            const shouldProcessUrl = draftObj.getIn(['content', 'cardInfo', 'url']).length > 0;
+            if (shouldProcessUrl) {
+                this._processUrl();
+            }
+        }
+    }
     componentWillReceiveProps (nextProps) {
-        const { draftObj } = nextProps;
+        const { draftObj, drafts } = nextProps;
+        const { history } = this.props;
+        const isSameEntry = draftObj && this.props.draftObj &&
+            draftObj.get('id') === this.props.draftObj.get('id');
+        const isNewlyLoaded = draftObj && !this.props.draftObj;
+        const shouldProcessUrl = draftObj && draftObj.getIn(['content', 'cardInfo', 'url']).length > 0 &&
+            (!isSameEntry || isNewlyLoaded);
         const hasCardContent = draftObj &&
             (draftObj.getIn(['content', 'cardInfo', 'title']).length > 0 ||
             draftObj.getIn(['content', 'cardInfo', 'description']).length > 0) &&
             draftObj.getIn(['content', 'cardInfo', 'url']).length > 0;
-        if (hasCardContent) {
+        /** handle just published draft! */
+        if (!draftObj && this.props.draftObj) {
+            if (drafts.size > 0) {
+                const draftId = drafts.first().get('id');
+                const draftType = drafts.first().getIn(['content', 'entryType']);
+                if (draftId) {
+                    history.push(`/draft/${draftType}/${draftId}`);
+                }
+            } else {
+                history.push('/draft/article/noDraft');
+            }
+        }
+        if (hasCardContent && isSameEntry) {
             this.setState({
                 urlInputHidden: true,
                 infoExtracted: true
             });
-        } else {
+        } else if (shouldProcessUrl) {
             this.setState({
                 urlInputHidden: false,
                 infoExtracted: false
+            });
+            this._processUrl(draftObj);
+        } else if (!isSameEntry) {
+            this.setState({
+                urlInputHidden: false,
+                infoExtracted: false,
+                parsingInfo: false
             });
         }
     }
@@ -68,12 +102,18 @@ class NewLinkEntryPage extends Component {
         history.push(`/draft/link/${draftId}`);
         ev.preventDefault();
     }
-    _processUrl = () => {
-        const { draftObj, loggedProfile, match, intl } = this.props;
+    _processUrl = (newerDraft) => {
+        const { loggedProfile, intl } = this.props;
+        let { draftObj } = this.props;
+        if (newerDraft) {
+            draftObj = newerDraft;
+        }
         const url = draftObj.getIn(['content', 'cardInfo', 'url']);
+        const draftId = draftObj.get('id');
+
         this.setState({
             parsingInfo: true,
-            urlInputHidden: true
+            urlInputHidden: true,
         }, () => {
             const parser = new WebsiteParser({
                 url,
@@ -91,11 +131,12 @@ class NewLinkEntryPage extends Component {
                             url: data.url
                         })),
                     })),
-                    id: match.params.draftId,
+                    id: draftId,
                 })));
                 this.setState({
                     parsingInfo: false,
-                    infoExtracted: true
+                    infoExtracted: true,
+                    parsingUrl: false
                 });
             }).catch(() => {
                 this.setState({
@@ -103,7 +144,7 @@ class NewLinkEntryPage extends Component {
                         card: intl.formatMessage(entryMessages.websiteInfoFetchingError),
                     },
                     parsingInfo: false,
-                    infoExtracted: true
+                    infoExtracted: true,
                 });
             });
         });
@@ -112,22 +153,30 @@ class NewLinkEntryPage extends Component {
     _handleUrlBlur = () => {
         const { draftObj } = this.props;
         const { content } = draftObj;
-        if (content.getIn(['cardInfo', 'url']).length > 0) {
-            return this._processUrl();
-        }
-        return this.props.draftUpdate(draftObj);
+        this.setState({
+            errors: {}
+        }, () => {
+            if (content.getIn(['cardInfo', 'url']).length > 0) {
+                return this._processUrl();
+            }
+            return this.props.draftUpdate(draftObj);
+        });
     }
 
     _handleKeyPress = (ev) => {
         const { draftObj } = this.props;
         // handle enter key press
-        if (ev.which === 13) {
-            if (draftObj.getIn(['content', 'cardInfo', 'url']).length) {
-                this._processUrl();
-            }
-            if (!ev.defaultPrevented) {
-                ev.preventDefault();
-            }
+        if (ev.keyCode === 13) {
+            this.setState({
+                errors: {}
+            }, () => {
+                if (draftObj.getIn(['content', 'cardInfo', 'url']).length) {
+                    this._processUrl();
+                }
+                if (!ev.defaultPrevented) {
+                    ev.preventDefault();
+                }
+            });
         }
     }
 
@@ -214,11 +263,11 @@ class NewLinkEntryPage extends Component {
 
     _handlePublish = (ev) => {
         ev.preventDefault();
-        const { draftObj, loggedProfile, match } = this.props;
+        const { draftObj, loggedProfile } = this.props;
         const publishPayload = {
             id: draftObj.id,
-            title: draftObj.getIn(['content', 'title']),
-            type: match.params.draftType
+            title: draftObj.getIn(['content', 'cardInfo', 'title']),
+            type: entryTypes.findIndex(type => type === draftObj.getIn(['content', 'entryType']))
         };
         this.validateData().then(() => {
             if (draftObj.onChain) {
@@ -419,7 +468,7 @@ class NewLinkEntryPage extends Component {
                       placeholder={intl.formatMessage(entryMessages.enterWebAddress)}
                       onChange={this._handleUrlChange}
                       onBlur={this._handleUrlBlur}
-                      onKeyPress={this._handleKeyPress}
+                      onKeyDown={this._handleKeyPress}
                       value={url}
                     />
                   }
@@ -517,6 +566,7 @@ class NewLinkEntryPage extends Component {
                         <EntryVersionTimeline
                           draftObj={draftObj}
                           onRevertConfirm={this._showRevertConfirm}
+                          intl={intl}
                         />
                       </div>
                     }

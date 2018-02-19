@@ -23,5 +23,10 @@
     "id": "app.tag.tagsLeft",
     "description": "How many tags you can add",
     "defaultMessage": "({value} remaining)"
+  },
+  {
+    "id": "app.tag.tags",
+    "description": "plural of tag",
+    "defaultMessage": "tags"
   }
 ]

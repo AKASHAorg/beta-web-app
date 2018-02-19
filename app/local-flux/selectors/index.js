@@ -61,10 +61,8 @@ export const selectBatchActions = state =>
 
 export const selectBlockNumber = state => state.externalProcState.getIn(['geth', 'status', 'blockNr']);
 
-export const selectClaimableEntryIds = state => state.actionState.get('claimable');
-
-export const selectClaimableEntries = state =>
-    state.actionState.get('claimable').map(entryId => selectEntry(state, entryId));
+export const selectClaimableActions = state =>
+    state.actionState.get('claimable').map(actionId => selectAction(state, actionId));
 
 export const selectColumn = (state, columnId) => state.dashboardState.getIn(['columnById', columnId]);
 
@@ -142,6 +140,8 @@ export const selectEntryCanClaim = (state, id) => state.entryState.getIn(['canCl
 
 export const selectEntryCanClaimVote = (state, id) => state.entryState.getIn(['canClaimVote', id]);
 
+export const selectEntryEndPeriod = state => state.entryState.get('endPeriod');
+
 export const selectEntryFlag = (state, flag) => state.entryState.getIn(['flags', flag]);
 
 export const selectEntryVote = (state, id) => state.entryState.getIn(['votes', id]);
@@ -168,6 +168,8 @@ export const selectFetchingMoreFollowers = (state, ethAddress) =>
 
 export const selectFetchingMoreFollowings = (state, ethAddress) =>
     state.profileState.getIn(['flags', 'fetchingMoreFollowings', ethAddress]);
+
+export const selectFetchingMoreHistory = state => state.actionState.getIn(['flags', 'fetchingMoreHistory']);
 
 export const selectFirstComment = state => state.commentsState.get('firstComm');
 
@@ -320,6 +322,11 @@ export const selectNewCommentsBlock = state =>
 export const selectNewestCommentBlock = (state, parent) =>
     state.commentsState.getIn(['newestCommentBlock', parent]);
 
+export const selectNotificationsPanel = state => state.appState.get('showNotificationsPanel');
+
+export const selectNotificationsPreference = state =>
+    state.settingsState.getIn(['userSettings', 'notificationsPreference']);
+
 export const selectPendingActionByType = (state, actionType) =>
     state.actionState.getIn(['pending', actionType]);
 
@@ -344,6 +351,9 @@ export const selectPendingCommentVote = (state, commentId) =>
     state.actionState.getIn(['pending', 'commentVote', commentId]);
 
 export const selectPendingCycleAeth = state => state.actionState.getIn(['pending', 'cycleAeth']);
+
+export const selectPendingEntries = (state, context) =>
+    state.entryState.getIn(['flags', 'pendingEntries', context]);
 
 export const selectPendingFollow = (state, ethAddress) =>
     !!state.actionState.getIn(['pending', 'follow', ethAddress]);
@@ -430,6 +440,8 @@ export const selectToken = state => state.profileState.getIn(['loggedProfile', '
 export const selectTokenExpiration = state => state.profileState.getIn(['loggedProfile', 'expiration']);
 
 export const selectTransactionsLog = state => state.appState.get('showTransactionsLog');
+
+export const selectUnreadNotifications = state => state.notificationsState.get('unreadNotifications');
 
 export const selectVoteCost = state => state.entryState.get('voteCostByWeight');
 

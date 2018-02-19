@@ -13,6 +13,7 @@ export const hideNotification = notification =>
     action(types.HIDE_NOTIFICATION, { notification });
 export const hidePreview = () => action(types.HIDE_PREVIEW);
 export const hideTerms = () => action(types.HIDE_TERMS);
+export const hideNotificationsPanel = () => action(types.HIDE_NOTIFICATIONS_PANEL);
 export const hideTransactionsLog = () => action(types.HIDE_TRANSACTIONS_LOG);
 export const navCounterIncrement = navType => action(types.NAV_COUNTER_INCREMENT, { navType });
 export const navCounterDecrement = navType => action(types.NAV_COUNTER_DECREMENT, { navType });
@@ -37,6 +38,7 @@ export const showNotification = notification =>
     action(types.SHOW_NOTIFICATION, { notification });
 export const showPreview = ({ columnType, value }) => action(types.SHOW_PREVIEW, { columnType, value });
 export const showTerms = () => action(types.SHOW_TERMS);
+export const showNotificationsPanel = () => action(types.SHOW_NOTIFICATIONS_PANEL);
 export const showTransactionsLog = () => action(types.SHOW_TRANSACTIONS_LOG);
 export const toggleLightSyncMode = lightSync => action(types.TOGGLE_LIGHT_SYNC_MODE, { lightSync });
 export const toggleAethWallet = () => action(types.TOGGLE_AETH_WALLET);
@@ -45,3 +47,8 @@ export const toggleGethDetailsModal = () => action(types.TOGGLE_GETH_DETAILS_MOD
 export const toggleIpfsDetailsModal = () => action(types.TOGGLE_IPFS_DETAILS_MODAL);
 export const toggleNavigationModal = () => action(types.TOGGLE_NAVIGATION_MODAL);
 export const toggleOutsideNavigation = url => action(types.TOGGLE_OUTSIDE_NAVIGATION_MODAL, { url });
+export const toggleOutsideNavigationSucccess = url =>
+    action(types.TOGGLE_OUTSIDE_NAVIGATION_MODAL_SUCCESS, { url });
+export const toggleOutsideNavigationRedirect = url =>
+    action(types.TOGGLE_OUTSIDE_NAVIGATION_MODAL_REDIRECT, { url });
+

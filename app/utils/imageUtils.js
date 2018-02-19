@@ -111,7 +111,7 @@ function extractImageFromContent (content) {
  */
 
 const settings = {
-    extentions: ['jpg', 'jpeg', 'png', 'svg'],
+    extensions: ['jpg', 'jpeg', 'png', 'svg'],
     resizerSettings: {
         alphaChannel: true,
         unsharpAmount: 50,
@@ -272,7 +272,7 @@ const getRawDataUrl = file =>
             reader.readAsDataURL(file);
         } catch (exception) {
             console.error(exception);
-            reject(exception);
+            reject(exception, 'image utils exception');
         }
     });
 
@@ -352,7 +352,7 @@ const getResizedImages = (inputFiles, options) => {
                     options.actualWidth = width;
                     return resizeAnimatedGif(imageDataUrl, size.imageObj, options);
                 }));
-        } else if (settings.extentions.includes(ext)) {
+        } else if (settings.extensions.includes(ext)) {
             imagePromises[index] = getRawDataUrl(file, options).then(imageDataUrl =>
                 getImageSize(imageDataUrl, options).then((results) => {
                 const { height, width } = results;
@@ -360,6 +360,8 @@ const getResizedImages = (inputFiles, options) => {
                 options.actualHeight = height;
                 return resizeImage(results.imageObj, options);
             }));
+        } else {
+            imagePromises.push(Promise.reject(`.${ext} extension is not supported!`));
         }
     });
     return imagePromises.concat(gifPromises);

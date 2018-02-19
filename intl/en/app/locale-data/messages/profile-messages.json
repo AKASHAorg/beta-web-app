@@ -52,7 +52,7 @@
   {
     "id": "app.profile.cyclingPlaceholder",
     "description": "placeholder for empty cycling AETH table",
-    "defaultMessage": "No Cycling AETH pending"
+    "defaultMessage": "No AETH cycling in progress"
   },
   {
     "id": "app.profile.cyclingProcess",
@@ -313,5 +313,15 @@
     "id": "app.profile.yourEthAddress",
     "description": "label for ethereum address input",
     "defaultMessage": "Your ethereum address"
+  },
+  {
+    "id": "app.profile.noNotifications",
+    "description": "placeholder message for empty notifcations panel log",
+    "defaultMessage": "You have not received any new notifications"
+  },
+  {
+    "id": "app.profile.profiles",
+    "description": "plural form of profile :)",
+    "defaultMessage": "profiles"
   }
 ]

@@ -232,7 +232,7 @@ const entryMessages = defineMessages({
     noCommentsFound: {
         id: 'app.entry.noCommentsFound',
         description: 'placeholder for empty comments list',
-        defaultMessage: 'No comments found'
+        defaultMessage: 'No comments yet.'
     },
     noDraftsFoundOnSearch: {
         id: 'app.noDraftsFoundOnSearch',
@@ -493,6 +493,21 @@ const entryMessages = defineMessages({
         id: 'app.entry.linkPlaceholder',
         description: 'placeholder for the link input in editors',
         defaultMessage: 'Type the link and press enter'
-    }
+    },
+    loadingImage: {
+        id: 'app.entry.loadingImage',
+        description: 'placeholder when an image is loading',
+        defaultMessage: 'Loading image'
+    },
+    entries: {
+        id: 'app.entry.entries',
+        description: 'plural form of entry! :)',
+        defaultMessage: 'entries'
+    },
+    leaveAComment: {
+        id: 'app.leaveAComment',
+        description: 'when user searches for a draft and nothing found',
+        defaultMessage: 'Be the first one to write a comment!'
+    },
 });
 export { entryMessages };
