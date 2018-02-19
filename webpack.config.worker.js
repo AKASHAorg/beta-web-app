@@ -8,7 +8,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 export default merge(baseConfig, {
     devtool: 'source-map',
 
-    entry: ['./app/ipfs.web.worker.js'],
+    entry: ['./main/ipfs.web.worker.js'],
 
     output: {
         path: path.join(__dirname, 'dist'),

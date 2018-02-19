@@ -62,17 +62,11 @@ const startApp = (web3, vault) => {
             }
         });
     IpfsConnector.getInstance().setOption('repo', 'ipfs#akasha-beta');
-    const ipfsWorker = new SharedWorker('/ipfs.web.worker.js');
-
-    ipfsWorker.port.onmessage = function (e) {
-        console.log('on window', e);
-    };
     initModules();
     // for dev only
     Object.defineProperty(window, 'Channel', { value: getChannels() });
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
     Object.defineProperty(window, 'contracts', { value: contracts });
-    Object.defineProperty(window, 'ipfsWorker', { value: ipfsWorker });
     // end
 
     web3Helper.setChannel(getChannels().client.tx.emitMined);
