@@ -39,7 +39,7 @@ class EntryVotesModal extends Component {
         clientChannel.removeListener(this.updateVotes);
     }
 
-    updateVotes = (ev, response) => {
+    updateVotes = (response) => {
         const { content } = this.props;
         this.setState({
             fetchingVotes: false,
