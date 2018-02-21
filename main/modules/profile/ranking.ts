@@ -28,10 +28,11 @@ const execute = Promise.coroutine(function* (data: { following: string[] }) {
         return {};
     }
     const collection = [];
-    data.following.push(web3Api.instance.eth.defaultAccount);
-    for (let i = 0; i < data.following.length; i++) {
-        const [karma, ] = yield contracts.instance.Essence.getCollected(data.following[i]);
-        collection.push({ethAddress: data.following[i], karma: (web3Api.instance.fromWei(karma)).toNumber()});
+    const dataCopyFollowing = Array.from(data.following);
+    dataCopyFollowing.push(web3Api.instance.eth.defaultAccount);
+    for (let i = 0; i < dataCopyFollowing.length; i++) {
+        const [karma, ] = yield contracts.instance.Essence.getCollected(dataCopyFollowing[i]);
+        collection.push({ethAddress: dataCopyFollowing[i], karma: (web3Api.instance.fromWei(karma)).toNumber()});
     }
 
     collection.sort((first, second) => {
