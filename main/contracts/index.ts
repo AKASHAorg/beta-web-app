@@ -1,8 +1,10 @@
 const initContracts = require('@akashaproject/contracts.js');
+const hash = require('object-hash');
 import { web3Api } from '../services';
 import { descend, filter, last, prop, sortWith, take, uniq, head } from 'ramda';
 import * as BlPromise from 'bluebird';
 import auth from '../modules/auth/Auth';
+import { eventCache } from '../modules/models/records';
 
 export class Contracts {
     public instance: any;
@@ -78,6 +80,10 @@ export class Contracts {
     public fromEvent(ethEvent: any, args: any, toBlock: number | string, limit: number,
                      options: { lastIndex?: number, reversed?: boolean, stopOnFirst?: boolean }) {
         const step = 5300;
+        const hashedEvent = hash(Array.from(arguments));
+        if (eventCache.hasFull(hashedEvent) && !options.reversed) {
+            return Promise.resolve(eventCache.getFull(hashedEvent));
+        }
         return new Promise((resolve, reject) => {
             let results = [];
             let filterIndex;
@@ -119,7 +125,9 @@ export class Contracts {
                     } else {
                         lastBlock = lastLog ? (sortedResults.length === limit && fromBlock !== 0) ? lastLog.blockNumber : 0 : 0;
                     }
-                    return resolve({ results: sortedResults, fromBlock: lastBlock, lastIndex });
+                    const result = { results: sortedResults, fromBlock: lastBlock, lastIndex };
+                    eventCache.setFull(hashedEvent, result);
+                    return resolve(result);
                 });
             };
             fetch(toBlock);
@@ -130,6 +138,10 @@ export class Contracts {
     public fromEventFilter(ethEvent: any, args: any, toBlock: number | string, limit: number,
                            options: { lastIndex?: number, reversed?: boolean }, aditionalFilter: (data) => boolean) {
         const step = 8300;
+        const hashedEvent = hash(Array.from(arguments));
+        if (eventCache.hasFull(hashedEvent) && !options.reversed) {
+            return Promise.resolve(eventCache.getFull(hashedEvent));
+        }
         return new Promise((resolve, reject) => {
             let results = [];
             let filterIndex;
@@ -168,7 +180,9 @@ export class Contracts {
                     } else {
                         lastBlock = lastLog ? (sortedResults.length === limit && fromBlock !== 0) ? lastLog.blockNumber : 0 : 0;
                     }
-                    return resolve({ results: sortedResults, fromBlock: lastBlock, lastIndex });
+                    const result = { results: sortedResults, fromBlock: lastBlock, lastIndex };
+                    eventCache.setFull(hashedEvent, result);
+                    return resolve(result);
                 });
             };
             fetch(toBlock);

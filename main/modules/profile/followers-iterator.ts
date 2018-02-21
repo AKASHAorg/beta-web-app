@@ -12,7 +12,8 @@ export const followersIterator = {
         'ethAddress': { 'type': 'string', 'format': 'address' },
         'akashaId': { 'type': 'string' },
         'lastBlock': { 'type': 'number' },
-        'limit': { 'type': 'number' }
+        'limit': { 'type': 'number' },
+        'totalLoaded': { 'type': 'number'}
     }
 };
 

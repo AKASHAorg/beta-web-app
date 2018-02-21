@@ -36,3 +36,4 @@ declare module 'request';
 declare module 'winston';
 declare module 'ramda';
 declare module 'lru-cache';
+declare module 'object-hash';

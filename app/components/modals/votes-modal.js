@@ -18,7 +18,7 @@ class EntryVotesModal extends Component {
         serverChannel = getChannels().server.entry.votesIterator;
         clientChannel = getChannels().client.entry.votesIterator;
         serverChannel.enable();
-        clientChannel.on(this.updateVotes);
+        getChannels().client.entry.votesIterator.on(this.updateVotes);
         this.state = {
             fetchingVotes: true,
             votes: [],
@@ -29,14 +29,14 @@ class EntryVotesModal extends Component {
     componentDidMount () {
         const { blockNr, content } = this.props;
         if (content.commentId) {
-            serverChannel.send({ toBlock: blockNr, commentId: content.commentId });
+            getChannels().server.entry.votesIterator.send({ toBlock: blockNr, commentId: content.commentId });
             return;
         }
-        serverChannel.send({ toBlock: blockNr, entryId: content.entryId });
+        getChannels().server.entry.votesIterator.send({ toBlock: blockNr, entryId: content.entryId });
     }
 
     componentWillUnmount () {
-        clientChannel.removeListener(this.updateVotes);
+        getChannels().client.entry.votesIterator.removeListener(this.updateVotes);
     }
 
     updateVotes = (response) => {
@@ -50,14 +50,14 @@ class EntryVotesModal extends Component {
         if (this.state.lastBlock > 0) {
             this.setState({ fetchingVotes: true });
             if (content.commentId) {
-                serverChannel.send({
+                getChannels().server.entry.votesIterator.send({
                     toBlock: this.state.lastBlock,
                     commentId: content.commentId,
                     lastIndex: this.state.lastIndex
                 });
                 return;
             }
-            serverChannel.send({
+            getChannels().server.entry.votesIterator.send({
                 toBlock: this.state.lastBlock,
                 entryId: content.entryId,
                 lastIndex: this.state.lastIndex

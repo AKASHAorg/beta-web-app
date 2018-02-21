@@ -13,7 +13,6 @@ const login = {
 };
 const execute = Promise.coroutine(function* (data: AuthLoginRequest) {
     const v = new schema.Validator();
-    console.log(data, v.validate(data, login).valid);
     v.validate(data, login, { throwError: true });
 
     return Auth.login(data.ethAddress, data.rememberTime);

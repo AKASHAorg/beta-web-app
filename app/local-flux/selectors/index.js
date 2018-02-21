@@ -230,6 +230,11 @@ export const selectLastFollower = (state, ethAddress) =>
 export const selectLastFollowing = (state, ethAddress) =>
     state.profileState.getIn(['lastFollowing', ethAddress]);
 
+export const selectCurrentTotalFollowing = (state, ethAddress) => {
+    return (state.profileState.getIn(['followings', ethAddress])).size;
+};
+
+
 export const selectLastGethLog = state =>
     state.externalProcState.getIn(['geth', 'lastLogTimestamp']);
 

@@ -76,7 +76,7 @@ const profileState = createReducer(initialState, {
         state.set('byId', addProfileData(state.get('byId'), { ethAddress: request.ethAddress })),
 
     [types.PROFILE_ALL_FOLLOWINGS]: (state, { following }) =>
-        state.set('allFollowings', following),
+        state.set('allFollowings', following), // this is not immutable ....
 
     [types.PROFILE_CLEAR_LOCAL]: state =>
         state.merge({

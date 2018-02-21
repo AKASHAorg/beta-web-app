@@ -29,7 +29,7 @@ const execute = Promise.coroutine(function* (data: {
 
     const v = new schema.Validator();
     v.validate(data, votesIterator, { throwError: true });
-
+    console.log('votes iterator', data);
     const collection = [];
     const maxResults = data.limit || 5;
     const filter = { target: data.entryId || data.commentId, voteType: data.entryId ? 0 : 1 };
