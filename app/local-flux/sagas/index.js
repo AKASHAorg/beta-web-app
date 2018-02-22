@@ -60,12 +60,14 @@ function* getUserSettings () {
 }
 
 function* launchHomeActions () {
+    yield put(eProcActions.gethStart());
     yield call(profileSaga.profileGetLogged);
     yield fork(dashboardSaga.dashboardGetActive);
     yield fork(dashboardSaga.dashboardGetAll);
     yield fork(highlightSaga.highlightGetAll);
     yield fork(listSaga.listGetAll);
-    yield fork(getUserSettings);
+    yield call(getUserSettings);
+    yield put(eProcActions.ipfsStart());
     const loggedEthAddress = yield select(selectLoggedEthAddress);
     if (loggedEthAddress) {
         yield put(actionActions.actionGetPending());
