@@ -1,7 +1,7 @@
 const initContracts = require('@akashaproject/contracts.js');
 const hash = require('object-hash');
 import { web3Api } from '../services';
-import { descend, filter, last, prop, sortWith, take, uniq, head } from 'ramda';
+import { descend, filter, last, prop, sortWith, take, uniq, head, isNil } from 'ramda';
 import * as BlPromise from 'bluebird';
 import auth from '../modules/auth/Auth';
 import { eventCache } from '../modules/models/records';
@@ -104,7 +104,7 @@ export class Contracts {
                     if (err) {
                         return reject(err);
                     }
-                    const filteredData = (options.lastIndex) ? filter(filterIndex, data) : data;
+                    const filteredData = (!isNil(options.lastIndex)) ? filter(filterIndex, data) : data; // @_@
 
                     results = uniq(results.concat(filteredData));
                     if (results.length < limit && fromBlock > 0 && !options.reversed) {

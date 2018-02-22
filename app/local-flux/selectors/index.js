@@ -234,6 +234,13 @@ export const selectCurrentTotalFollowing = (state, ethAddress) => {
     return (state.profileState.getIn(['followings', ethAddress])).size;
 };
 
+export const selectCurrentTotalFollowers = (state, ethAddress) => {
+    return (state.profileState.getIn(['followers', ethAddress])).size;
+};
+
+export const selectCurrentTotalProfileEntries = (state, ethAddress) => {
+    return (state.entryState.getIn(['profileEntries', ethAddress, 'entryIds'])).size;
+};
 
 export const selectLastGethLog = state =>
     state.externalProcState.getIn(['geth', 'lastLogTimestamp']);

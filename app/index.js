@@ -10,6 +10,7 @@ import rootSaga from './local-flux/sagas';
 import configureStore from './local-flux/store/configureStore';
 import sagaMiddleware from './local-flux/store/sagaMiddleware';
 import { AppContainer } from './containers';
+import Loadable from 'react-loadable';
 import './styles/core.scss';
 
 if (process.env.DARK_THEME) {
@@ -22,7 +23,7 @@ export const bootstrap = (web3Enabled = false, vault = false) => {
     const history = createHashHistory();
     const store = configureStore();
     sagaMiddleware.run(rootSaga);
-
+    Loadable.preloadReady().then(() =>
     render(
         <Provider store={store}>
             <ConnectedIntlProvider>
@@ -32,6 +33,6 @@ export const bootstrap = (web3Enabled = false, vault = false) => {
             </ConnectedIntlProvider>
         </Provider>,
         document.getElementById('root')
-    );
+    ));
 };
 

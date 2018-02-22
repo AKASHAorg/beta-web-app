@@ -25,7 +25,7 @@ const execute = Promise.coroutine(function* (data: {
     // If already loaded all results
     if (totalFollowing <= data.totalLoaded) {
         return {
-            collection: uniq(collection),
+            collection: collection,
             lastBlock: 0,
             lastIndex: 0,
             akashaId: data.akashaId,
