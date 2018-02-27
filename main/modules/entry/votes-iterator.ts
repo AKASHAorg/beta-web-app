@@ -29,9 +29,13 @@ const execute = Promise.coroutine(function* (data: {
 
     const v = new schema.Validator();
     v.validate(data, votesIterator, { throwError: true });
-    console.log('votes iterator', data);
     const collection = [];
-    const maxResults = data.limit || 5;
+    const sourceId = data.entryId || data.commentId;
+    const record = yield contracts.instance.Votes.getRecord(sourceId);
+    let maxResults = record[0].toString() === '0' ? 0 : data.limit || 5;
+    if (maxResults > record[0].toNumber()) {
+        maxResults = record[0].toNumber();
+    }
     const filter = { target: data.entryId || data.commentId, voteType: data.entryId ? 0 : 1 };
     const fetched = yield contracts.fromEvent(contracts.instance.Votes.Vote, filter, data.toBlock, maxResults,
         { lastIndex: data.lastIndex, reversed: data.reversed || false });
