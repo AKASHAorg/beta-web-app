@@ -1,7 +1,9 @@
 import { call, fork, put, select, takeEvery } from 'redux-saga/effects';
 import * as actionActions from '../actions/action-actions';
 import * as appActions from '../actions/app-actions';
+import * as entryActions from '../actions/entry-actions';
 import * as eProcActions from '../actions/external-process-actions';
+import * as licenseActions from '../actions/license-actions';
 import * as notificationsActions from '../actions/notifications-actions';
 import * as profileActions from '../actions/profile-actions';
 import { selectLoggedEthAddress } from '../selectors';
@@ -60,7 +62,6 @@ function* getUserSettings () {
 }
 
 function* launchHomeActions () {
-    yield put(eProcActions.gethStart());
     yield call(profileSaga.profileGetLogged);
     yield fork(dashboardSaga.dashboardGetActive);
     yield fork(dashboardSaga.dashboardGetAll);
@@ -68,6 +69,8 @@ function* launchHomeActions () {
     yield fork(listSaga.listGetAll);
     yield call(getUserSettings);
     yield put(eProcActions.ipfsStart());
+    yield put(entryActions.entryVoteCost());
+    yield put(licenseActions.licenseGetAll());
     const loggedEthAddress = yield select(selectLoggedEthAddress);
     if (loggedEthAddress) {
         yield put(actionActions.actionGetPending());
@@ -92,8 +95,16 @@ function* bootstrapHome () {
     yield put(appActions.bootstrapHomeSuccess());
 }
 
+function* startGeth () {
+    yield put(eProcActions.gethStart());
+}
+
+function* watchGethStartSuccess() {
+    yield takeEvery(types.GETH_START_SUCCESS, bootstrapHome);
+}
+
 function* watchBootstrapHome () {
-    yield takeEvery(types.BOOTSTRAP_HOME, bootstrapHome);
+    yield takeEvery(types.BOOTSTRAP_HOME, startGeth);
 }
 
 export default function* rootSaga () { // eslint-disable-line max-statements
@@ -119,4 +130,5 @@ export default function* rootSaga () { // eslint-disable-line max-statements
     yield fork(utilsSaga.watchUtilsActions);
     yield fork(bootstrapApp);
     yield fork(watchBootstrapHome);
+    yield fork(watchGethStartSuccess);
 }

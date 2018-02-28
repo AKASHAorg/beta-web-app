@@ -17,6 +17,13 @@ class DashboardPage extends Component {
 
     dashboardRef = null;
 
+    componentWillMount () {
+        const { allDashboards, activeDashboard, match } = this.props;
+        if (!allDashboards.includes(match.params.dashboardId)) {
+            this.props.history.push(`/dashboard/${activeDashboard || ''}`)
+        }
+    }
+
     componentWillReceiveProps (nextProps) {
         if (!nextProps.activeDashboard) {
             return;
@@ -133,6 +140,7 @@ DashboardPage.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        allDashboards: state.dashboardState.get('allDashboards'),
         activeDashboard: state.dashboardState.get('activeDashboard'),
         columns: state.dashboardState.get('columnById'),
         darkTheme: state.settingsState.getIn(['general', 'darkTheme']),

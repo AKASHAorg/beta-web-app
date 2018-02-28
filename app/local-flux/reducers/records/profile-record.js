@@ -70,7 +70,7 @@ export const LoggedProfile = Record({
     akashaId: null,
     ethAddress: null,
     expiration: null,
-    token: null,
+    token: '',
 });
 
 const Flags = Record({

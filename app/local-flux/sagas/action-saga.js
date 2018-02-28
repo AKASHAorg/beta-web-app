@@ -9,7 +9,7 @@ import * as tagActions from '../actions/tag-actions';
 import * as transactionActions from '../actions/transaction-actions';
 import * as types from '../constants';
 import { selectAction, selectActionsHistory, selectBatchActions, selectLoggedEthAddress,
-    selectActionToPublish } from '../selectors';
+    selectActionToPublish, selectNeedAuthAction, selectToken } from '../selectors';
 import * as actionService from '../services/action-service';
 import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
@@ -145,6 +145,14 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
          * continue to publishing
          */
         yield put(actions.actionAddSuccess(ethAddress, actionType, payload));
+        const ethAddress = yield select(selectLoggedEthAddress);
+        const token = yield select(selectToken);
+        const needAuthAction = yield select(selectNeedAuthAction);
+        if (token && needAuthAction) {
+            yield put(actions.actionPublish(needAuthAction.get('id')));
+        } else {
+            yield put(profileActions.profileLogin({ ethAddress, password: '', remeberTime: 1, reauthenticate: true }));
+        }
     } else {
         /**
          * stop publishing and display the appropriate modal

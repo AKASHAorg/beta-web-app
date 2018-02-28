@@ -168,7 +168,7 @@ function* profileGetBalance ({ unit = 'ether' }) {
         return;
     }
     yield call(enableChannel, channel, getChannels().client.profile.manager);
-    yield apply(channel, channel.send, [{ etherBase: ethAddress, unit }]);
+    yield apply(channel, channel.send, [{ ethAddress, unit }]);
 }
 
 function* profileGetByAddress ({ ethAddress }) {

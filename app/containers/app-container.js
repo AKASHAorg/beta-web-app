@@ -95,7 +95,7 @@ class AppContainer extends Component {
     // all bootstrapping logic should be here
     // avoid spreading it over multiple components/containers
     _bootstrapApp = (props) => {
-        const { location, appState } = props;
+        const { location, appState, unlocked, web3 } = props;
         const nonLoginRoutes = ['/setup'];
         const shouldBootstrapHome = !nonLoginRoutes.every(route =>
             location.pathname === '/' || location.pathname.includes(route)
@@ -107,10 +107,8 @@ class AppContainer extends Component {
         }
 
         // check if we need to bootstrap home
-        if (shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady')) {
+        if (web3 && unlocked && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady')) {
             this.props.bootstrapHome();
-            this.props.entryVoteCost();
-            this.props.licenseGetAll();
 
             // make requests for geth status every 30s for updating the current block
             this.props.gethGetStatus();
@@ -240,7 +238,7 @@ class AppContainer extends Component {
                 {appState.get('showNavigationModal') &&
                   <NavigationModal toggleNavigationModal={this.props.toggleNavigationModal} />
                 }
-                {needAuth && !needFunds && <ConfirmationDialog intl={intl} needAuth={needAuth} />}
+                {/* {needAuth && !needFunds && <ConfirmationDialog intl={intl} needAuth={needAuth} />} */}
                 {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
                 {appState.get('showProfileEditor') && <ProfileEdit />}
               </div>

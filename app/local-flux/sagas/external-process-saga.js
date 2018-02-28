@@ -7,6 +7,7 @@ import * as appActions from '../actions/app-actions';
 import * as profileActions from '../actions/profile-actions';
 import * as searchActions from '../actions/search-actions';
 import * as types from '../constants';
+import * as profileService from '../services/profile-service';
 import { selectGethStatus, selectGethSyncActionId, selectLastGethLog,
     selectLastIpfsLog, selectLoggedEthAddress } from '../selectors';
 
@@ -243,10 +244,16 @@ function* watchGethStartChannel () {
         } else {
             const gethStatus = yield select(selectGethStatus);
             const syncActionId = yield select(selectGethSyncActionId);
+            const loggedProfile = { ethAddress: resp.services.geth.ethAddress };
             const gethIsSyncing = gethStatus.get('process') && !gethStatus.get('upgrading') &&
                 (syncActionId === 1 || syncActionId === 0);
             if (gethIsSyncing && !gethSyncInterval) {
                 yield call(gethGetSyncStatus);
+            }
+            try {
+                yield apply(profileService, profileService.profileSaveLogged, [loggedProfile]);
+            } catch (error) {
+                yield put(profileActions.profileSaveLoggedError(error));
             }
             yield put(actions.gethStartSuccess(resp.data, resp.services));
         }
