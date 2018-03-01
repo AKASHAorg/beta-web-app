@@ -24,7 +24,8 @@ const votesIterator = {
  */
 const execute = Promise.coroutine(function* (data: {
     toBlock?: number, limit?: number,
-    entryId?: string, commentId?: string, lastIndex?: number, reversed?: boolean
+    entryId?: string, commentId?: string, lastIndex?: number, reversed?: boolean,
+    totalLoaded?: number
 }) {
 
     const v = new schema.Validator();
@@ -35,6 +36,15 @@ const execute = Promise.coroutine(function* (data: {
     let maxResults = record[0].toString() === '0' ? 0 : data.limit || 5;
     if (maxResults > record[0].toNumber()) {
         maxResults = record[0].toNumber();
+    }
+    if (record[0].toNumber() <= data.totalLoaded) {
+        return { collection: [], lastBlock: 0 };
+    }
+    if (data.totalLoaded) {
+        const nextTotal = data.totalLoaded + maxResults;
+        if (nextTotal > record[0].toNumber()) {
+            maxResults = record[0].toNumber() - data.totalLoaded;
+        }
     }
     const filter = { target: data.entryId || data.commentId, voteType: data.entryId ? 0 : 1 };
     const fetched = yield contracts.fromEvent(contracts.instance.Votes.Vote, filter, data.toBlock, maxResults,

@@ -30,14 +30,10 @@ const execute = Promise.coroutine(function* (data: {
 
     const collection = [];
     const commentsCount = yield contracts.instance.Comments.totalComments(data.entryId);
-    let maxResults = commentsCount.toString() === '0' ? 0 : data.limit || 5;
-    if (maxResults > commentsCount.toNumber()) {
-        maxResults = commentsCount.toNumber();
-    }
+    const maxResults = commentsCount.toNumber();
     const fetched = yield contracts
         .fromEvent(contracts.instance.Comments.Publish, {
                 entryId: data.entryId,
-                parent: data.parent,
                 author: data.author
             },
             data.toBlock, maxResults, { lastIndex: data.lastIndex, reversed: data.reversed });
@@ -47,7 +43,9 @@ const execute = Promise.coroutine(function* (data: {
             entryId: event.args.entryId,
             noResolve: true
         });
-        collection.push(Object.assign({}, comment, { commentId: event.args.id }));
+        collection.push(Object.assign({},
+            comment,
+            { commentId: event.args.id, parent: event.args.parent }));
     }
 
     return { collection: collection, lastBlock: fetched.fromBlock, lastIndex: fetched.lastIndex };
