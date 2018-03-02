@@ -111,18 +111,20 @@ const commentsState = createReducer(initialState, {
             if(comm.parent === '0x0000000000000000000000000000000000000000000000000000000000000000') {
                 comm.parent = '0';
             }
-            let list = state.getIn(['byParent', comm.parent]) || new List();
+            let list = newState.getIn(['byParent', comm.parent]) || new List();
             comm.entryId = request.entryId;
             const comment = createCommentWithAuthor(comm);
-            byId = byId.set(comm.commentId, comment);
+            byId = newState.get('byId').set(comm.commentId, comment);
             list = list.includes(comm.commentId) ? list : list.push(comm.commentId);
             list = sortByScore(byId, list);
-            newState = state.merge({byParent: state.get('byParent').set(comm.parent, list)});
+            newState = newState.merge({
+                byId: byId,
+                byParent: newState.get('byParent').set(comm.parent, list)
+            });
         });
 
 
         return newState.merge({
-            byId,
             flags: state.get('flags').setIn(['fetchingComments', parent], false),
             lastBlock: state.get('lastBlock').set(parent, data.lastBlock),
             lastIndex: state.get('lastIndex').set(parent, data.lastIndex),

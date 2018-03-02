@@ -21,7 +21,7 @@ const commentsIterator = {
  * @type {Function}
  */
 const execute = Promise.coroutine(function* (data: {
-    toBlock: number,
+    toBlock: number, more?: boolean,
     limit?: number, entryId?: string, parent?: string, author?: string, lastIndex?: number, reversed?: boolean
 }) {
 
@@ -29,6 +29,9 @@ const execute = Promise.coroutine(function* (data: {
     v.validate(data, commentsIterator, { throwError: true });
 
     const collection = [];
+    if (data.more) {
+        return { collection: collection, lastBlock: 0, lastIndex: 0 };
+    }
     const commentsCount = yield contracts.instance.Comments.totalComments(data.entryId);
     const maxResults = commentsCount.toNumber();
     const fetched = yield contracts
