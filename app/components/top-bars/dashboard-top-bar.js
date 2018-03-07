@@ -70,7 +70,7 @@ class DashboardTopBar extends Component {
 
         return (
           <div className="flex-center-y dashboard-top-bar">
-            <Navigation />
+            {/* <Navigation /> */}
             {columns.map((column, i) => (
               <TopBarIcon
                 key={column.get('id')}

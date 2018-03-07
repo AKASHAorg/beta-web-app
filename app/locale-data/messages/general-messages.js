@@ -827,6 +827,11 @@ const generalMessages = defineMessages({
         id: 'app.general.viewAll',
         description: 'view all',
         defaultMessage: 'View All'
+    },
+    or: {
+        id: 'app.general.or',
+        description: 'or',
+        defaultMessage: 'or'
     }
 });
 export { generalMessages };

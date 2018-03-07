@@ -1,0 +1,72 @@
+[
+  {
+    "id": "app.placeholder.akasha",
+    "description": "footer subtitle",
+    "defaultMessage": "Akasha"
+  },
+  {
+    "id": "app.placeholder.contacts",
+    "description": "footer subtitle",
+    "defaultMessage": "Contacts"
+  },
+  {
+    "id": "app.placeholder.downloadDesktopApp",
+    "description": "title for web placeholder card",
+    "defaultMessage": "Download Desktop App"
+  },
+  {
+    "id": "app.placeholder.downloadDesktopAppSubtitle",
+    "description": "subtitle for web placeholder card",
+    "defaultMessage": "For the full experience try our desktop application"
+  },
+  {
+    "id": "app.placeholder.welcome",
+    "description": "title for web placeholder page",
+    "defaultMessage": "Welcome to Akasha"
+  },
+  {
+    "id": "app.placeholder.welcomeSubtitle",
+    "description": "subtitle for web placeholder page",
+    "defaultMessage": "Decentralised Social Media Platform based on Ethereum and IPFS"
+  },
+  {
+    "id": "app.placeholder.tryBrowser",
+    "description": "title for web placeholder card",
+    "defaultMessage": "Try Akasha on browser"
+  },
+  {
+    "id": "app.placeholder.tryBrowserSubtitle",
+    "description": "subtitle for web placeholder card",
+    "defaultMessage": "Fast and easy to use"
+  },
+  {
+    "id": "app.placeholder.getExtension",
+    "description": "button title",
+    "defaultMessage": "Get Chrome Extension"
+  },
+  {
+    "id": "app.placeholder.getBrave",
+    "description": "button title",
+    "defaultMessage": "Get Brave Browser"
+  },
+  {
+    "id": "app.placeholder.download",
+    "description": "button title",
+    "defaultMessage": "Download"
+  },
+  {
+    "id": "app.placeholder.terms",
+    "description": "placeholder card info",
+    "defaultMessage": "By downloading, you agree to the {termsLink}"
+  },
+  {
+    "id": "app.placeholder.termsOfService",
+    "description": "terms of service title",
+    "defaultMessage": "Terms of Service"
+  },
+  {
+    "id": "app.placeholder.blog",
+    "description": "blog subfooter",
+    "defaultMessage": "Blog"
+  }
+]

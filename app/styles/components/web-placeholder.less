@@ -1,0 +1,162 @@
+.web-placeholder {
+    background-color: @background;
+    height: 100vh;
+    overflow-y: auto;
+
+    a {
+        text-decoration: none;
+    }
+
+    &__header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        flex: 0;
+        padding: 30px;
+    }
+
+    &__header-left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    &__header-left-title {
+        margin-left: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        color: @heading-color;
+    }
+
+    &__header-right {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-right: 20px;
+        a {
+            padding-left: 5px;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        flex: 0;
+        min-height: 700px;
+        height: 75%;
+    }
+
+    &__body-title {
+        font-size: 22px;
+        font-weight: 500;
+        color: @heading-color;
+        margin: 0 auto;
+        padding-top: 50px;
+    }
+
+    &__body-subtitle {
+        font-size: 16px;
+        color: @text-color-secondary;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    &__card-wrap {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 0 auto;
+        padding: 50px 0;
+    }
+
+    &__card-wrapper {
+        padding: 5px;
+    }
+
+    &__card-title {
+        font-size: 16px;
+        font-weight: 500px;
+        color: @heading-color;
+        padding-bottom: 5px;
+    }
+
+    &__card-subtitle {
+        padding: 0 10px;
+        color: @text-color-secondary;
+    }
+
+    &__card {
+        width: 360px;
+        height: 250px;
+        text-align: center;
+    }
+
+    &__icons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding-top: 40px;
+    }
+
+    &__icon-metamask {
+        background: @metamask-bg top center no-repeat;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        padding-bottom: 70px;
+    }
+
+    &__icon-brave {
+        background: @brave-logo-bg top center no-repeat;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        padding-bottom: 70px;
+    }
+
+    &__download-btn {
+        padding: 28px 0;
+    }
+
+    &__or {
+        margin-top: 15px;
+        color: @text-color-secondary;
+    }
+
+    &__terms {
+        color: @text-color-secondary;
+    }
+
+    &__footer {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex: 0;
+        padding-bottom: 60px;
+        width: 100%;
+        height: 100px;
+
+        a.mail {
+            color: @text-color-secondary;
+            text-decoration: none;
+            font-size: 12px;
+            :hover {
+              opacity: 0.5;
+            }
+          }
+    }
+
+    &__subfooter {
+        display: flex;
+        flex-direction: column;
+        color: @text-color;
+        font-size: 14px;
+        padding: 0 50px;
+    }
+
+    &__subfooter-title {
+        color: @heading-color;
+        font-size: 16px;
+    }
+}

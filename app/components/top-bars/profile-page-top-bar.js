@@ -31,7 +31,7 @@ const ProfilePageTopBar = (props) => {
 
     return (
       <div className="flex-center-y profile-page-top-bar">
-        <Navigation />
+        {/* <Navigation /> */}
         <Tooltip title={intl.formatMessage(profileMessages.entries)}>
           <Icon
             className="content-link profile-page-top-bar__column-icon"

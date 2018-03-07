@@ -1,4 +1,5 @@
 import { List, Map, Record, Collection } from 'immutable';
+import { genId } from '../../../utils/dataModule';
 
 export const AethBalance = Record({
     bonded: null,
@@ -70,7 +71,7 @@ export const LoggedProfile = Record({
     akashaId: null,
     ethAddress: null,
     expiration: null,
-    token: '',
+    token: genId(),
 });
 
 const Flags = Record({

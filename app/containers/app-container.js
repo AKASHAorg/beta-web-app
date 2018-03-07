@@ -8,7 +8,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
     toggleNavigationModal, toggleOutsideNavigation, navForwardCounterReset,
-    navCounterIncrement } from '../local-flux/actions/app-actions';
+    navCounterIncrement, showTerms } from '../local-flux/actions/app-actions';
 import { entryVoteCost } from '../local-flux/actions/entry-actions';
 import { gethGetStatus } from '../local-flux/actions/external-process-actions';
 import { licenseGetAll } from '../local-flux/actions/license-actions';
@@ -21,7 +21,7 @@ import { AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayM
     Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar, Notification,
     NotificationsPanel, PageContent, PreviewPanel, ProfileOverview, ProfileOverviewSecondarySidebar,
     ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar, TransactionsLogPanel,
-    ProfileSettings, WalletPanel, FullSizeImageViewer } from '../components';
+    ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
 import { selectLoggedEthAddress } from '../local-flux/selectors/index';
 
@@ -134,12 +134,11 @@ class AppContainer extends Component {
 
         if(!web3) {
             return (
-                <h1>
-                    {'No web3 provider found.'}
-                    <a target={"_blank"} href={"https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"}>
-                        {'Install MetaMask'}
-                    </a>
-                </h1>
+                <WebPlaceholder
+                    appState={appState}
+                    hideTerms={this.props.hideTerms}
+                    showTerms={this.props.showTerms}
+                />
             )
         }
         if(!unlocked) {
@@ -238,7 +237,6 @@ class AppContainer extends Component {
                 {appState.get('showNavigationModal') &&
                   <NavigationModal toggleNavigationModal={this.props.toggleNavigationModal} />
                 }
-                {/* {needAuth && !needFunds && <ConfirmationDialog intl={intl} needAuth={needAuth} />} */}
                 {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
                 {appState.get('showProfileEditor') && <ProfileEdit />}
               </div>
@@ -275,6 +273,7 @@ AppContainer.propTypes = {
     web3: PropTypes.bool,
     unlocked: PropTypes.bool,
     userSettingsAddTrustedDomain: PropTypes.func,
+    showTerms: PropTypes.func
 };
 
 function mapStateToProps (state) {
@@ -307,6 +306,7 @@ export default DragDropContext(HTML5Backend)(connect(
         toggleOutsideNavigation,
         navCounterIncrement,
         navForwardCounterReset,
-        userSettingsAddTrustedDomain
+        userSettingsAddTrustedDomain,
+        showTerms
     }
 )(injectIntl(AppContainer)));

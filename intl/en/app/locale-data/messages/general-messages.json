@@ -818,5 +818,10 @@
     "id": "app.general.viewAll",
     "description": "view all",
     "defaultMessage": "View All"
+  },
+  {
+    "id": "app.general.or",
+    "description": "or",
+    "defaultMessage": "or"
   }
 ]

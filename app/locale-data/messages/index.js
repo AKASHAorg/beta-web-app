@@ -9,6 +9,7 @@ export { generalMessages } from './general-messages';
 export { highlightMessages } from './highlight-messages';
 export { listMessages } from './list-messages';
 export { notificationMessages } from './notification-messages';
+export { placeholderMessages } from './placeholder-messages';
 export { profileMessages } from './profile-messages';
 export { searchMessages } from './search-messages';
 export { settingsMessages } from './settings-messages';
