@@ -28,6 +28,7 @@ export const AppRecord = Record({
         isTrusted: false
     }),
     showGethDetailsModal: false,
+    showGuestModal: false,
     showIpfsDetailsModal: false,
     showNavigationModal: false,
     showNotificationsPanel: false,

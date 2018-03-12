@@ -70,14 +70,14 @@ class ProfileOverviewSecondarySidebar extends Component {
             <div className="profile-overview-sidebar__line-wrapper">
               <div className="profile-overview-sidebar__line" />
             </div>
-            <div className="profile-overview-sidebar__logout-wrapper">
+            {/* <div className="profile-overview-sidebar__logout-wrapper">
               <div
                 onClick={this.props.profileLogout}
                 className="profile-overview-sidebar__logout"
               >
                 {intl.formatMessage(generalMessages.logout)}
               </div>
-            </div>
+            </div> */}
           </div>
         );
     }

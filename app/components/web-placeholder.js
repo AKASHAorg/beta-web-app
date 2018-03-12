@@ -8,11 +8,19 @@ import { generalMessages, placeholderMessages } from '../locale-data/messages';
 
 const WebPlaceholder = (props) => {
     const { appState, intl, hideTerms, showTerms } = props;
+    let metamaskLink = "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en";
+    const userAgent = navigator.userAgent;
 
     const termsShow = (ev) => {
       ev.preventDefault();
       if (showTerms) return showTerms();
       return null;
+    }
+
+     if (userAgent.indexOf("Firefox") > -1) {
+      metamaskLink = "https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/";
+    } else if (userAgent.indexOf("OPR") > -1) {
+      metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
     }
 
     return (
@@ -92,7 +100,7 @@ const WebPlaceholder = (props) => {
                     {intl.formatMessage(placeholderMessages.tryBrowserSubtitle)}
                   </div>
                   <div className="web-placeholder__icons">
-                    <a target={"_blank"} href={"https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"}>
+                    <a target={"_blank"} href={metamaskLink}>
                       <div className="web-placeholder__icon-wrap">
                         <div className="web-placeholder__icon-metamask" />
                         {intl.formatMessage(placeholderMessages.getExtension)}

@@ -17,9 +17,9 @@ import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
 import { AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayModal,
-    DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, Highlights, IpfsDetailsModal,
-    Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar, Notification,
-    NotificationsPanel, PageContent, PreviewPanel, ProfileOverview, ProfileOverviewSecondarySidebar,
+    DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
+    IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
+    Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
     ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar, TransactionsLogPanel,
     ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
@@ -107,7 +107,7 @@ class AppContainer extends Component {
         }
 
         // check if we need to bootstrap home
-        if (web3 && unlocked && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady')) {
+        if (web3 && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady')) {
             this.props.bootstrapHome();
 
             // make requests for geth status every 30s for updating the current block
@@ -141,13 +141,9 @@ class AppContainer extends Component {
                 />
             )
         }
-        if(!unlocked) {
-            return (
-                <h2>{'Please unlock vault from MetaMask.'}</h2>
-            )
-        }
         /* eslint-enable no-shadow */
         const showGethDetailsModal = appState.get('showGethDetailsModal');
+        const showGuestModal = appState.get('showGuestModal');
         const showIpfsDetailsModal = appState.get('showIpfsDetailsModal');
         const showWallet = appState.get('showWallet');
         const isOverlay = location.state && location.state.overlay && this.previousLocation !== location;
@@ -173,17 +169,35 @@ class AppContainer extends Component {
                       <PageContent showSecondarySidebar={appState.get('showSecondarySidebar')}>
                         <Route exact path="/@:akashaId" component={ProfilePage} />
                         <Route exact path="/0x:ethAddress" component={ProfilePage} />
-                        <Route path="/profileoverview/overview" component={ProfileOverview} />
-                        <Route path="/profileoverview/myentries" component={MyEntries} />
-                        <Route path="/profileoverview/highlights" component={Highlights} />
-                        <Route exact path="/profileoverview/lists" component={Lists} />
-                        <Route path="/profileoverview/lists/:listId" component={ListEntries} />
-                        <Route path="/profileoverview/settings" component={ProfileSettings} />
-                        <Route path="/profileoverview/preferences" component={AppPreferences} />
+                        {unlocked &&
+                          <Route path="/profileoverview/myentries" component={MyEntries} />
+                        }
+                        {unlocked &&
+                          <Route path="/profileoverview/highlights" component={Highlights} />
+                        }
+                        {unlocked &&
+                           <Route exact path="/profileoverview/lists" component={Lists} />
+                        }    
+                        {unlocked &&
+                           <Route exact path="/profileoverview/lists" component={Lists} />
+                        }
+                        {unlocked &&
+                           <Route path="/profileoverview/lists/:listId" component={ListEntries} />
+                        }
+                        {unlocked &&
+                           <Route path="/profileoverview/settings" component={ProfileSettings} />
+                        }
+                        {unlocked &&
+                          <Route path="/profileoverview/preferences" component={AppPreferences} />
+                        }
                         <Switch location={isOverlay ? this.previousLocation : location}>
                           <Route path="/dashboard/:dashboardId?" component={DashboardPage} />
-                          <Route path="/draft/article/:draftId" component={NewTextEntryPage} />
-                          <Route path="/draft/link/:draftId" component={NewLinkEntryPage} />
+                          {unlocked &&
+                            <Route path="/draft/article/:draftId" component={NewTextEntryPage} />
+                          }
+                          {unlocked &&
+                            <Route path="/draft/link/:draftId" component={NewLinkEntryPage} />
+                          }                       
                           <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
                           <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
                           <Route path="/search" component={SearchPage} />
@@ -200,6 +214,7 @@ class AppContainer extends Component {
                         intl={intl}
                         location={location}
                         showSecondarySidebar={appState.get('showSecondarySidebar')}
+                        unlocked={unlocked}
                       />
                       {!!showWallet &&
                         <WalletPanel
@@ -220,7 +235,7 @@ class AppContainer extends Component {
                     </div>
                   </DataLoader>
                 }
-                <Sidebar />
+                <Sidebar unlocked={unlocked} />
                 <Route path="/setup" component={SetupPages} />
                 <Notification />
                 <FullSizeImageViewer />
@@ -233,6 +248,7 @@ class AppContainer extends Component {
                 />
                 {needFunds && <FaucetAndManafyModal />}
                 {showGethDetailsModal && <GethDetailsModal />}
+                {showGuestModal && <GuestModal />}
                 {showIpfsDetailsModal && <IpfsDetailsModal />}
                 {appState.get('showNavigationModal') &&
                   <NavigationModal toggleNavigationModal={this.props.toggleNavigationModal} />

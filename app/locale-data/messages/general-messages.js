@@ -832,6 +832,26 @@ const generalMessages = defineMessages({
         id: 'app.general.or',
         description: 'or',
         defaultMessage: 'or'
+    },
+    sidebarTooltipGuest: {
+        id: 'app.general.sidebarTooltipGuest',
+        description: 'tooltip text for sidebar guest mode',
+        defaultMessage: 'Not available in guest mode'
+    },
+    guestMode: {
+        id: 'app.general.guestMode',
+        description: 'title for guest mode button',
+        defaultMessage: 'Guest Mode'
+    },
+    guestModeInfo: {
+        id: 'app.general.guestModeInfo',
+        description: 'info for guest mode modal',
+        defaultMessage: 'While in guest mode you have access to a limited part of the Akasha app, and cannot do any action that requires a transaction.'
+    },
+    unlockVault: {
+        id: 'app.general.unlockVault',
+        description: 'info for guest mode modal',
+        defaultMessage: 'Please unlock your Metamask Vault to enjoy the full Akasha web experience!'
     }
 });
 export { generalMessages };

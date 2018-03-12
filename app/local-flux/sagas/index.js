@@ -63,16 +63,16 @@ function* getUserSettings () {
 
 function* launchHomeActions () {
     yield call(profileSaga.profileGetLogged);
-    yield fork(dashboardSaga.dashboardGetActive);
-    yield fork(dashboardSaga.dashboardGetAll);
-    yield fork(highlightSaga.highlightGetAll);
-    yield fork(listSaga.listGetAll);
-    yield call(getUserSettings);
     yield put(eProcActions.ipfsStart());
     yield put(entryActions.entryVoteCost());
     yield put(licenseActions.licenseGetAll());
     const loggedEthAddress = yield select(selectLoggedEthAddress);
     if (loggedEthAddress) {
+        yield fork(dashboardSaga.dashboardGetActive);
+        yield fork(dashboardSaga.dashboardGetAll);
+        yield fork(highlightSaga.highlightGetAll);
+        yield fork(listSaga.listGetAll);
+        yield call(getUserSettings);
         yield put(actionActions.actionGetPending());
         yield put(profileActions.profileFollowingsIterator({
             ethAddress: loggedEthAddress,

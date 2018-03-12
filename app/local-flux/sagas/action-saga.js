@@ -1,6 +1,7 @@
 import * as reduxSaga from 'redux-saga';
 import { apply, call, fork, put, select, takeEvery } from 'redux-saga/effects';
 import * as actions from '../actions/action-actions';
+import * as appActions from '../actions/app-actions';
 import * as commentsActions from '../actions/comments-actions';
 import * as draftActions from '../actions/draft-actions';
 import * as entryActions from '../actions/entry-actions';
@@ -14,6 +15,7 @@ import * as actionService from '../services/action-service';
 import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
 import { balanceToNumber } from '../../utils/number-formatter';
+import { isEthAddress } from '../../utils/dataModule';
 
 const ACTION_HISTORY_LIMIT = 20;
 
@@ -133,6 +135,10 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
     if (actionType === actionTypes.faucet) {
         const id = yield select(selectActionToPublish);
         yield put(actions.actionPublish(id)); // eslint-disable-line no-use-before-define
+    }
+    if (!isEthAddress(ethAddress)) {
+        yield put(appActions.toggleGuestModal());
+        return;
     }
     /**
      * Check if user has enough balance to create the action

@@ -45,7 +45,7 @@ const placeholderMessages = defineMessages({
     getExtension: {
         id: 'app.placeholder.getExtension',
         description: 'button title',
-        defaultMessage: 'Get Chrome Extension'
+        defaultMessage: 'Get Metamask'
     },
     getBrave: {
         id: 'app.placeholder.getBrave',

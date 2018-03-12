@@ -109,6 +109,9 @@ const appState = createReducer(initialState, {
     [types.TOGGLE_GETH_DETAILS_MODAL]: state =>
         state.set('showGethDetailsModal', !state.get('showGethDetailsModal')),
 
+    [types.TOGGLE_GUEST_MODAL]: state =>
+        state.set('showGuestModal', !state.get('showGuestModal')),
+
     [types.TOGGLE_IPFS_DETAILS_MODAL]: state =>
         state.set('showIpfsDetailsModal', !state.get('showIpfsDetailsModal')),
 

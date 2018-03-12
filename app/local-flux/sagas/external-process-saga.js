@@ -244,14 +244,16 @@ function* watchGethStartChannel () {
         } else {
             const gethStatus = yield select(selectGethStatus);
             const syncActionId = yield select(selectGethSyncActionId);
-            const loggedProfile = { ethAddress: resp.services.geth.ethAddress };
+            const loggedProfile = (resp.services.geth.ethAddress) ?
+                resp.services.geth.ethAddress : 
+                'guest';
             const gethIsSyncing = gethStatus.get('process') && !gethStatus.get('upgrading') &&
                 (syncActionId === 1 || syncActionId === 0);
             if (gethIsSyncing && !gethSyncInterval) {
                 yield call(gethGetSyncStatus);
             }
             try {
-                yield apply(profileService, profileService.profileSaveLogged, [loggedProfile]);
+                yield apply(profileService, profileService.profileSaveLogged, [{ethAddress: loggedProfile}]);
             } catch (error) {
                 yield put(profileActions.profileSaveLoggedError(error));
             }
