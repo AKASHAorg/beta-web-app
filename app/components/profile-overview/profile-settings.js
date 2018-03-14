@@ -20,7 +20,6 @@ const { Option } = Select;
 class ProfileSettings extends Component {
     constructor (props) {
         super(props);
-        const pref = props.userSettings.passwordPreference;
         const license = props.userSettings.get('defaultLicense');
         const donations = props.loggedProfileData.get('akashaId') ?
             props.loggedProfileData.get('donationsEnabled') :
@@ -28,7 +27,7 @@ class ProfileSettings extends Component {
         const hideCommentContent = props.userSettings.get('hideCommentContent');
         const hideEntryContent = props.userSettings.get('hideEntryContent');
         const notificationsPreference = props.userSettings.get('notificationsPreference');
-        const trustedDomains = props.userSettings.get('trustedDomains');
+        const trustedDomains = props.userSettings.get('trustedDomains').toJS();
         this.state = {
             defaultLicenseParent: license.parent || '2',
             defaultLicenseId: license.id || '4',
@@ -36,8 +35,6 @@ class ProfileSettings extends Component {
             hideCommentsValue: hideCommentContent.value,
             hideEntries: hideEntryContent.checked,
             hideEntriesValue: hideEntryContent.value,
-            rememberTime: pref && pref.remember ? pref.remember : false,
-            unlockTime: pref && pref.time ? pref.time : 5,
             donationsValue: donations,
             notifFeed: notificationsPreference.feed,
             notifComments: notificationsPreference.comments,
@@ -96,17 +93,6 @@ class ProfileSettings extends Component {
             }
         }
 
-    handleTimeChange = (value) => {
-        this.setState({
-            unlockTime: Number(value),
-            rememberTime: true
-        });
-    };
-
-    handleRememberTimeChange = (e) => {
-        this.setState({ rememberTime: e.target.checked });
-    };
-
     handleTipsChange = (e) => {
         this.setState({ donationsValue: e.target.value });
     }
@@ -117,7 +103,7 @@ class ProfileSettings extends Component {
 
     handleShowModal = () => {
         const { userSettings } = this.props;
-        const initialTrustedDomains = userSettings.get('trustedDomains');
+        const initialTrustedDomains = userSettings.get('trustedDomains').toJS();
         this.setState({
             filteredTrustedDomains: initialTrustedDomains,
             search: '',
@@ -136,7 +122,7 @@ class ProfileSettings extends Component {
 
     onSearchChange = (ev) => {
         const { userSettings } = this.props;
-        const initialTrustedDomains = userSettings.get('trustedDomains');
+        const initialTrustedDomains = userSettings.get('trustedDomains').toJS();
         this.setState({ search: ev.target.value }, () => {
             const filtered = initialTrustedDomains.filter(domain => domain.includes(this.state.search));
             this.setState({ filteredTrustedDomains: filtered });
@@ -194,10 +180,10 @@ class ProfileSettings extends Component {
 
     onSaveSettings = () => {
         const { loggedEthAddress, loggedProfileData } = this.props;
+        const akashaId = loggedProfileData.get('akashaId');
         const { defaultLicenseId, defaultLicenseParent, donationsValue, hideComments,
             hideCommentsValue, hideEntries, hideEntriesValue, notifFeed, notifDonations,
-            notifComments, notifVotes, unlockTime, rememberTime, trustedDomains } = this.state;
-        const passwordPreference = { remember: rememberTime, time: unlockTime };
+            notifComments, notifVotes, trustedDomains } = this.state;
         const defaultLicense = { id: defaultLicenseId, parent: defaultLicenseParent };
         const hideCommentContent = { checked: hideComments, value: hideCommentsValue };
         const hideEntryContent = { checked: hideEntries, value: hideEntriesValue };
@@ -211,11 +197,10 @@ class ProfileSettings extends Component {
             defaultLicense,
             hideCommentContent,
             hideEntryContent,
-            passwordPreference,
             notificationsPreference,
             trustedDomains
         };
-        if (donationsValue !== loggedProfileData.get('donationsEnabled')) {
+        if (akashaId && donationsValue !== loggedProfileData.get('donationsEnabled')) {
             this.props.actionAdd(loggedEthAddress, toggleDonations, { status: donationsValue });
         }
         this.props.userSettingsSave(loggedEthAddress, payload);
@@ -225,9 +210,8 @@ class ProfileSettings extends Component {
         const { intl, licenses, loggedProfileData, pendingToggleDonations, savingUserSettings,
             userSettings } = this.props;
         const { defaultLicenseId, defaultLicenseParent, hideComments, hideCommentsValue, hideEntries,
-            hideEntriesValue, notifComments, notifDonations, notifFeed, notifVotes, unlockTime,
-            rememberTime, donationsValue, trustedDomains } = this.state;
-        const pref = userSettings.passwordPreference;
+            hideEntriesValue, notifComments, notifDonations, notifFeed, notifVotes,
+            donationsValue, trustedDomains } = this.state;
         const license = userSettings.get('defaultLicense');
         const hideCommentContent = userSettings.get('hideCommentContent');
         const hideEntryContent = userSettings.get('hideEntryContent');
@@ -236,11 +220,9 @@ class ProfileSettings extends Component {
             true;
         const tipsDisabled = !loggedProfileData.get('akashaId');
         const notifPref = userSettings.notificationsPreference;
-        const initialTrustedDomains = userSettings.get('trustedDomains');
+        const initialTrustedDomains = userSettings.get('trustedDomains').toJS();
 
         const formChanged = (
-            pref.remember !== rememberTime ||
-            pref.time !== unlockTime ||
             license.id !== defaultLicenseId ||
             license.parent !== defaultLicenseParent ||
             donationsEnabled !== donationsValue ||
@@ -260,33 +242,6 @@ class ProfileSettings extends Component {
             {this.showTrustedDomainsModal(formChanged)}
             <div className="profile-settings__form">
               <Form>
-                <div>
-                  <div className="profile-settings__item-title">
-                    {intl.formatMessage(settingsMessages.passphraseOptions)}
-                  </div>
-                  <div className="profile-settings__item-description">
-                    {intl.formatMessage(settingsMessages.passphraseOptionsDescription)}
-                  </div>
-                  <FormItem>
-                    <div className="profile-settings__pass-wrap">
-                      <Checkbox
-                        checked={rememberTime}
-                        onChange={this.handleRememberTimeChange}
-                      >
-                        {intl.formatMessage(formMessages.rememberPassFor)}
-                      </Checkbox>
-                      <div className="profile-settings__pass-select">
-                        <RememberPassphraseSelect
-                          isChecked={this.state.rememberTime}
-                          handleCheck={this.handleRememberTimeChange}
-                          handleTimeChange={this.handleTimeChange}
-                          size="large"
-                          unlockTime={unlockTime.toString()}
-                        />
-                      </div>
-                    </div>
-                  </FormItem>
-                </div>
                 <div>
                   <div className="profile-settings__item-title">
                     {intl.formatMessage(settingsMessages.licenseOptions)}

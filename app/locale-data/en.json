@@ -615,6 +615,8 @@
   "app.placeholder.terms": "By downloading, you agree to the {termsLink}",
   "app.placeholder.termsOfService": "Terms of Service",
   "app.placeholder.blog": "Blog",
+  "app.placeholder.troubleConnecting": "We are having trouble connecting",
+  "app.placeholder.wrongNetwork": "Please make sure your Metamask extension is set on the Rinkeby Test Network.",
   "app.profile.amountPlaceholder": "Type an amount",
   "app.profile.avatarTitle": "PROFILE PICTURE",
   "app.profile.backgroundImageTitle": "COVER PHOTO",

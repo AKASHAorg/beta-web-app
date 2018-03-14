@@ -69,6 +69,7 @@ class VotePopover extends Component {
         const { form, onSubmit, type } = this.props;
         const weight = form.getFieldValue('weight');
         onSubmit({ type, weight });
+        this.onVisibleChange(false);
     };
 
     onVisibleChange = (popoverVisible) => {

@@ -151,8 +151,14 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
          * continue to publishing
          */
         yield put(actions.actionAddSuccess(ethAddress, actionType, payload));
+        const token = yield select(selectToken);
         const needAuthAction = yield select(selectNeedAuthAction);
-        yield put(actions.actionPublish(needAuthAction.get('id')));
+        if (token && needAuthAction) {
+            yield put(actions.actionPublish(needAuthAction.get('id')));
+        } else {
+            yield put(profileActions.profileLogin({ ethAddress, password: '', remeberTime: 1, reauthenticate: true }));
+        }
+
     } else {
         /**
          * stop publishing and display the appropriate modal

@@ -3,11 +3,11 @@ import React from 'react';
 import classNames from 'classnames';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { Button, Card } from 'antd';
-import { Icon, Terms } from './';
-import { generalMessages, placeholderMessages } from '../locale-data/messages';
+import { Icon, Terms } from '../';
+import { generalMessages, placeholderMessages } from '../../locale-data/messages';
 
 const WebPlaceholder = (props) => {
-    const { appState, intl, hideTerms, showTerms } = props;
+    const { appState, intl, hideTerms, showTerms, gethErr } = props;
     let metamaskLink = "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en";
     const userAgent = navigator.userAgent;
 
@@ -22,6 +22,87 @@ const WebPlaceholder = (props) => {
     } else if (userAgent.indexOf("OPR") > -1) {
       metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
     }
+
+    const noMetamaskCards = (
+      <div className="web-placeholder__card-wrap">
+        <div className="web-placeholder__card-wrapper">
+          <Card className="web-placeholder__card">
+            <div className="web-placeholder__card-title">
+              {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
+            </div>
+            <div className="web-placeholder__card-subtitle">
+              {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle)}
+            </div>
+            <div className="web-placeholder__download-btn">
+              <Button
+                type="primary"
+                target={"_blank"}
+                href={"https://github.com/AkashaProject/dapp/releases"}
+              >
+                {intl.formatMessage(placeholderMessages.download)}
+              </Button>
+            </div>
+            <div className="web-placeholder__terms">
+              <FormattedMessage
+                {...placeholderMessages.terms}
+                  values={{
+                    termsLink: (
+                      <a
+                        onClick={termsShow}
+                      >
+                        {intl.formatMessage(placeholderMessages.termsOfService)}
+                      </a>
+                    )
+                  }}
+              />
+            </div>
+          </Card>
+        </div>
+        <div className="web-placeholder__card-wrapper">
+          <Card className="web-placeholder__card">
+            <div className="web-placeholder__card-title">
+              {intl.formatMessage(placeholderMessages.tryBrowser)}
+            </div>
+            <div className="web-placeholder__card-subtitle">
+              {intl.formatMessage(placeholderMessages.tryBrowserSubtitle)}
+            </div>
+            <div className="web-placeholder__icons">
+              <a target={"_blank"} href={metamaskLink}>
+                <div>
+                  <div className="web-placeholder__icon-metamask" />
+                  {intl.formatMessage(placeholderMessages.getExtension)}
+                </div>
+              </a>
+              <div className="web-placeholder__or">
+                {intl.formatMessage(generalMessages.or)}
+              </div>
+              <a target={"_blank"} href={"https://brave.com/download/"}>
+                <div className="web-placeholder__icon-brave" />
+                {intl.formatMessage(placeholderMessages.getBrave)}
+              </a>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+
+    const gethErrCard = (
+      <div className="web-placeholder__card-wrap">
+        <div className="web-placeholder__card-wrapper">
+          <Card className="web-placeholder__card">
+            <div className="web-placeholder__icon-wrap">
+              <div className="web-placeholder__icon-metamask" />
+            </div>
+            <div className="web-placeholder__card-title">
+              {intl.formatMessage(placeholderMessages.troubleConnecting)}
+            </div>
+            <div className="web-placeholder__card-subtitle">
+              {intl.formatMessage(placeholderMessages.wrongNetwork)}
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
 
     return (
         <div className="web-placeholder">
@@ -57,66 +138,7 @@ const WebPlaceholder = (props) => {
             <div className="web-placeholder__body-subtitle">
               {intl.formatMessage(placeholderMessages.welcomeSubtitle)}
             </div>
-            <div className="web-placeholder__card-wrap">
-              <div className="web-placeholder__card-wrapper">
-                <Card className="web-placeholder__card">
-                  <div className="web-placeholder__card-title">
-                    {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
-                  </div>
-                  <div className="web-placeholder__card-subtitle">
-                    {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle)}
-                  </div>
-                  <div className="web-placeholder__download-btn">
-                    <Button
-                      type="primary"
-                      target={"_blank"}
-                      href={"https://github.com/AkashaProject/dapp/releases"}
-                    >
-                      {intl.formatMessage(placeholderMessages.download)}
-                    </Button>
-                  </div>
-                  <div className="web-placeholder__terms">
-                    <FormattedMessage
-                      {...placeholderMessages.terms}
-                        values={{
-                          termsLink: (
-                            <a
-                              onClick={termsShow}
-                            >
-                              {intl.formatMessage(placeholderMessages.termsOfService)}
-                            </a>
-                          )
-                        }}
-                    />
-                  </div>
-                </Card>
-              </div>
-              <div className="web-placeholder__card-wrapper">
-                <Card className="web-placeholder__card">
-                  <div className="web-placeholder__card-title">
-                    {intl.formatMessage(placeholderMessages.tryBrowser)}
-                  </div>
-                  <div className="web-placeholder__card-subtitle">
-                    {intl.formatMessage(placeholderMessages.tryBrowserSubtitle)}
-                  </div>
-                  <div className="web-placeholder__icons">
-                    <a target={"_blank"} href={metamaskLink}>
-                      <div className="web-placeholder__icon-wrap">
-                        <div className="web-placeholder__icon-metamask" />
-                        {intl.formatMessage(placeholderMessages.getExtension)}
-                      </div>
-                    </a>
-                    <div className="web-placeholder__or">
-                      {intl.formatMessage(generalMessages.or)}
-                    </div>
-                    <a target={"_blank"} href={"https://brave.com/download/"}>
-                      <div className="web-placeholder__icon-brave" />
-                      {intl.formatMessage(placeholderMessages.getBrave)}
-                    </a>
-                  </div>
-                </Card>
-              </div>
-            </div>
+            {gethErr ? gethErrCard : noMetamaskCards}
           </div>
           <div className="web-placeholder__footer">
             <div className="web-placeholder__subfooter">
@@ -151,7 +173,8 @@ WebPlaceholder.propTypes = {
     appState: PropTypes.shape(),
     intl: PropTypes.shape(),
     showTerms: PropTypes.func,
-    hideTerms: PropTypes.func
+    hideTerms: PropTypes.func,
+    gethErr: PropTypes.bool
 }
 
 export default injectIntl(WebPlaceholder);

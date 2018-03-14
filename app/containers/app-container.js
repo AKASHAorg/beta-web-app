@@ -10,7 +10,7 @@ import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
     toggleNavigationModal, toggleOutsideNavigation, navForwardCounterReset,
     navCounterIncrement, showTerms } from '../local-flux/actions/app-actions';
 import { entryVoteCost } from '../local-flux/actions/entry-actions';
-import { gethGetStatus } from '../local-flux/actions/external-process-actions';
+import { gethGetStatus, gethStop } from '../local-flux/actions/external-process-actions';
 import { licenseGetAll } from '../local-flux/actions/license-actions';
 import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-actions';
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
@@ -20,8 +20,8 @@ import { AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayM
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
-    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar, TransactionsLogPanel,
-    ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder } from '../components';
+    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TestnetPlaceholder, TopBar,
+    TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
 import { selectLoggedEthAddress } from '../local-flux/selectors/index';
 
@@ -42,6 +42,7 @@ usage <AppRoute exact path="/foo" layout={MainLayout} component={Foo} />
 */
 
 class AppContainer extends Component {
+    state = { gethErr: false };
     bootstrappingHome = false;
     // pass previousLocation to Switch when we need to render Entry Page as an overlay
     previousLocation = this.props.location;
@@ -80,6 +81,14 @@ class AppContainer extends Component {
                 title: intl.formatMessage(errorMessages.fatalError),
             });
         }
+        const gethErr = errorState.get('byId').some(err => err.get('code') === 'GSE01');
+        if (gethErr) {
+            this.props.gethStop();
+            if (this.interval) {
+                clearInterval(this.interval);
+            }
+            this.setState({ gethErr: true });
+        }
     }
 
     componentWillUpdate (nextProps) {
@@ -107,7 +116,7 @@ class AppContainer extends Component {
         }
 
         // check if we need to bootstrap home
-        if (web3 && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady')) {
+        if (web3 && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady') && appState.get('appReady')) {
             this.props.bootstrapHome();
 
             // make requests for geth status every 30s for updating the current block
@@ -132,12 +141,13 @@ class AppContainer extends Component {
         const { activeDashboard, appState, hideTerms, history, intl, location,
             loggedEthAddress, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
 
-        if(!web3) {
+        if (!web3 || this.state.gethErr) {
             return (
                 <WebPlaceholder
                     appState={appState}
                     hideTerms={this.props.hideTerms}
                     showTerms={this.props.showTerms}
+                    gethErr={this.state.gethErr}
                 />
             )
         }
@@ -270,6 +280,7 @@ AppContainer.propTypes = {
     errorDeleteFatal: PropTypes.func.isRequired,
     errorState: PropTypes.shape().isRequired,
     gethGetStatus: PropTypes.func,
+    gethStop: PropTypes.func,
     hideTerms: PropTypes.func.isRequired,
     history: PropTypes.shape(),
     intl: PropTypes.shape(),
@@ -314,6 +325,7 @@ export default DragDropContext(HTML5Backend)(connect(
         entryVoteCost,
         errorDeleteFatal,
         gethGetStatus,
+        gethStop,
         hideTerms,
         licenseGetAll,
         toggleAethWallet,

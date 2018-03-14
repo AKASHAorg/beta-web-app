@@ -71,7 +71,8 @@ export const LoggedProfile = Record({
     akashaId: null,
     ethAddress: null,
     expiration: null,
-    token: genId(),
+    token: null
+    // token: genId(),
 });
 
 const Flags = Record({

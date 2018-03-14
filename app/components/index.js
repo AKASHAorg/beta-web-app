@@ -160,5 +160,5 @@ export VotesModal from './modals/votes-modal';
 export VotePopover from './popovers/vote-popover';
 export WalletPanel from './panels/wallet-panel';
 export WebsiteInfoCard from './cards/website-info-card';
-export WebPlaceholder from './web-placeholder';
+export WebPlaceholder from './placeholders/web-placeholder';
 /* eslint-enable import/no-named-as-default */
