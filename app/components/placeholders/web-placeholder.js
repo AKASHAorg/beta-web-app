@@ -123,7 +123,7 @@ const WebPlaceholder = (props) => {
               <a href="https://www.reddit.com/r/AkashaProject" target="_blank">
                 <Icon type="reddit" />
               </a>
-              <a href="https://discord.gg/2FBvqSe" target="_blank">
+              <a href="https://discord.gg/JqqKasJ" target="_blank">
                 <Icon type="discord" />
               </a>
               <a href="https://github.com/AkashaProject" target="_blank">
