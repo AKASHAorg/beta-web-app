@@ -28,6 +28,9 @@ build/Release
 node_modules
 jspm_packages
 
+# flow type definitions
+flow-typed
+
 # Optional npm cache directory
 .npm
 

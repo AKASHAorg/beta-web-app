@@ -197,7 +197,7 @@
   {
     "id": "app.entry.noProfiles",
     "description": "placeholder for empty profiles list",
-    "defaultMessage": "No profiles"
+    "defaultMessage": "No profiles yet"
   },
   {
     "id": "app.profile.noTransactions",

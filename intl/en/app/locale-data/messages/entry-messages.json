@@ -222,7 +222,7 @@
   {
     "id": "app.entry.noEntries",
     "description": "placeholder for empty entry list",
-    "defaultMessage": "No entries"
+    "defaultMessage": "No entries yet"
   },
   {
     "id": "app.entry.noNewEntries",

@@ -1,32 +1,32 @@
 {
   "presets": [
-    ["env", {
-      "targets": {
-        "browsers": ["last 2 versions", "safari >= 7"]
-      }
-    }],
-    "react",
-    "stage-0"
+      ["env", {
+          "targets": {
+              "browsers": ["last 2 versions", "safari >= 7"]
+          }
+      }],
+      "react",
+      "stage-0",
+      "flow"
   ],
   "plugins": [
-    "add-module-exports",
-    "transform-runtime",
-    "syntax-dynamic-import"
+      "add-module-exports",
+      "transform-runtime"
   ],
   "env": {
-    "development": {
-      "presets": [
-        "react-hmre"
-      ],
-      "plugins": [
-        [
-          "react-intl",
-          {
-            "messagesDir": "./intl/en",
-            "enforceDescriptions": false
-          }
-        ]
-      ]
-    }
+      "development": {
+          "presets": [
+              "react-hmre"
+          ],
+          "plugins": [
+              [
+                  "react-intl",
+                  {
+                      "messagesDir": "./intl/en",
+                      "enforceDescriptions": false
+                  }
+              ]
+          ]
+      }
   }
 }
