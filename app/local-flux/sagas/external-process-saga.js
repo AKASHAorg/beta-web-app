@@ -10,6 +10,7 @@ import * as types from '../constants';
 import * as profileService from '../services/profile-service';
 import { selectGethStatus, selectGethSyncActionId, selectLastGethLog,
     selectLastIpfsLog, selectLoggedEthAddress } from '../selectors';
+import { guestAddress } from '../../constants/guest-address';
 
 let gethSyncInterval = null;
 
@@ -246,7 +247,7 @@ function* watchGethStartChannel () {
             const syncActionId = yield select(selectGethSyncActionId);
             const loggedProfile = (resp.services.geth.ethAddress) ?
                 resp.services.geth.ethAddress : 
-                'guest';
+                guestAddress;
             const gethIsSyncing = gethStatus.get('process') && !gethStatus.get('upgrading') &&
                 (syncActionId === 1 || syncActionId === 0);
             if (gethIsSyncing && !gethSyncInterval) {

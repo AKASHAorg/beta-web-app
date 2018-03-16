@@ -16,6 +16,7 @@ import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
 import { balanceToNumber } from '../../utils/number-formatter';
 import { isEthAddress } from '../../utils/dataModule';
+import { guestAddress } from '../../constants/guest-address';
 
 const ACTION_HISTORY_LIMIT = 20;
 
@@ -136,7 +137,7 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
         const id = yield select(selectActionToPublish);
         yield put(actions.actionPublish(id)); // eslint-disable-line no-use-before-define
     }
-    if (!isEthAddress(ethAddress)) {
+    if (ethAddress === guestAddress) {
         yield put(appActions.toggleGuestModal());
         return;
     }
