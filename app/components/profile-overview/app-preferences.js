@@ -28,10 +28,7 @@ class AppPreferences extends Component {
             darkTheme: this.state.darkTheme
         });
         if (darkTheme !== generalSettings.darkTheme) {
-            this.props.showNotification({
-                id: 'themeTips',
-                duration: 4
-            });
+            window.location.reload();
         }
     }
 

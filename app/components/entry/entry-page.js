@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { injectIntl } from 'react-intl';
-import { parse } from 'querystring';
 import throttle from 'lodash.throttle';
 import classNames from 'classnames';
 import { CommentEditor, CommentsList, DataLoader, EntryPageActions, EntryPageContent,
@@ -18,34 +17,23 @@ class EntryPage extends Component {
     };
 
     componentDidMount () {
-        const { entry, location, match } = this.props;
+        const { entry, match } = this.props;
         const { params } = match;
-        const { version } = parse(location.search);
-        this.checkNewCommentsInterval = setInterval(
-            this.checkNewComments,
-            CHECK_NEW_COMMENTS_INTERVAL
-        );
-        if (!entry || entry.get('entryId') !== params.entryId ||
-                (version !== undefined && entry.getIn(['content', 'version']) !== version)) {
-            const { entryId } = params;
+        if (!entry || entry.get('entryId') !== params.entryId) {
             this.getFullEntry();
-            this.fetchComments(entryId);
         }
     }
 
     componentWillReceiveProps (nextProps) {
-        const { commentsClean, entry, location, match, pendingComments } = this.props;
+        const { commentsClean, entry, match, pendingComments } = this.props;
 
         const { params } = match;
         const nextParams = nextProps.match.params;
         const { entryId } = nextParams;
-        const { version } = parse(nextProps.location.search);
 
-        if ((params.entryId !== entryId && entry.get('entryId') !== entryId) ||
-                (version !== undefined && version !== location.query.version)) {
+        if (params.entryId !== entryId && entry.get('entryId') !== entryId) {
             commentsClean();
             this.getFullEntry({ props: nextProps });
-            this.fetchComments(entryId);
         }
         if (!this.listenerRegistered && this.container) {
             this.container.addEventListener('scroll', this.throttledHandler);
@@ -81,6 +69,14 @@ class EntryPage extends Component {
     getFullEntry = ({ props } = {}) => {
         const { match } = props || this.props;
         const { akashaId, entryId, ethAddress } = match.params;
+        this.fetchComments(entryId);
+        if (this.checkNewCommentsInterval) {
+            clearInterval(this.checkNewCommentsInterval);
+        }
+        this.checkNewCommentsInterval = setInterval(
+            this.checkNewComments,
+            CHECK_NEW_COMMENTS_INTERVAL
+        );
         const prefixed = ethAddress === '0' ? undefined : `0x${ethAddress}`;
         const version = parseInt(match.params.version, 10);
         const versionNr = isNaN(Number(version)) ? null : Number(version);
@@ -127,19 +123,28 @@ class EntryPage extends Component {
     };
 
     throttledHandler = throttle(this.handleContentScroll, 300);
-
+    _handleEditorEnableSwitch = (enabled) => {
+        this.setState({
+            editorEnabled: enabled
+        });
+    }
+    _handleEditorFocus = () => {
+        if (!this.state.editorEnabled) {
+            this.commentEditor.onWrapperClick(true);
+        }
+    }
     onRetry = () => {
         const { entry, entryResolveIpfsHash } = this.props;
         const { entryId } = this.props.match.params;
-        // this.getFullEntry();
-        // this.fetchComments(entryId);
         entryResolveIpfsHash({ entryId, ipfsHash: entry.get('ipfsHash') });
     };
 
-    render () {
-        const { actionAdd, baseUrl, commentsLoadNew, entry, fetchingFullEntry, fullSizeImageAdd,
+    render () { // eslint-disable-line complexity
+        const {
+            actionAdd, baseUrl, commentsLoadNew, entry, fetchingFullEntry, fullSizeImageAdd,
             highlightSave, intl, latestVersion, licenses, loggedProfileData, newComments, resolvingIpfsHash,
-            toggleOutsideNavigation } = this.props;
+            toggleOutsideNavigation
+        } = this.props;
         const { showInHeader } = this.state;
         const buttonWrapperClass = classNames({
             'entry-page__button-wrapper_fixed': showInHeader,
@@ -214,6 +219,7 @@ class EntryPage extends Component {
                   loggedProfileData={loggedProfileData}
                   parent="0"
                   ref={this.getEditorRef}
+                  onEnable={this._handleEditorEnableSwitch}
                 />
                 <div
                   id="comments-section"
@@ -232,7 +238,11 @@ class EntryPage extends Component {
                       </div>
                     }
                   </div>
-                  <CommentsList containerRef={this.container} getTriggerRef={this.getTriggerRef} />
+                  <CommentsList
+                    containerRef={this.container}
+                    getTriggerRef={this.getTriggerRef}
+                    onNewCommentButtonClick={this._handleEditorFocus}
+                  />
                 </div>
               </div>
             </div>);
@@ -269,7 +279,6 @@ EntryPage.propTypes = {
     intl: PropTypes.shape(),
     latestVersion: PropTypes.number,
     licenses: PropTypes.shape(),
-    location: PropTypes.shape(),
     loggedProfileData: PropTypes.shape(),
     match: PropTypes.shape(),
     newComments: PropTypes.shape(),

@@ -116,6 +116,7 @@
     "less": "2.7.3",
     "less-loader": "4.1.0",
     "lodash.debounce": "4.0.8",
+    "lokijs": "^1.5.3",
     "megadraft": "0.4.36",
     "minimist": "1.2.0",
     "mocha": "5.0.4",

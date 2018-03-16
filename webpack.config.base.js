@@ -58,7 +58,7 @@ export default {
         new webpack.NamedModulesPlugin(),
     ],
     node: {
-        fs: false,
+        fs: 'empty',
         net: false,
         tls: false
     }

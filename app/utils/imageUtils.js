@@ -355,11 +355,11 @@ const getResizedImages = (inputFiles, options) => {
         } else if (settings.extensions.includes(ext)) {
             imagePromises[index] = getRawDataUrl(file, options).then(imageDataUrl =>
                 getImageSize(imageDataUrl, options).then((results) => {
-                const { height, width } = results;
-                options.actualWidth = width;
-                options.actualHeight = height;
-                return resizeImage(results.imageObj, options);
-            }));
+                    const { height, width } = results;
+                    options.actualWidth = width;
+                    options.actualHeight = height;
+                    return resizeImage(results.imageObj, options);
+                }));
         } else {
             imagePromises.push(Promise.reject(`.${ext} extension is not supported!`));
         }

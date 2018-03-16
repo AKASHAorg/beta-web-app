@@ -273,5 +273,20 @@
     "id": "app.error.saveGeneralSettings",
     "description": "error message for saving general settings",
     "defaultMessage": "An error occurred while saving your settings"
+  },
+  {
+    "id": "app.error.appErrorTitle",
+    "description": "Title message to display when the app crashes because of an unexpected error",
+    "defaultMessage": "Ah snap!"
+  },
+  {
+    "id": "app.error.appErrorSubtitle",
+    "description": "Subtitle message to display when the app crashes because of an unexpected error",
+    "defaultMessage": "Something went terribly wrong."
+  },
+  {
+    "id": "app.error.copyError",
+    "description": "label for copy to clipboard button",
+    "defaultMessage": "Copy error to clipboard"
   }
 ]

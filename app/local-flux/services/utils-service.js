@@ -1,5 +1,3 @@
-import getChannels from 'akasha-channels';
-
 // export const backupKeys = ({ target, onSuccess, onError }) => {
 //     const clientChannel = Channel.client.utils.backupKeys;
 //     const serverChannel = Channel.server.utils.backupKeys;
@@ -18,12 +16,13 @@ import getChannels from 'akasha-channels';
 // };
 
 export const uploadImage = (files, imgId) => {
-    const serverChannel = getChannels().server.utils.uploadImage;
-    const clientChannel = getChannels().client.utils.uploadImage;
-    getChannels().server.utils.uploadImage.enable();
+    const serverChannel = window.Channel.server.utils.uploadImage;
+    const clientChannel = window.Channel.client.utils.uploadImage;
+    const managerChannel = window.Channel.client.utils.manager;
+    // console.log(files, 'the files to convert');
 
     return new Promise((resolve, reject) => {
-        clientChannel.once(({ data }) => {
+        clientChannel.once((ev, { data }) => {
             if (data.error) return reject(data.error);
             if (files instanceof Uint8Array) {
                 return resolve(data.collection[0].hash);
@@ -35,9 +34,10 @@ export const uploadImage = (files, imgId) => {
             // console.log(files, 'the new files with ipfs hash');
             return resolve(files);
         });
-        if (files instanceof Uint8Array) {
+        managerChannel.once(() => {
+            if (files instanceof Uint8Array) {
                 serverChannel.send([{ source: files }]);
-        } else {
+            } else {
                 serverChannel.send(
                     Object.keys(files)
                         .map(fileKey => ({
@@ -46,5 +46,7 @@ export const uploadImage = (files, imgId) => {
                             source: files[fileKey].src
                         })));
             }
+        });
+        serverChannel.enable();
     });
 };

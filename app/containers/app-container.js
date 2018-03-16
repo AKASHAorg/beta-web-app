@@ -8,7 +8,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
     toggleNavigationModal, toggleOutsideNavigation, navForwardCounterReset,
-    navCounterIncrement, showTerms } from '../local-flux/actions/app-actions';
+    navCounterIncrement, showNotification, showTerms } from '../local-flux/actions/app-actions';
 import { entryVoteCost } from '../local-flux/actions/entry-actions';
 import { gethGetStatus, gethStop } from '../local-flux/actions/external-process-actions';
 import { licenseGetAll } from '../local-flux/actions/license-actions';
@@ -16,7 +16,7 @@ import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-act
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
-import { AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayModal,
+import { AppErrorBoundary, AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayModal,
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
@@ -116,7 +116,7 @@ class AppContainer extends Component {
         }
 
         // check if we need to bootstrap home
-        if (web3 && shouldBootstrapHome && !this.bootstrappingHome && !appState.get('homeReady') && appState.get('appReady')) {
+        if (web3 && shouldBootstrapHome && appState.get('appReady') && !this.bootstrappingHome && !appState.get('homeReady')) {
             this.props.bootstrapHome();
 
             // make requests for geth status every 30s for updating the current block
@@ -163,6 +163,9 @@ class AppContainer extends Component {
           <div className="flex-center-x app-container__root">
             <DataLoader flag={!appState.get('appReady')} size="large" style={{ paddingTop: '100px' }}>
               <div className="container fill-height app-container">
+                <AppErrorBoundary
+                  showNotification={this.props.showNotification}
+                >
                 {location.pathname === '/' && <Redirect to="/setup/configuration" />}
                 {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
                 {!location.pathname.startsWith('/setup') &&
@@ -245,9 +248,9 @@ class AppContainer extends Component {
                     </div>
                   </DataLoader>
                 }
+                </AppErrorBoundary>
                 <Sidebar unlocked={unlocked} />
                 <Route path="/setup" component={SetupPages} />
-                <Notification />
                 <FullSizeImageViewer />
                 <ErrorNotification />
                 <NavigateAwayModal
@@ -265,6 +268,7 @@ class AppContainer extends Component {
                 }
                 {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
                 {appState.get('showProfileEditor') && <ProfileEdit />}
+                <Notification />
               </div>
             </DataLoader>
           </div>
@@ -297,6 +301,7 @@ AppContainer.propTypes = {
     toggleOutsideNavigation: PropTypes.func,
     navForwardCounterReset: PropTypes.func,
     navCounterIncrement: PropTypes.func,
+    showNotification: PropTypes.func.isRequired,
     web3: PropTypes.bool,
     unlocked: PropTypes.bool,
     userSettingsAddTrustedDomain: PropTypes.func,
@@ -335,6 +340,7 @@ export default DragDropContext(HTML5Backend)(connect(
         navCounterIncrement,
         navForwardCounterReset,
         userSettingsAddTrustedDomain,
-        showTerms
+        showTerms,
+        showNotification
     }
 )(injectIntl(AppContainer)));

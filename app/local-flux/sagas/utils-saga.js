@@ -1,6 +1,6 @@
-import { apply, call, fork, put, take } from 'redux-saga/effects';
-import getChannels from 'akasha-channels';
+import { apply, call, fork, put, take, takeEvery } from 'redux-saga/effects';
 import { actionChannels, enableChannel } from './helpers';
+import getChannels from 'akasha-channels';
 import * as actions from '../actions/utils-actions';
 import * as appActions from '../actions/app-actions';
 import * as types from '../constants';
@@ -9,14 +9,6 @@ function* backupKeysRequest () {
     const channel = getChannels().server.utils.backupKeys;
     yield call(enableChannel, channel, getChannels().client.utils.manager);
     yield apply(channel, channel.send, [{}]);
-}
-
-// Action watchers
-
-function* watchBackupKeysRequest () {
-    while (yield take(types.BACKUP_KEYS_REQUEST)) {
-        yield fork(backupKeysRequest);
-    }
 }
 
 // Channel watchers
@@ -38,7 +30,7 @@ function* watchBackupChannel () {
 }
 
 export function* watchUtilsActions () {
-    yield fork(watchBackupKeysRequest);
+    yield takeEvery(types.BACKUP_KEYS_REQUEST, backupKeysRequest);
 }
 
 export function* registerUtilsListeners () {

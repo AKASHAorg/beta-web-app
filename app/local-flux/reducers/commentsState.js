@@ -1,12 +1,15 @@
-import { List, Map } from 'immutable';
+import {List, Map} from 'immutable';
+import {isEmpty} from 'ramda';
 import * as types from '../constants';
-import { createReducer } from './create-reducer';
-import { CommentAuthor, CommentRecord, CommentsState } from './records';
+import {createReducer} from './create-reducer';
+import {CommentAuthor, CommentRecord, CommentsState} from './records';
 
 const initialState = new CommentsState();
+const hexZero = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-const createCommentWithAuthor = (comment) => {
-    if (!comment.parent) {
+const createCommentWithAuthor = (record) => {
+    const comment = Object.assign({}, record);
+    if (!comment.parent || comment.parent === hexZero) {
         comment.parent = '0';
     }
     return new CommentRecord(comment).set('author', new CommentAuthor(comment.author));
@@ -54,8 +57,8 @@ const sortByScore = (byId, list = new List()) => {
 const commentsState = createReducer(initialState, {
     [types.CLEAN_STORE]: () => initialState,
 
-    [types.COMMENTS_CHECK_NEW_SUCCESS]: (state, { data, request }) => {
-        const { collection, lastBlock } = data;
+    [types.COMMENTS_CHECK_NEW_SUCCESS]: (state, {data, request}) => {
+        const {collection, lastBlock} = data;
         if (!collection.length) {
             return state.setIn(['newComments', 'lastBlock'], lastBlock);
         }
@@ -69,14 +72,14 @@ const commentsState = createReducer(initialState, {
         });
         return state.merge({
             byId,
-            newComments: state.get('newComments').merge({ lastBlock, comments })
+            newComments: state.get('newComments').merge({lastBlock, comments})
         });
     },
 
     [types.COMMENTS_CLEAN]: () => initialState,
 
-    [types.COMMENTS_GET_SCORE_SUCCESS]: (state, { data }) => {
-        const { commentId, score } = data;
+    [types.COMMENTS_GET_SCORE_SUCCESS]: (state, {data}) => {
+        const {commentId, score} = data;
         if (score === state.getIn(['byId', commentId, 'score'])) {
             return state;
         }
@@ -89,7 +92,7 @@ const commentsState = createReducer(initialState, {
         });
     },
 
-    [types.COMMENTS_GET_VOTE_OF_SUCCESS]: (state, { data }) => {
+    [types.COMMENTS_GET_VOTE_OF_SUCCESS]: (state, {data}) => {
         const votes = {};
         data.collection.forEach((res) => {
             votes[res.commentId] = res.vote;
@@ -97,18 +100,18 @@ const commentsState = createReducer(initialState, {
         return state.mergeIn(['votes'], new Map(votes));
     },
 
-    [types.COMMENTS_ITERATOR]: (state, { parent }) =>
+    [types.COMMENTS_ITERATOR]: (state, {parent}) =>
         state.setIn(['flags', 'fetchingComments', parent], true),
 
-    [types.COMMENTS_ITERATOR_ERROR]: (state, { request }) =>
+    [types.COMMENTS_ITERATOR_ERROR]: (state, {request}) =>
         state.setIn(['flags', 'fetchingComments', request.parent], false),
 
-    [types.COMMENTS_ITERATOR_SUCCESS]: (state, { data, request }) => {
+    [types.COMMENTS_ITERATOR_SUCCESS]: (state, {data, request}) => {
         let byId = state.get('byId');
         const parent = request.parent;
         let newState = state;
         data.collection.forEach((comm) => {
-            if(comm.parent === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+            if (!comm.parent || comm.parent === hexZero) {
                 comm.parent = '0';
             }
             let list = newState.getIn(['byParent', comm.parent]) || new List();
@@ -123,7 +126,6 @@ const commentsState = createReducer(initialState, {
             });
         });
 
-
         return newState.merge({
             flags: state.get('flags').setIn(['fetchingComments', parent], false),
             lastBlock: state.get('lastBlock').set(parent, data.lastBlock),
@@ -133,7 +135,7 @@ const commentsState = createReducer(initialState, {
         });
     },
 
-    [types.COMMENTS_ITERATOR_REVERSED_SUCCESS]: (state, { data, request }) => {
+    [types.COMMENTS_ITERATOR_REVERSED_SUCCESS]: (state, {data, request}) => {
         let byId = state.get('byId');
         const parent = request.parent;
         let list = state.getIn(['byParent', parent]) || new List();
@@ -163,7 +165,10 @@ const commentsState = createReducer(initialState, {
         let newestCommentBlock = state.get('newestCommentBlock');
         newComments.forEach((id) => {
             const comment = state.getIn(['byId', id]);
-            const parent = comment.get('parent') || '0';
+            let parent = comment.get('parent');
+            if (!parent || parent === hexZero) {
+                parent = '0';
+            }
             const list = sortByScore(byId, byParent.get(parent).push(id));
             byParent = byParent.set(parent, list);
             newestCommentBlock = newestCommentBlock.set(parent, state.getIn(['newComments', 'lastBlock']));
@@ -175,13 +180,13 @@ const commentsState = createReducer(initialState, {
         });
     },
 
-    [types.COMMENTS_MORE_ITERATOR]: (state, { parent }) =>
+    [types.COMMENTS_MORE_ITERATOR]: (state, {parent}) =>
         state.setIn(['flags', 'fetchingMoreComments', parent], true),
 
-    [types.COMMENTS_MORE_ITERATOR_ERROR]: (state, { request }) =>
+    [types.COMMENTS_MORE_ITERATOR_ERROR]: (state, {request}) =>
         state.setIn(['flags', 'fetchingMoreComments', request.parent], false),
 
-    [types.COMMENTS_MORE_ITERATOR_SUCCESS]: (state, { data, request }) => {
+    [types.COMMENTS_MORE_ITERATOR_SUCCESS]: (state, {data, request}) => {
         let byId = state.get('byId');
         const parent = request.parent;
         let list = state.getIn(['byParent', parent]) || new List();
@@ -201,7 +206,7 @@ const commentsState = createReducer(initialState, {
         });
     },
 
-    [types.COMMENTS_RESOLVE_IPFS_HASH]: (state, { ipfsHashes, commentIds }) => {
+    [types.COMMENTS_RESOLVE_IPFS_HASH]: (state, {ipfsHashes, commentIds}) => {
         let byHash = state.get('byHash');
         let resolvingComments = state.getIn(['flags', 'resolvingComments']);
         ipfsHashes.forEach((hash, index) => {
@@ -214,22 +219,19 @@ const commentsState = createReducer(initialState, {
         });
     },
 
-    [types.COMMENTS_RESOLVE_IPFS_HASH_ERROR]: (state, { data }) =>
+    [types.COMMENTS_RESOLVE_IPFS_HASH_ERROR]: (state, {data}) =>
         state.setIn(['flags', 'resolvingComments', data], false),
 
-    [types.COMMENTS_RESOLVE_IPFS_HASH_SUCCESS]: (state, { data }) => {
-        const commentId = state.getIn(['byHash', data.ipfsHash]);
-        if (!data.ipfsHash) {
+    [types.COMMENTS_RESOLVE_IPFS_HASH_SUCCESS]: (state, {data}) => {
+        if (!data.ipfsHash || isEmpty(data)) {
             return state;
         }
+        const commentId = state.getIn(['byHash', data.ipfsHash]);
         return state.merge({
             byId: state.get('byId').setIn([commentId, 'content'], data.content),
             flags: state.get('flags').setIn(['resolvingComments', data.ipfsHash], false)
         });
     },
-
-    // when requesting a new entry, clear comments in the store
-    [types.ENTRY_GET_FULL]: () => initialState,
 });
 
 export default commentsState;

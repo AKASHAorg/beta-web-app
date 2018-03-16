@@ -820,6 +820,16 @@
     "defaultMessage": "View All"
   },
   {
+    "id": "app.general.reload",
+    "description": "reload",
+    "defaultMessage": "Reload"
+  },
+  {
+    "id": "app.general.reportIssue",
+    "description": "report issue",
+    "defaultMessage": "Report issue"
+  },
+  {
     "id": "app.general.or",
     "description": "or",
     "defaultMessage": "or"
