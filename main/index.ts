@@ -13,7 +13,6 @@ window.addEventListener('load', function () {
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
         if (!web3Local.eth.accounts.length) {
-            web3Api.instance.eth.defaultAccount = web3Local.eth.accounts[0];
             return startApp(web3Local, false);
         }
     }
@@ -26,6 +25,7 @@ const startApp = (web3, vault) => {
         return bootstrap(false, false);
     }
     web3Api.instance = web3;
+    web3Api.instance.eth.defaultAccount = web3.eth.accounts[0];
     ipfsApi.instance = IpfsConnector.getInstance();
     console.time('bootstrap');
     IpfsConnector.getInstance().setOption('config',
