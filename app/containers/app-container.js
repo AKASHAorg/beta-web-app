@@ -166,7 +166,7 @@ class AppContainer extends Component {
                 <AppErrorBoundary
                   showNotification={this.props.showNotification}
                 >
-                {location.pathname === '/' && <Redirect to="/setup/configuration" />}
+                {location.pathname === '/' && <Redirect to="/dashboard" />}
                 {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
                 {!location.pathname.startsWith('/setup') &&
                   <DataLoader flag={!appState.get('homeReady')} size="large" style={{ paddingTop: '100px' }}>
