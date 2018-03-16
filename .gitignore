@@ -45,3 +45,4 @@ main/**/*.js
 !main/typings/*
 test-repo
 !gulpfile.old.js
+dist
