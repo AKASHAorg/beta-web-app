@@ -751,12 +751,12 @@ const generalMessages = defineMessages({
     waitASecond: {
         id: 'app.general.waitASecond',
         description: 'title for external navigation modal',
-        defaultMessage: 'Wait a second...'
+        defaultMessage: 'Hold on a second'
     },
     externalNavigationWarning: {
         id: 'app.general.externalNavigationWarning',
         description: 'warning displayed when clicking an external link',
-        defaultMessage: 'You are about to navigate to an external URL'
+        defaultMessage: 'You are about to navigate to an external URL.'
     },
     collectAll: {
         id: 'app.general.collectAll',
@@ -862,6 +862,26 @@ const generalMessages = defineMessages({
         id: 'app.general.unlockVault',
         description: 'info for guest mode modal',
         defaultMessage: 'Please unlock your Metamask Vault to enjoy the full Akasha web experience!'
+    },
+    thanks: {
+        id: 'app.general.thanks',
+        description: 'thanks',
+        defaultMessage: 'Thanks!'
+    },
+    initialFaucetTitle: {
+        id: 'app.general.initialFaucetTitle',
+        description: 'title for inital faucet modal',
+        defaultMessage: 'A Gift from Akasha'
+    },
+    initialFaucetInfo: {
+        id: 'app.general.initialFaucetInfo',
+        description: 'info for inital faucet modal',
+        defaultMessage: 'We are sending you some test ETH and AETH!'
+    },
+    externalNavigationAreYouSure: {
+        id: 'app.general.externalNavigationAreYouSure',
+        description: 'warning displayed when clicking an external link',
+        defaultMessage: 'Are you sure you want to go there?'
     }
 });
 export { generalMessages };

@@ -742,12 +742,12 @@
   {
     "id": "app.general.waitASecond",
     "description": "title for external navigation modal",
-    "defaultMessage": "Wait a second..."
+    "defaultMessage": "Hold on a second"
   },
   {
     "id": "app.general.externalNavigationWarning",
     "description": "warning displayed when clicking an external link",
-    "defaultMessage": "You are about to navigate to an external URL"
+    "defaultMessage": "You are about to navigate to an external URL."
   },
   {
     "id": "app.general.collectAll",
@@ -853,5 +853,25 @@
     "id": "app.general.unlockVault",
     "description": "info for guest mode modal",
     "defaultMessage": "Please unlock your Metamask Vault to enjoy the full Akasha web experience!"
+  },
+  {
+    "id": "app.general.thanks",
+    "description": "thanks",
+    "defaultMessage": "Thanks!"
+  },
+  {
+    "id": "app.general.initialFaucetTitle",
+    "description": "title for inital faucet modal",
+    "defaultMessage": "A Gift from Akasha"
+  },
+  {
+    "id": "app.general.initialFaucetInfo",
+    "description": "info for inital faucet modal",
+    "defaultMessage": "We are sending you some test ETH and AETH!"
+  },
+  {
+    "id": "app.general.externalNavigationAreYouSure",
+    "description": "warning displayed when clicking an external link",
+    "defaultMessage": "Are you sure you want to go there?"
   }
 ]

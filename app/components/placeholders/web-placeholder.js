@@ -23,6 +23,24 @@ const WebPlaceholder = (props) => {
       metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
     }
 
+    const icons = (
+      <div className="web-placeholder__icons">
+        <a target={"_blank"} href={metamaskLink}>
+          <div>
+            <div className="web-placeholder__icon-metamask" />
+            {intl.formatMessage(placeholderMessages.getExtension)}
+          </div>
+        </a>
+        <div className="web-placeholder__or">
+          {intl.formatMessage(generalMessages.or)}
+        </div>
+        <a target={"_blank"} href={"https://brave.com/download/"}>
+          <div className="web-placeholder__icon-brave" />
+          {intl.formatMessage(placeholderMessages.getBrave)}
+        </a>
+      </div>
+    );
+
     const noMetamaskCards = (
       <div className="web-placeholder__card-wrap">
         <div className="web-placeholder__card-wrapper">
@@ -66,21 +84,7 @@ const WebPlaceholder = (props) => {
             <div className="web-placeholder__card-subtitle">
               {intl.formatMessage(placeholderMessages.tryBrowserSubtitle)}
             </div>
-            <div className="web-placeholder__icons">
-              <a target={"_blank"} href={metamaskLink}>
-                <div>
-                  <div className="web-placeholder__icon-metamask" />
-                  {intl.formatMessage(placeholderMessages.getExtension)}
-                </div>
-              </a>
-              <div className="web-placeholder__or">
-                {intl.formatMessage(generalMessages.or)}
-              </div>
-              <a target={"_blank"} href={"https://brave.com/download/"}>
-                <div className="web-placeholder__icon-brave" />
-                {intl.formatMessage(placeholderMessages.getBrave)}
-              </a>
-            </div>
+            {icons}
           </Card>
         </div>
       </div>

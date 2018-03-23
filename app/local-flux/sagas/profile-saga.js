@@ -614,9 +614,11 @@ function* watchProfileFaucetChannel () {
         const { actionId } = resp.request;
         if (resp.error) {
             yield put(actions.profileFaucetError(resp.error, resp.request));
+            yield put(actionActions.actionDelete(actionId));
         } else if (resp.data.receipt) {
             if (!resp.data.receipt.success) {
                 yield put(actions.profileFaucetError({}));
+                yield put(actionActions.actionDelete(actionId));
             } else {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 yield put(actions.profileFaucetSuccess());

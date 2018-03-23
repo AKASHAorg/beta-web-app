@@ -136,6 +136,7 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
     if (actionType === actionTypes.faucet) {
         const id = yield select(selectActionToPublish);
         yield put(actions.actionPublish(id)); // eslint-disable-line no-use-before-define
+        return;
     }
     if (ethAddress === guestAddress) {
         yield put(appActions.toggleGuestModal());
@@ -147,7 +148,7 @@ function* actionAdd ({ ethAddress, payload, actionType }) {
     const balance = yield select(state => state.profileState.get('balance'));
     const publishingCost = yield select(state => state.profileState.get('publishingCost'));
     const hasBalance = hasEnoughBalance(actionType, balance, publishingCost, payload || null);
-    if ((hasBalance.eth && hasBalance.mana) || !balanceRequired(actionType)) {
+    if ((hasBalance.eth && hasBalance.mana)) {
         /**
          * continue to publishing
          */

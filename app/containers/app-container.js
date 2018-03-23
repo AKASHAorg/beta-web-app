@@ -21,9 +21,11 @@ import { AppErrorBoundary, AppPreferences, ConfirmationDialog, FaucetAndManafyMo
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
     ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TestnetPlaceholder, TopBar,
-    TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder } from '../components';
+    TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder,
+    InitialFaucetModal } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
-import { selectLoggedEthAddress } from '../local-flux/selectors/index';
+import { selectLoggedEthAddress, selectBalance } from '../local-flux/selectors/index';
+import { guestAddress } from '../constants/guest-address';
 
 notification.config({
     top: 60,
@@ -138,7 +140,7 @@ class AppContainer extends Component {
 
     render () {
         /* eslint-disable no-shadow */
-        const { activeDashboard, appState, hideTerms, history, intl, location,
+        const { activeDashboard, appState, balance, hideTerms, history, intl, location,
             loggedEthAddress, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
 
         if (!web3 || this.state.gethErr) {
@@ -158,6 +160,7 @@ class AppContainer extends Component {
         const showWallet = appState.get('showWallet');
         const isOverlay = location.state && location.state.overlay && this.previousLocation !== location;
         const needFunds = needEth || needAeth || needMana;
+        const showInitialFaucetModal = loggedEthAddress && (loggedEthAddress !== guestAddress) && balance.get('eth') !== null && (!balance.get('eth') || !balance.getIn(['aeth', 'total']));
 
         return (
           <div className="flex-center-x app-container__root">
@@ -260,6 +263,7 @@ class AppContainer extends Component {
                   onClick={this.props.toggleOutsideNavigation}
                 />
                 {needFunds && <FaucetAndManafyModal />}
+                {showInitialFaucetModal && <InitialFaucetModal />}
                 {showGethDetailsModal && <GethDetailsModal />}
                 {showGuestModal && <GuestModal />}
                 {showIpfsDetailsModal && <IpfsDetailsModal />}
@@ -312,6 +316,7 @@ function mapStateToProps (state) {
     return {
         activeDashboard: state.dashboardState.get('activeDashboard'),
         appState: state.appState,
+        balance: selectBalance(state),
         errorState: state.errorState,
         faucet: state.profileState.get('faucet'),
         loggedEthAddress: selectLoggedEthAddress(state),

@@ -10,7 +10,7 @@ import { genId } from '../utils/dataModule';
 import { Avatar, EssencePopover, Icon, KarmaPopover, ManaPopover, SidebarIcon } from './';
 import { generalMessages } from '../locale-data/messages';
 import { draftCreate, draftsGet } from '../local-flux/actions/draft-actions';
-import { profileEditToggle } from '../local-flux/actions/app-actions';
+import { profileEditToggle, toggleGuestModal } from '../local-flux/actions/app-actions';
 import { profileLogout } from '../local-flux/actions/profile-actions';
 import { selectLoggedProfileData, selectLoggedProfile,
     selectProfileEditToggle } from '../local-flux/selectors';
@@ -238,19 +238,15 @@ class Sidebar extends Component {
             />
           </div>
         </Popover>) :
-        (
-          <Tooltip
-            mouseEnterDelay={0.3}
-            title={intl.formatMessage(generalMessages.sidebarTooltipGuest)}
-            placement="right"
+        (<div
+           className="content-link flex-center sidebar__new-entry-wrapper"
+           onClick={() => this.props.toggleGuestModal()}
           >
-            <div className="content-link flex-center sidebar__new-entry-wrapper">
-              <Icon
-                className="sidebar__new-entry-icon"
-                type="newEntry"
-              />
-            </div>
-          </Tooltip>
+            <Icon
+              className="sidebar__new-entry-icon"
+              type="newEntry"
+            />
+          </div>
         );
         return (
           <div className={`sidebar ${this._isSidebarVisible(location) && 'sidebar_shown'}`}>
@@ -345,6 +341,7 @@ Sidebar.propTypes = {
     loggedProfileData: PropTypes.shape(),
     profileEditToggle: PropTypes.func,
     profileLogout: PropTypes.func,
+    toggleGuestModal: PropTypes.func,
     userSelectedLicense: PropTypes.shape(),
     unlocked: PropTypes.bool
 };
@@ -374,6 +371,7 @@ export default connect(
         profileEditToggle,
         profileLogout,
         draftsGet,
+        toggleGuestModal
     },
     null,
     {

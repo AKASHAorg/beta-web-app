@@ -4,10 +4,12 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { Button, Form, Popover, Slider, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { selectManaBalance, selectVoteCost } from '../../local-flux/selectors';
+import { selectManaBalance, selectVoteCost, selectLoggedEthAddress } from '../../local-flux/selectors';
 import { entryMessages, formMessages, generalMessages } from '../../locale-data/messages';
 import { balanceToNumber } from '../../utils/number-formatter';
 import { Icon } from '../';
+import { toggleGuestModal } from '../../local-flux/actions/app-actions';
+import { guestAddress } from '../../constants/guest-address';
 
 const FormItem = Form.Item;
 const MIN = 1;
@@ -73,6 +75,10 @@ class VotePopover extends Component {
     };
 
     onVisibleChange = (popoverVisible) => {
+        if (this.props.loggedEthAddress === guestAddress) {
+            this.props.toggleGuestModal();
+            return;
+        }
         this.wasVisible = true;
         this.setState({
             popoverVisible: popoverVisible && this.canVote()
@@ -99,7 +105,7 @@ class VotePopover extends Component {
     };
 
     renderContent = () => {
-        const { form, intl, votePending } = this.props;
+        const { form, intl, votePending, loggedEthAddress } = this.props;
         const { getFieldDecorator, getFieldError, getFieldValue } = form;
         const title = this.isDownVote() ? entryMessages.downvote : entryMessages.upvote;
 
@@ -213,6 +219,7 @@ VotePopover.propTypes = {
     iconClassName: PropTypes.string,
     intl: PropTypes.shape().isRequired,
     isOwnEntity: PropTypes.bool,
+    loggedEthAddress: PropTypes.string,
     mana: PropTypes.string,
     onSubmit: PropTypes.func.isRequired,
     type: PropTypes.string.isRequired,
@@ -224,8 +231,14 @@ VotePopover.propTypes = {
 function mapStateToProps (state) {
     return {
         mana: selectManaBalance(state),
-        voteCost: selectVoteCost(state)
+        voteCost: selectVoteCost(state),
+        loggedEthAddress: selectLoggedEthAddress(state)
     };
 }
 
-export default connect(mapStateToProps)(Form.create()(injectIntl(VotePopover)));
+export default connect(
+    mapStateToProps,
+    {
+        toggleGuestModal
+    }
+)(Form.create()(injectIntl(VotePopover)));
