@@ -138,7 +138,7 @@ class AppContainer extends Component {
         }
     }
 
-    render () {
+    render () { // eslint-disable-line complexity
         /* eslint-disable no-shadow */
         const { activeDashboard, appState, balance, hideTerms, history, intl, location,
             loggedEthAddress, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
@@ -160,7 +160,7 @@ class AppContainer extends Component {
         const showWallet = appState.get('showWallet');
         const isOverlay = location.state && location.state.overlay && this.previousLocation !== location;
         const needFunds = needEth || needAeth || needMana;
-        const showInitialFaucetModal = loggedEthAddress && (loggedEthAddress !== guestAddress) && balance.get('eth') !== null && (!balance.get('eth') || !balance.getIn(['aeth', 'total']));
+        const showInitialFaucetModal = loggedEthAddress && (loggedEthAddress !== guestAddress) && balance.get('eth') !== null && (!Number(balance.get('eth')) || !Number(balance.getIn(['aeth', 'total'])));
 
         return (
           <div className="flex-center-x app-container__root">

@@ -48,3 +48,6 @@ test-repo
 dist
 package-lock.json
 app/locale-data/en-source.json
+app/locale-data/en.json
+intl/en/*
+.vscode

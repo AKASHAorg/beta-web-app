@@ -91,6 +91,7 @@ const errorState = createReducer(initialState, {
     [types.IPFS_STOP_ERROR]: addNewError,
     [types.PROFILE_BOND_AETH_ERROR]: addNewError,
     [types.PROFILE_CYCLE_AETH_ERROR]: addNewError,
+    [types.PROFILE_FAUCET_ERROR]: addNewError,    
     [types.PROFILE_FREE_AETH_ERROR]: addNewError,
     [types.PROFILE_GET_LIST_ERROR]: addNewError,
     [types.PROFILE_GET_LOCAL_ERROR]: addNewError,
