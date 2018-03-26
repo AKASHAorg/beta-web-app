@@ -1,0 +1,45 @@
+{
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "plugins": ["babel"],
+    "rules": {
+        "react/jsx-indent": [2, 2],
+        "indent": [2, 4, {"SwitchCase": 1, "ignoredNodes": ["JSXElement", "JSXElement *"]}],
+        "comma-dangle": [0],
+        "comma-style": ["error", "last"],
+        "complexity": [2, 10],
+        "max-depth": [2, 5],
+        "max-len": ["error", 110],
+        "max-statements": [2, 20],
+        "arrow-body-style": ["error", "as-needed"],
+        "space-before-function-paren": [2, "always"],
+        "eqeqeq": ["error", "allow-null"],
+        "no-underscore-dangle": ["error", { "allowAfterThis": true }],
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/require-default-props": 0,
+        "react/sort-comp": 0,
+        "jsx-a11y/no-static-element-interactions": 0,
+        "jsx-a11y/href-no-hash": "off",
+        "jsx-a11y/click-events-have-key-events": 0,
+        "import/no-extraneous-dependencies": 0,
+        "import/prefer-default-export": 0,
+        "babel/generator-star-spacing": 1,
+        "generator-star-spacing": 0,
+        "no-param-reassign": [0],
+        "no-plusplus": 0,
+        "object-curly-newline": 0,
+        "function-paren-newline": 0
+    },
+    "settings": {
+        "import/core-modules": ["electron", "local-flux", "locale-data", "shared-components"],
+        "import/external-module-folders": ["node_modules", "local-flux", "shared-components", "locale-data"]
+    },
+    "parser": "babel-eslint",
+    "env": {
+        "browser": true,
+        "node": true,
+        "shared-node-browser": true,
+        "mocha": true,
+        "es6": true,
+        "commonjs": true
+    }
+}

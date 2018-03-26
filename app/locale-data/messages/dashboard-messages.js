@@ -186,5 +186,20 @@ const dashboardMessages = defineMessages({
         description: 'label for tag column',
         defaultMessage: 'Tag'
     },
+    noColumnsTitle: {
+        id: 'app.dashboard.noColumnsTitle',
+        description: 'Column placeholder title',
+        defaultMessage: 'A new world awaits you!'
+    },
+    noColumns: {
+        id: 'app.dashboard.noColumns',
+        description: 'Column placeholder message',
+        defaultMessage: 'Your favorite topics and users at your fingertips.'
+    },
+    addFirstColumn: {
+        id: 'app.dashboard.addFirstColumn',
+        description: 'add first column button label',
+        defaultMessage: 'Add first column'
+    }
 });
 export { dashboardMessages };
