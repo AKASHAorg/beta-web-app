@@ -46,3 +46,5 @@ main/**/*.js
 test-repo
 !gulpfile.old.js
 dist
+package-lock.json
+app/locale-data/en-source.json

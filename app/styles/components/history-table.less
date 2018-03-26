@@ -47,4 +47,30 @@
             fill: @error-color !important;
         }
     }
+
+    &__placeholder {
+        flex-wrap: wrap;
+        display: flex;
+        width: 100%;
+        &-image {
+            background: @history-empty-state-bg top center no-repeat;
+            height: 57px;
+            width: 100%;
+            min-width: 100%;
+            flex-grow: 1;
+        }
+        &-text {
+            min-width: 100%;
+            flex-grow: 1;
+            text-align: center;
+            margin-top: 1.5em;
+            color: @text-color-secondary;
+            font-size: 0.86em;
+            div:first-child {
+                font-weight: 500;
+                color: @text-color;
+                font-size: 1.2em;
+            }
+        }
+    }
 }
