@@ -65,12 +65,12 @@ class NavigateAway extends Component {
             </div>    
             <div className="navigate-away-modal__custom-footer">
               <div className="navigate-away-modal__checkbox">
-              <Checkbox
-                value={this.state.trustedDomain}
-                onChange={this.changeCheckbox}
-              >
-                {intl.formatMessage(generalMessages.trustedDomain)}
-              </Checkbox>
+                <Checkbox
+                  value={this.state.trustedDomain}
+                  onChange={this.changeCheckbox}
+                >
+                  {intl.formatMessage(generalMessages.trustedDomain)}
+                </Checkbox>
               </div>
               <div className="navigate-away-modal__footer-btns">
                 <div className="navigate-away-modal__cancel-btn">
