@@ -861,7 +861,7 @@ const generalMessages = defineMessages({
     unlockVault: {
         id: 'app.general.unlockVault',
         description: 'info for guest mode modal',
-        defaultMessage: 'Please unlock your Metamask Vault to enjoy the full Akasha web experience!'
+        defaultMessage: 'Please refresh the page to login after unlocking Metamask.'
     },
     thanks: {
         id: 'app.general.thanks',
@@ -882,6 +882,11 @@ const generalMessages = defineMessages({
         id: 'app.general.externalNavigationAreYouSure',
         description: 'warning displayed when clicking an external link',
         defaultMessage: 'Are you sure you want to go there?'
-    }
+    },
+    loginUnlock: {
+        id: 'app.general.loginUnlock',
+        description: 'info for guest mode modal',
+        defaultMessage: 'Login by unlocking your Metamask'
+    },
 });
 export { generalMessages };

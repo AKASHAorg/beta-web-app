@@ -75,12 +75,12 @@ const placeholderMessages = defineMessages({
     troubleConnecting: {
         id: 'app.placeholder.troubleConnecting',
         description: 'title for geth error card',
-        defaultMessage: 'We are having trouble connecting'
+        defaultMessage: 'No extension on the test network'
     },
     wrongNetwork: {
         id: 'app.placeholder.wrongNetwork',
         description: 'title for geth error card',
-        defaultMessage: 'Please make sure your Metamask extension is set on the Rinkeby Test Network.'
+        defaultMessage: 'Please set Metamask to run on the Rinkeby test network.'
     }
 });
 export { placeholderMessages };

@@ -53,20 +53,22 @@ class NavigateAway extends Component {
         return (
           <Modal
             closable
+            onCancel={this.handleCancel}
+            onOk={this.handleOk}
             visible={navigation.get('isVisible')}
             footer={null}
             title={intl.formatMessage(generalMessages.waitASecond)}
             wrapClassName="navigate-away-modal"
           >
-            <div className="navigate-away-modal__url">{navigation.get('url')}</div>
             <div className="navigate-away-modal__warn">
               <div>{intl.formatMessage(generalMessages.externalNavigationWarning)}</div>
               <div>{intl.formatMessage(generalMessages.externalNavigationAreYouSure)}</div>
-            </div>    
+            </div>
+            <div className="navigate-away-modal__url">{navigation.get('url')}</div>    
             <div className="navigate-away-modal__custom-footer">
               <div className="navigate-away-modal__checkbox">
                 <Checkbox
-                  value={this.state.trustedDomain}
+                  checked={this.state.trustedDomain}
                   onChange={this.changeCheckbox}
                 >
                   {intl.formatMessage(generalMessages.trustedDomain)}

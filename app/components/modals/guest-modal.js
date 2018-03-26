@@ -11,12 +11,14 @@ const GuestModal = (props) => (
     footer={null}
     onCancel={props.toggleGuestModal}
     visible
+    wrapClassName="guest-modal"
   >
     <div>
-      <div className="top-bar-right__guest-modal-info">
-        {props.intl.formatMessage(generalMessages.guestModeInfo)}
+      <div className="guest-modal__helper-icon" />
+      <div className="guest-modal__unlock">
+        {props.intl.formatMessage(generalMessages.loginUnlock)}
       </div>
-      <div>
+      <div className="guest-modal__info">
         {props.intl.formatMessage(generalMessages.unlockVault)}
       </div>
     </div>

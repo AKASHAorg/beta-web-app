@@ -93,9 +93,9 @@ const WebPlaceholder = (props) => {
     const gethErrCard = (
       <div className="web-placeholder__card-wrap">
         <div className="web-placeholder__card-wrapper">
-          <Card className="web-placeholder__card">
+          <Card className="web-placeholder__card-geth-err">
             <div className="web-placeholder__icon-wrap">
-              <div className="web-placeholder__icon-metamask" />
+              <div className="web-placeholder__icon-no-extension-helper" />
             </div>
             <div className="web-placeholder__card-title">
               {intl.formatMessage(placeholderMessages.troubleConnecting)}
