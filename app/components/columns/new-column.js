@@ -48,6 +48,7 @@ class NewColumn extends Component {
             !column.equals(this.props.column) ||
             dashboardId !== this.props.dashboardId ||
             !lists.equals(this.props.lists) ||
+            (!newColumn && this.props.newColumn) ||
             (newColumn && !newColumn.equals(this.props.newColumn)) ||
             !previewEntries.equals(this.props.previewEntries) ||
             !profileResults.equals(this.props.profileResults) ||

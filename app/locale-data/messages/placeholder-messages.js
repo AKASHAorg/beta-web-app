@@ -25,7 +25,7 @@ const placeholderMessages = defineMessages({
     welcome: {
         id: 'app.placeholder.welcome',
         description: 'title for web placeholder page',
-        defaultMessage: 'Welcome to Akasha'
+        defaultMessage: 'Welcome to AKASHA'
     },
     welcomeSubtitle: {
         id: 'app.placeholder.welcomeSubtitle',

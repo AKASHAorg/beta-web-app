@@ -6,6 +6,7 @@ import { notification, Modal } from 'antd';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { actionAdd } from '../local-flux/actions/action-actions';
 import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
     toggleNavigationModal, toggleOutsideNavigation, navForwardCounterReset,
     navCounterIncrement, showNotification, showTerms } from '../local-flux/actions/app-actions';
@@ -16,13 +17,13 @@ import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-act
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
-import { AppErrorBoundary, AppPreferences, ConfirmationDialog, FaucetAndManafyModal, NavigateAwayModal,
+import { AppErrorBoundary, AppPreferences, FaucetAndManafyModal, NavigateAwayModal,
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
-    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TestnetPlaceholder, TopBar,
+    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar,
     TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder,
-    InitialFaucetModal } from '../components';
+    FaucetNotification } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
 import { selectLoggedEthAddress, selectBalance } from '../local-flux/selectors/index';
 import { guestAddress } from '../constants/guest-address';
@@ -139,28 +140,28 @@ class AppContainer extends Component {
     }
 
     render () { // eslint-disable-line complexity
-        /* eslint-disable no-shadow */
         const { activeDashboard, appState, balance, hideTerms, history, intl, location,
-            loggedEthAddress, needAuth, needEth, needAeth, needMana, web3, unlocked } = this.props;
+            loggedEthAddress, needEth, needAeth, needMana, web3, unlocked } = this.props;
 
         if (!web3 || this.state.gethErr) {
             return (
-                <WebPlaceholder
-                    appState={appState}
-                    hideTerms={this.props.hideTerms}
-                    showTerms={this.props.showTerms}
-                    gethErr={this.state.gethErr}
-                />
+              <WebPlaceholder
+                appState={appState}
+                hideTerms={this.props.hideTerms}
+                showTerms={this.props.showTerms}
+                gethErr={this.state.gethErr}
+              />
             )
         }
-        /* eslint-enable no-shadow */
         const showGethDetailsModal = appState.get('showGethDetailsModal');
         const showGuestModal = appState.get('showGuestModal');
         const showIpfsDetailsModal = appState.get('showIpfsDetailsModal');
         const showWallet = appState.get('showWallet');
         const isOverlay = location.state && location.state.overlay && this.previousLocation !== location;
         const needFunds = needEth || needAeth || needMana;
-        const showInitialFaucetModal = loggedEthAddress && (loggedEthAddress !== guestAddress) && balance.get('eth') !== null && (!Number(balance.get('eth')) || !Number(balance.getIn(['aeth', 'total'])));
+        const ethBalance = balance.get('eth');
+        const noFunds = ethBalance && !Number(ethBalance) && !Number(balance.getIn(['aeth', 'total']));
+        const showInitialFaucetModal = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
 
         return (
           <div className="flex-center-x app-container__root">
@@ -169,88 +170,88 @@ class AppContainer extends Component {
                 <AppErrorBoundary
                   showNotification={this.props.showNotification}
                 >
-                {location.pathname === '/' && <Redirect to="/dashboard" />}
-                {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
-                {!location.pathname.startsWith('/setup') &&
-                  <DataLoader flag={!appState.get('homeReady')} size="large" style={{ paddingTop: '100px' }}>
-                    <div>
-                      {activeDashboard && location.pathname === '/dashboard' &&
-                        <Redirect to={`/dashboard/${activeDashboard}`} />
-                      }
-                      <SecondarySidebar shown={appState.get('showSecondarySidebar')}>
-                        <Route path="/dashboard/:dashboardId?" component={DashboardSecondarySidebar} />
-                        <Route path="/draft/:draftType/:draftId" component={NewEntrySecondarySidebar} />
-                        <Route path="/profileoverview/:title" component={ProfileOverviewSecondarySidebar} />
-                      </SecondarySidebar>
-                      <PageContent showSecondarySidebar={appState.get('showSecondarySidebar')}>
-                        <Route exact path="/@:akashaId" component={ProfilePage} />
-                        <Route exact path="/0x:ethAddress" component={ProfilePage} />
-                        {unlocked &&
-                          <Route path="/profileoverview/myentries" component={MyEntries} />
+                  {location.pathname === '/' && <Redirect to="/dashboard" />}
+                  {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
+                  {!location.pathname.startsWith('/setup') &&
+                    <DataLoader flag={!appState.get('homeReady')} size="large" style={{ paddingTop: '100px' }}>
+                      <div>
+                        {activeDashboard && location.pathname === '/dashboard' &&
+                          <Redirect to={`/dashboard/${activeDashboard}`} />
                         }
-                        {unlocked &&
-                          <Route path="/profileoverview/highlights" component={Highlights} />
-                        }
-                        {unlocked &&
-                           <Route exact path="/profileoverview/lists" component={Lists} />
-                        }    
-                        {unlocked &&
-                           <Route exact path="/profileoverview/lists" component={Lists} />
-                        }
-                        {unlocked &&
-                           <Route path="/profileoverview/lists/:listId" component={ListEntries} />
-                        }
-                        {unlocked &&
-                           <Route path="/profileoverview/settings" component={ProfileSettings} />
-                        }
-                        {unlocked &&
-                          <Route path="/profileoverview/preferences" component={AppPreferences} />
-                        }
-                        <Switch location={isOverlay ? this.previousLocation : location}>
-                          <Route path="/dashboard/:dashboardId?" component={DashboardPage} />
+                        <SecondarySidebar shown={appState.get('showSecondarySidebar')}>
+                          <Route path="/dashboard/:dashboardId?" component={DashboardSecondarySidebar} />
+                          <Route path="/draft/:draftType/:draftId" component={NewEntrySecondarySidebar} />
+                          <Route path="/profileoverview/:title" component={ProfileOverviewSecondarySidebar} />
+                        </SecondarySidebar>
+                        <PageContent showSecondarySidebar={appState.get('showSecondarySidebar')}>
+                          <Route exact path="/@:akashaId" component={ProfilePage} />
+                          <Route exact path="/0x:ethAddress" component={ProfilePage} />
                           {unlocked &&
-                            <Route path="/draft/article/:draftId" component={NewTextEntryPage} />
+                            <Route path="/profileoverview/myentries" component={MyEntries} />
                           }
                           {unlocked &&
-                            <Route path="/draft/link/:draftId" component={NewLinkEntryPage} />
-                          }                       
-                          <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
-                          <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
-                          <Route path="/search" component={SearchPage} />
-                        </Switch>
-                        {isOverlay &&
-                          <div>
+                            <Route path="/profileoverview/highlights" component={Highlights} />
+                          }
+                          {unlocked &&
+                            <Route exact path="/profileoverview/lists" component={Lists} />
+                          }    
+                          {unlocked &&
+                            <Route exact path="/profileoverview/lists" component={Lists} />
+                          }
+                          {unlocked &&
+                            <Route path="/profileoverview/lists/:listId" component={ListEntries} />
+                          }
+                          {unlocked &&
+                            <Route path="/profileoverview/settings" component={ProfileSettings} />
+                          }
+                          {unlocked &&
+                            <Route path="/profileoverview/preferences" component={AppPreferences} />
+                          }
+                          <Switch location={isOverlay ? this.previousLocation : location}>
+                            <Route path="/dashboard/:dashboardId?" component={DashboardPage} />
+                            {unlocked &&
+                              <Route path="/draft/article/:draftId" component={NewTextEntryPage} />
+                            }
+                            {unlocked &&
+                              <Route path="/draft/link/:draftId" component={NewLinkEntryPage} />
+                            }                       
                             <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
                             <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
-                          </div>
-                        }
-                      </PageContent>
-                      <TopBar
-                        history={history}
-                        intl={intl}
-                        location={location}
-                        showSecondarySidebar={appState.get('showSecondarySidebar')}
-                        unlocked={unlocked}
-                      />
-                      {!!showWallet &&
-                        <WalletPanel
-                          showWallet={showWallet}
-                          toggleAethWallet={this.props.toggleAethWallet}
-                          toggleEthWallet={this.props.toggleEthWallet}
+                            <Route path="/search" component={SearchPage} />
+                          </Switch>
+                          {isOverlay &&
+                            <div>
+                              <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
+                              <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
+                            </div>
+                          }
+                        </PageContent>
+                        <TopBar
+                          history={history}
+                          intl={intl}
+                          location={location}
+                          showSecondarySidebar={appState.get('showSecondarySidebar')}
+                          unlocked={unlocked}
                         />
-                      }
-                      {!!appState.get('showPreview') &&
-                        <PreviewPanel />
-                      }
-                      {appState.get('showTransactionsLog') &&
-                        <TransactionsLogPanel />
-                      }
-                      {appState.get('showNotificationsPanel') &&
-                        <NotificationsPanel />
-                      }
-                    </div>
-                  </DataLoader>
-                }
+                        {!!showWallet &&
+                          <WalletPanel
+                            showWallet={showWallet}
+                            toggleAethWallet={this.props.toggleAethWallet}
+                            toggleEthWallet={this.props.toggleEthWallet}
+                          />
+                        }
+                        {!!appState.get('showPreview') &&
+                          <PreviewPanel />
+                        }
+                        {appState.get('showTransactionsLog') &&
+                          <TransactionsLogPanel />
+                        }
+                        {appState.get('showNotificationsPanel') &&
+                          <NotificationsPanel />
+                        }
+                      </div>
+                    </DataLoader>
+                  }
                 </AppErrorBoundary>
                 <Sidebar unlocked={unlocked} />
                 <Route path="/setup" component={SetupPages} />
@@ -263,7 +264,9 @@ class AppContainer extends Component {
                   onClick={this.props.toggleOutsideNavigation}
                 />
                 {needFunds && <FaucetAndManafyModal />}
-                {showInitialFaucetModal && <InitialFaucetModal />}
+                {showInitialFaucetModal &&
+                  <FaucetNotification actionAdd={this.props.actionAdd} loggedEthAddress={loggedEthAddress} />
+                }
                 {showGethDetailsModal && <GethDetailsModal />}
                 {showGuestModal && <GuestModal />}
                 {showIpfsDetailsModal && <IpfsDetailsModal />}
@@ -281,8 +284,10 @@ class AppContainer extends Component {
 }
 
 AppContainer.propTypes = {
+    actionAdd: PropTypes.func.isRequired,
     activeDashboard: PropTypes.string,
     appState: PropTypes.shape().isRequired,
+    balance: PropTypes.shape().isRequired,
     bootstrapHome: PropTypes.func,
     entryVoteCost: PropTypes.func,
     errorDeleteFatal: PropTypes.func.isRequired,
@@ -295,7 +300,6 @@ AppContainer.propTypes = {
     licenseGetAll: PropTypes.func,
     location: PropTypes.shape().isRequired,
     loggedEthAddress: PropTypes.string,
-    needAuth: PropTypes.string,
     needEth: PropTypes.bool,
     needAeth: PropTypes.bool,
     needMana: PropTypes.bool,
@@ -320,7 +324,6 @@ function mapStateToProps (state) {
         errorState: state.errorState,
         faucet: state.profileState.get('faucet'),
         loggedEthAddress: selectLoggedEthAddress(state),
-        needAuth: state.actionState.get('needAuth'),
         needEth: state.actionState.get('needEth'),
         needAeth: state.actionState.get('needAeth'),
         needMana: state.actionState.get('needMana'),
@@ -331,6 +334,7 @@ export { AppContainer };
 export default DragDropContext(HTML5Backend)(connect(
     mapStateToProps,
     {
+        actionAdd,
         bootstrapHome,
         entryVoteCost,
         errorDeleteFatal,

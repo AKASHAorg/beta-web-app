@@ -1,5 +1,4 @@
 import startScreen from "./setup/start-screen";
-import initialFaucetModal from "./modals/initial-faucet-modal";
 
 /* eslint-disable import/no-named-as-default */
 export AddImage from './comment/add-image';
@@ -45,7 +44,7 @@ export ErrorNotification from './notifications/error-notification';
 export EssenceHistory from './essence-history';
 export EssencePopover from './popovers/essence-popover';
 export EthWallet from './wallets/eth-wallet';
-export InitialFaucetModal from './modals/initial-faucet-modal';
+export FaucetNotification from './notifications/faucet-notification';
 export FaucetAndManafyModal from './modals/faucet-and-manafy-modal';
 export FollowButton from './follow-button';
 export FullSizeImageViewer from './image-viewer/full-size-image-viewer';

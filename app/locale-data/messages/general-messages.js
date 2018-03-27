@@ -868,16 +868,6 @@ const generalMessages = defineMessages({
         description: 'thanks',
         defaultMessage: 'Thanks!'
     },
-    initialFaucetTitle: {
-        id: 'app.general.initialFaucetTitle',
-        description: 'title for inital faucet modal',
-        defaultMessage: 'A Gift from Akasha'
-    },
-    initialFaucetInfo: {
-        id: 'app.general.initialFaucetInfo',
-        description: 'info for inital faucet modal',
-        defaultMessage: 'We are sending you some test ETH and AETH!'
-    },
     externalNavigationAreYouSure: {
         id: 'app.general.externalNavigationAreYouSure',
         description: 'warning displayed when clicking an external link',
@@ -888,5 +878,10 @@ const generalMessages = defineMessages({
         description: 'info for guest mode modal',
         defaultMessage: 'Login by unlocking your Metamask'
     },
+    here: {
+        id: 'app.general.here',
+        description: 'here',
+        defaultMessage: 'here'
+    }
 });
 export { generalMessages };

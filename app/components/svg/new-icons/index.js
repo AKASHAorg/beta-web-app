@@ -1,5 +1,6 @@
 export activity from './activity';
 export akasha from './akasha';
+export akashaWelcome from './akasha-welcome';
 export arrowDown from './arrow-down';
 export arrowDropdownClose from './arrow-dropdown-close';
 export arrowDropdownOpen from './arrow-dropdown-open';
@@ -20,6 +21,7 @@ export dashboard from './dashboard';
 export discord from './discord';
 export draft from './draft';
 export edit from './edit';
+export emojiHug from './emoji-hug';
 export entries from './entries';
 export entry from './entry';
 export essence from './essence';
