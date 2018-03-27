@@ -860,16 +860,6 @@
     "defaultMessage": "Thanks!"
   },
   {
-    "id": "app.general.initialFaucetTitle",
-    "description": "title for inital faucet modal",
-    "defaultMessage": "A Gift from Akasha"
-  },
-  {
-    "id": "app.general.initialFaucetInfo",
-    "description": "info for inital faucet modal",
-    "defaultMessage": "We are sending you some test ETH and AETH!"
-  },
-  {
     "id": "app.general.externalNavigationAreYouSure",
     "description": "warning displayed when clicking an external link",
     "defaultMessage": "Are you sure you want to go there?"
@@ -878,5 +868,10 @@
     "id": "app.general.loginUnlock",
     "description": "info for guest mode modal",
     "defaultMessage": "Login by unlocking your Metamask"
+  },
+  {
+    "id": "app.general.here",
+    "description": "here",
+    "defaultMessage": "here"
   }
 ]
