@@ -1,6 +1,7 @@
 import { apply, call, fork, put, select, takeEvery } from 'redux-saga/effects';
 import * as actions from '../actions/dashboard-actions';
 import * as dashboardService from '../services/dashboard-service';
+import * as profileService from '../services/profile-service';
 import * as types from '../constants';
 import * as columnTypes from '../../constants/columns';
 import { selectActiveDashboardId, selectDashboards,
@@ -92,6 +93,12 @@ export function* dashboardGetAll () {
         const orderedData = yield apply(dashboardService, dashboardService.getDashboardOrder, [ethAddress]);
         if (orderedData.length) {
             data = orderedData.map(dashId => data.find(el => el.id === dashId));
+        }
+        if (!data.length) {
+            const lastBlock = yield apply(profileService, profileService.profileGetLastBlockNr, [ethAddress]);
+            if (!lastBlock) {
+                yield put(actions.dashboardAdd('My first board', []));
+            }
         }
         yield put(actions.dashboardGetAllSuccess(data));
     } catch (error) {
