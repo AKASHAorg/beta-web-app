@@ -12,11 +12,17 @@ window.addEventListener('load', function () {
     let web3Local;
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
-        if (!web3Local.eth.accounts.length) {
-            return startApp(web3Local, false);
-        }
+        return web3Local.eth.getAccounts((err, accList) => {
+           if (err) {
+               throw err;
+           }
+            web3Api.instance = web3Local;
+            web3Api.instance.eth.defaultAccount = accList[0];
+           return startApp(web3Local, !!accList.length);
+        });
+
     }
-    startApp(web3Local, true);
+    startApp(false, true);
 });
 
 
@@ -24,8 +30,7 @@ const startApp = (web3, vault) => {
     if (!web3) {
         return bootstrap(false, false);
     }
-    web3Api.instance = web3;
-    web3Api.instance.eth.defaultAccount = web3.eth.accounts[0];
+
     ipfsApi.instance = IpfsConnector.getInstance();
     console.time('bootstrap');
     IpfsConnector.getInstance().setOption('config',

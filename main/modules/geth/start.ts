@@ -18,7 +18,9 @@ const execute = Promise.coroutine(function*() {
         gethStatus.api = true;
         gethStatus.version = yield web3Api.instance.version.getNodeAsync();
         gethStatus.networkID = yield web3Api.instance.version.getNetworkAsync();
-        gethStatus.ethKey = web3Api.instance.eth.accounts[0];
+
+        const accounts = yield web3Api.instance.eth.getAccountsAsync();
+        gethStatus.ethKey = accounts[0];
     }
     yield contracts.init();
     return { started: connected };

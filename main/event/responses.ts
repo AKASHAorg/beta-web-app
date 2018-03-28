@@ -45,21 +45,24 @@ class GethStatus {
     }
 
     public get ethKey() {
-        if (web3Api.instance.eth.accounts[0] !== this._ethKey) {
-            console.log('default account changed');
-            if (this._ethKey) {
-                location.reload();
-            }
+        web3Api.instance.eth.getAccounts((err, accList) => {
+            if (err) { throw err; }
+            if (accList[0] !== this._ethKey) {
+                console.log('default account changed');
+                if (this._ethKey) {
+                    location.reload();
+                }
 
-            if (!web3Api.instance.eth.accounts[0]) {
-                this.shouldUnlockVault = true;
+                if (!accList[0]) {
+                    this.shouldUnlockVault = true;
+                }
+                this._ethKey = accList[0];
+                if (this.shouldUnlockVault && this._ethKey) {
+                    this.shouldUnlockVault = false;
+                }
+                this.shouldLogout = true;
             }
-            this._ethKey = web3Api.instance.eth.accounts[0];
-            if (this.shouldUnlockVault && this._ethKey) {
-               this.shouldUnlockVault = false;
-            }
-            this.shouldLogout = true;
-        }
+        });
         return this._ethKey;
     }
 
