@@ -6,7 +6,6 @@ import { Button, Form, Popover, Slider, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { selectManaBalance, selectVoteCost, selectLoggedEthAddress } from '../../local-flux/selectors';
 import { entryMessages, formMessages, generalMessages } from '../../locale-data/messages';
-import { balanceToNumber } from '../../utils/number-formatter';
 import { Icon } from '../';
 import { toggleGuestModal } from '../../local-flux/actions/app-actions';
 import { guestAddress } from '../../constants/guest-address';
@@ -105,7 +104,7 @@ class VotePopover extends Component {
     };
 
     renderContent = () => {
-        const { form, intl, votePending, loggedEthAddress } = this.props;
+        const { form, intl, votePending } = this.props;
         const { getFieldDecorator, getFieldError, getFieldValue } = form;
         const title = this.isDownVote() ? entryMessages.downvote : entryMessages.upvote;
 
@@ -222,6 +221,7 @@ VotePopover.propTypes = {
     loggedEthAddress: PropTypes.string,
     mana: PropTypes.string,
     onSubmit: PropTypes.func.isRequired,
+    toggleGuestModal: PropTypes.func,
     type: PropTypes.string.isRequired,
     voteCost: PropTypes.shape().isRequired,
     votePending: PropTypes.bool,

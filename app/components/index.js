@@ -46,7 +46,7 @@ export EssenceHistory from './essence-history';
 export EssencePopover from './popovers/essence-popover';
 export EthWallet from './wallets/eth-wallet';
 export FaucetNotification from './notifications/faucet-notification';
-export FaucetAndManafyModal from './modals/faucet-and-manafy-modal';
+export ManafyModal from './modals/manafy-modal';
 export FollowButton from './follow-button';
 export FullSizeImageViewer from './image-viewer/full-size-image-viewer';
 export GethCacheSelect from './forms/geth-cache-select';
