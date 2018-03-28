@@ -34,35 +34,51 @@
         background-color: @error-color;
     }
 
-    &__select {
-        width: 85px;
+    &__title {
+        font-size: 16px;
+        font-weight: 500;
+        color: @heading-color;
+        height: 22px;
     }
 
-    &__select-dropdown {
-        font-size: 12px;
-
-        li.ant-select-dropdown-menu-item {
-            color: @heading-color;
-        }
+    &__description {
+        margin: 8px 0px 12px;
     }
 
-    &__translate-option {
-        background-color: @primary-color;
-        color: white !important;
-
-        &.ant-select-dropdown-menu-item-active {
-            background-color: @primary-color;
-        }
+    &__input-wrapper {
+        position: relative;
+        height: 76px;
     }
 
-    &__link-icon {
-        width: 10px;
-        height: 10px;
-        margin-left: 5px;
-        stroke: white;
+    &__error {
+        position: absolute;
+        bottom: -20px;
+        font-size: 13px;
+        color: @error-color;
     }
 
-    .ant-select-selection-selected-value {
-        font-size: 12px;
+    &__actions {
+        display: flex;
+    }
+
+    &__actions-left {
+        flex: 0 0 auto;
+        height: 36px;
+        display: flex;
+        align-items: center;
+    }
+
+    &__actions-right {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    &__toggle-label {
+        font-size: 14px;
+        color: @input-color;
+        height: 21px;
+        line-height: 21px;
     }
 }

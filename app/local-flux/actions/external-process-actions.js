@@ -35,7 +35,7 @@ export const gethGetSyncStatusSuccess = (data, services) =>
 export const gethPauseSync = () => action(types.GETH_PAUSE_SYNC);
 export const gethResetBusy = () => action(types.GETH_RESET_BUSY);
 export const gethResumeSync = () => action(types.GETH_RESUME_SYNC);
-export const gethStart = () => action(types.GETH_START);
+export const gethStart = (bootstrap) => action(types.GETH_START, { bootstrap });
 
 export const gethStartError = (data, error) => {
     if (typeof error !== 'object') {
@@ -47,8 +47,8 @@ export const gethStartError = (data, error) => {
 };
 
 export const gethStartLogger = () => action(types.GETH_START_LOGGER);
-export const gethStartSuccess = (data, services) =>
-    action(types.GETH_START_SUCCESS, { data, services });
+export const gethStartSuccess = (data, services, request) =>
+    action(types.GETH_START_SUCCESS, { data, services, request });
 export const gethStop = () => action(types.GETH_STOP);
 
 export const gethStopError = (error) => {

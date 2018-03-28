@@ -882,6 +882,11 @@ const generalMessages = defineMessages({
         id: 'app.general.here',
         description: 'here',
         defaultMessage: 'here'
+    },
+    version: {
+        id: 'app.general.version',
+        description: 'version',
+        defaultMessage: 'Version'
     }
 });
 export { generalMessages };
