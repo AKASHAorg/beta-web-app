@@ -34,7 +34,7 @@ export const execute = Promise.coroutine(function* (data: { ethAddress?: string,
                         from: ev.args.from,
                         aeth: (web3Api.instance.fromWei(ev.args.aeth, 'ether')).toFormat(5),
                         eth: (web3Api.instance.fromWei(ev.args.eth, 'ether')).toFormat(5),
-                        message: web3Api.instance.toUtf8(ev.args.extraData)
+                        message: ev.args.extraData
                     },
                     blockNumber: ev.blockNumber
                 }
