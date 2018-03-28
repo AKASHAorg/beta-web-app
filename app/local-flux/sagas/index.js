@@ -90,17 +90,19 @@ function* bootstrapApp () {
     yield put(appActions.appReady());
 }
 
-function* bootstrapHome () {
+function* bootstrapHome ({ request }) {
     // launch the necessary actions for the home/dashboard component
-    yield call(launchHomeActions);
-    yield put(appActions.bootstrapHomeSuccess());
+    if (request.bootstrap) {
+        yield call(launchHomeActions);
+        yield put(appActions.bootstrapHomeSuccess());
+    }
 }
 
 function* startGeth () {
-    yield put(eProcActions.gethStart());
+    yield put(eProcActions.gethStart(true));
 }
 
-function* watchGethStartSuccess() {
+function* watchGethStartSuccess () {
     yield takeEvery(types.GETH_START_SUCCESS, bootstrapHome);
 }
 

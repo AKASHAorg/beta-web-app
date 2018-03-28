@@ -89,6 +89,7 @@ const eProcState = createReducer(initialState, {
         const syncActionId = oldSyncActionId === 2 ? oldSyncActionId : 3;
         // action.data.upgrading = state.getIn(['geth', 'status', 'upgrading']) || null;
         const status = Object.assign({}, data, services.geth);
+        status.version = status.version || state.getIn(['geth', 'status', 'version']);
         const newStatus = computeGethStatus(status);
 
         return state.mergeIn(['geth'], {

@@ -68,11 +68,11 @@ function* ipfsSetPorts ({ ports, restart }) {
     yield apply(channel, channel.send, [{ ports, restart }]);
 }
 
-function* gethStart () {
+function* gethStart ({ bootstrap }) {
     const channel = getChannels().server.geth.startService;
     const gethOptions = yield select(state => state.settingsState.get('geth').toJS());
     // filter out the null and false options
-    const options = {};
+    const options = { bootstrap };
     Object.keys(gethOptions).forEach((key) => {
         if (gethOptions[key] !== null && gethOptions[key] !== false) {
             options[key] = gethOptions[key];
@@ -170,15 +170,6 @@ function filterLogs (logs) {
     return sortedLogs;
 }
 
-function* watchGethLogsChannel () {
-    while (true) {
-        const resp = yield take(actionChannels.geth.logs);
-        const timestamp = yield select(selectLastGethLog);
-        const logs = filterLogs([...resp.data.gethError, ...resp.data.gethInfo], timestamp);
-        yield put(actions.gethGetLogsSuccess(logs));
-    }
-}
-
 function* watchIpfsLogsChannel () {
     while (true) {
         const resp = yield take(actionChannels.ipfs.logs);
@@ -258,7 +249,7 @@ function* watchGethStartChannel () {
             } catch (error) {
                 yield put(profileActions.profileSaveLoggedError(error));
             }
-            yield put(actions.gethStartSuccess(resp.data, resp.services));
+            yield put(actions.gethStartSuccess(resp.data, resp.services, resp.request));
         }
         if (resp.error || resp.services.geth.process || resp.data.started) {
             yield fork(gethResetBusyState);
@@ -331,12 +322,6 @@ function* watchGethSyncStatusChannel () {
     }
 }
 
-function* watchGethStartRequest () {
-    while (yield take(types.GETH_START)) {
-        yield call(gethStart);
-    }
-}
-
 function* watchIpfsStartRequest () {
     while (yield take(types.IPFS_START)) {
         yield call(ipfsStart);
@@ -399,7 +384,7 @@ function* watchIpfsSetPorts () {
 }
 
 export function* watchEProcActions () {
-    yield fork(watchGethStartRequest);
+    yield takeEvery(types.GETH_START, gethStart);
     yield fork(watchIpfsStartRequest);
     yield fork(watchGethStatusRequest);
     yield fork(watchIpfsStatusRequest);
