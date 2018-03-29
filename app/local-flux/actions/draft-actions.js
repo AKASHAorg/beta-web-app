@@ -100,6 +100,9 @@ export const draftPublishUpdate = ({ actionId, ...payload }) =>
     action(types.DRAFT_PUBLISH_UPDATE, { actionId, ...payload });
 export const draftPublishUpdateError = error => action(types.DRAFT_PUBLISH_UPDATE_ERROR, { error });
 export const draftPublishUpdateSuccess = data => action(types.DRAFT_PUBLISH_UPDATE_SUCCESS, { data });
+
+export const draftResetIterator = () => action(types.DRAFT_RESET_ITERATOR);
+
 /**
  * Revert draft content to another version
  */

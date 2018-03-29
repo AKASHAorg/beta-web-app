@@ -2,25 +2,26 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { Col, Row, Button, Modal } from 'antd';
+import { Col, Row } from 'antd';
 import { DraftJS } from 'megadraft';
 import { fromJS } from 'immutable';
-import { PublishOptionsPanel, TextEntryEditor, EntryVersionTimeline, NewEntryTopBar,
-    TagEditor, WebsiteInfoCard, DataLoader } from '../components';
+import { DataLoader, EditorFooter, NoDraftsPlaceholder, PublishOptionsPanel, TextEntryEditor, TagEditor,
+    WebsiteInfoCard } from '../components';
 import { genId } from '../utils/dataModule';
 import { selectDraftById, selectLoggedProfile } from '../local-flux/selectors';
-import { entryMessages, generalMessages } from '../locale-data/messages';
+import { entryMessages } from '../locale-data/messages';
 import { WebsiteParser } from '../utils/extract-website-info';
 import { draftAddTag, draftRemoveTag, draftCreate, draftUpdate,
     draftRevertToVersion } from '../local-flux/actions/draft-actions';
 import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
+import { tagExists } from '../local-flux/actions/tag-actions';
 import * as actionTypes from '../constants/action-types';
 import { entryTypes } from '../constants/entry-types';
 
 const { EditorState } = DraftJS;
-const { confirm } = Modal;
+
 class NewLinkEntryPage extends Component {
     constructor (props) {
         super(props);
@@ -42,7 +43,7 @@ class NewLinkEntryPage extends Component {
             }
         }
     }
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps (nextProps) { // eslint-disable-line complexity
         const { draftObj, drafts } = nextProps;
         const { history } = this.props;
         const isSameEntry = draftObj && this.props.draftObj &&
@@ -101,7 +102,7 @@ class NewLinkEntryPage extends Component {
         });
         history.push(`/draft/link/${draftId}`);
         ev.preventDefault();
-    }
+    };
     _processUrl = (newerDraft) => {
         const { loggedProfile, intl } = this.props;
         let { draftObj } = this.props;
@@ -148,7 +149,7 @@ class NewLinkEntryPage extends Component {
                 });
             });
         });
-    }
+    };
 
     _handleUrlBlur = () => {
         const { draftObj } = this.props;
@@ -161,7 +162,7 @@ class NewLinkEntryPage extends Component {
             }
             return this.props.draftUpdate(draftObj);
         });
-    }
+    };
 
     _handleKeyPress = (ev) => {
         const { draftObj } = this.props;
@@ -178,7 +179,7 @@ class NewLinkEntryPage extends Component {
                 }
             });
         }
-    }
+    };
 
     _handleUrlChange = (ev) => {
         const { match, loggedProfile, draftObj } = this.props;
@@ -189,7 +190,7 @@ class NewLinkEntryPage extends Component {
             })),
             id: match.params.draftId,
         })));
-    }
+    };
 
     _handleEditorChange = (editorState) => {
         const { draftObj, loggedProfile } = this.props;
@@ -199,7 +200,7 @@ class NewLinkEntryPage extends Component {
                 draft: editorState,
             })),
         })));
-    }
+    };
 
     _handleTagAdd = (tagName) => {
         const { draftObj } = this.props;
@@ -208,7 +209,7 @@ class NewLinkEntryPage extends Component {
             draftId: draftObj.get('id')
         });
         this.props.draftUpdate(draftObj.setIn(['tags', tagName], { fetching: true }));
-    }
+    };
 
     _handleTagRemove = (tagName) => {
         const { draftObj } = this.props;
@@ -217,7 +218,7 @@ class NewLinkEntryPage extends Component {
             draftId: draftObj.get('id')
         });
         this.props.draftUpdate(draftObj.deleteIn(['tags', tagName]));
-    }
+    };
 
     _handleDraftLicenceChange = (licenceField, licence) => {
         const { draftObj, loggedProfile } = this.props;
@@ -227,7 +228,7 @@ class NewLinkEntryPage extends Component {
                 content: draftObj.get('content').setIn(['licence', licenceField], licence)
             }))
         );
-    }
+    };
 
     _handleExcerptChange = (excerpt) => {
         const { draftObj, loggedProfile } = this.props;
@@ -241,7 +242,7 @@ class NewLinkEntryPage extends Component {
                 excerpt: null,
             }
         }));
-    }
+    };
 
     validateData = () =>
         new Promise((resolve, reject) => {
@@ -285,40 +286,7 @@ class NewLinkEntryPage extends Component {
         }).catch((errors) => {
             this.setState({ errors });
         });
-    }
-
-    _handleVersionRevert = (version) => {
-        const { draftObj, loggedProfile } = this.props;
-        this.props.draftRevertToVersion({
-            version,
-            id: draftObj.id
-        });
-        this.props.entryGetFull({
-            entryId: draftObj.id,
-            version,
-            asDraft: true,
-            revert: true,
-            ethAddress: loggedProfile.get('ethAddress'),
-        });
-    }
-
-    _showRevertConfirm = (ev, version) => {
-        const handleVersionRevert = this._handleVersionRevert.bind(null, version);
-        const { draftObj, intl } = this.props;
-        if (draftObj.localChanges) {
-            confirm({
-                content: intl.formatMessage(entryMessages.revertConfirmTitle),
-                okText: intl.formatMessage(generalMessages.yes),
-                okType: 'danger',
-                cancelText: intl.formatMessage(generalMessages.no),
-                onOk: handleVersionRevert,
-                onCancel () {}
-            });
-        } else {
-            handleVersionRevert();
-        }
-        ev.preventDefault();
-    }
+    };
 
     _handleInfoCardClose = () => {
         const { draftObj, loggedProfile, match } = this.props;
@@ -343,17 +311,16 @@ class NewLinkEntryPage extends Component {
                 }))
             );
         });
-    }
+    };
 
-    _togglePublishPanel = () =>
-        () => {
-            this.setState({
-                showPublishPanel: !this.state.showPublishPanel
-            });
-        }
+    _togglePublishPanel = () => {
+        this.setState({
+            showPublishPanel: !this.state.showPublishPanel
+        });
+    };
 
     _createRef = nodeName =>
-        (node) => { this[nodeName] = node; }
+        (node) => { this[nodeName] = node; };
 
     _calculateEditorMinHeight = () => {
         let height = '20%';
@@ -366,12 +333,12 @@ class NewLinkEntryPage extends Component {
             height = maxHeight - wicNode.getBoundingClientRect().height - 70;
         }
         return height;
-    }
+    };
     _handleInternalTagError = (hasError) => {
         this.setState({
             tagError: hasError
         });
-    }
+    };
     _handleTagInputChange = () => {
         this.setState(prevState => ({
             errors: {
@@ -379,7 +346,7 @@ class NewLinkEntryPage extends Component {
                 tags: null
             }
         }));
-    }
+    };
     _checkIfDisabled = () => {
         const { pendingFaucetTx } = this.props;
         if (this.state.tagError) {
@@ -389,39 +356,18 @@ class NewLinkEntryPage extends Component {
             return true;
         }
         return false;
-    }
-    /* eslint-disable complexity */
-    render () {
+    };
+    render () { // eslint-disable-line complexity
         const { intl, baseUrl, darkTheme, draftObj, drafts, draftsFetched, licences,
             match, tagSuggestions, tagSuggestionsCount, showSecondarySidebar,
-            loggedProfile, selectionState, canCreateTags } = this.props;
-
+            loggedProfile, selectionState, canCreateTags, tagExistsPending } = this.props;
         const { showPublishPanel, errors, shouldResetCaret, parsingInfo,
             infoExtracted, urlInputHidden } = this.state;
         const unpublishedDrafts = drafts.filter(drft => !drft.get('onChain'));
         const draftId = match.params.draftId;
 
         if (!draftObj && unpublishedDrafts.size === 0 && !draftId.startsWith('0x') && draftsFetched) {
-            return (
-              <div
-                className={
-                    `edit-entry-page__no-drafts
-                    edit-entry-page__no-drafts${darkTheme ? '_dark' : ''}`
-                }
-              >
-                <div className="edit-entry-page__no-drafts_placeholder-image" />
-                <div className="edit-entry-page__no-drafts_placeholder-text">
-                  <h3>
-                    {intl.formatMessage(entryMessages.youHaveNoDrafts)}
-                  </h3>
-                  <p>
-                    <a href="#" onClick={this._createNewDraft}>
-                      {intl.formatMessage(entryMessages.startANewDraft)}
-                    </a>
-                  </p>
-                </div>
-              </div>
-            );
+            return <NoDraftsPlaceholder darkTheme={darkTheme} onNewDraft={this._createNewDraft} />;
         }
         if ((!draftObj || !draftObj.get('content'))) {
             return (
@@ -434,7 +380,7 @@ class NewLinkEntryPage extends Component {
             );
         }
         const currentSelection = selectionState.getIn([draftObj.get('id'), loggedProfile.get('ethAddress')]);
-        const { content, tags, localChanges, onChain } = draftObj;
+        const { content, tags, onChain } = draftObj;
         const { excerpt, draft, latestVersion, licence, cardInfo } = content;
         const { url, title, description } = cardInfo;
         let draftWithSelection = draft;
@@ -446,13 +392,8 @@ class NewLinkEntryPage extends Component {
         }
         const editorMinHeight = this._calculateEditorMinHeight();
         return (
-          <div
-            className="edit-entry-page link-page"
-          >
-            <Row
-              type="flex"
-              className="edit-entry-page__content"
-            >
+          <div className="edit-entry-page link-page">
+            <Row type="flex" className="edit-entry-page__content">
               <Col
                 span={showPublishPanel ? 17 : 24}
                 className="edit-entry-page__editor-wrapper"
@@ -463,7 +404,6 @@ class NewLinkEntryPage extends Component {
                 >
                   {!urlInputHidden &&
                     <input
-                      ref={this._createRef('titleInput')}
                       className="edit-entry-page__url-input-field"
                       placeholder={intl.formatMessage(entryMessages.enterWebAddress)}
                       onChange={this._handleUrlChange}
@@ -503,25 +443,22 @@ class NewLinkEntryPage extends Component {
                   {!parsingInfo && infoExtracted && !errors.card &&
                     <div className="edit-entry-page__tag-editor_wrapper">
                       <TagEditor
+                        canCreateTags={canCreateTags}
                         className="edit-entry-page__tag-editor"
-                        ref={this._createRef('tagEditor')}
-                        nodeRef={(node) => { this.tagsField = node; }}
                         intl={intl}
-                        ethAddress={loggedProfile.get('ethAddress')}
+                        isUpdate={onChain}
+                        onChange={this._handleTagInputChange}                        
                         onTagAdd={this._handleTagAdd}
                         onTagRemove={this._handleTagRemove}
-                        onChange={this._handleTagInputChange}
-                        tags={tags}
-                        actionAdd={this.props.actionAdd}
+                        searchResetResults={this.props.searchResetResults}                        
                         searchTags={this.props.searchTags}
+                        tagErrors={errors.tags}
+                        tagExists={this.props.tags}
+                        tagExistsCheck={this.props.tagExists}
+                        tagExistsPending={tagExistsPending}
+                        tags={tags}
                         tagSuggestions={tagSuggestions}
                         tagSuggestionsCount={tagSuggestionsCount}
-                        searchResetResults={this.props.searchResetResults}
-                        inputDisabled={onChain}
-                        isUpdate={onChain}
-                        onTagError={this._handleInternalTagError}
-                        tagErrors={errors.tags}
-                        canCreateTags={canCreateTags}
                       />
                     </div>
                   }
@@ -539,68 +476,23 @@ class NewLinkEntryPage extends Component {
                   errors={errors}
                   baseUrl={baseUrl}
                   intl={intl}
-                  onClose={this._togglePublishPanel()}
+                  onClose={this._togglePublishPanel}
                   onLicenceChange={this._handleDraftLicenceChange}
                   onExcerptChange={this._handleExcerptChange}
-                  title={title}
                   excerpt={excerpt}
                   selectedLicence={licence}
                   licences={licences}
                 />
               </Col>
-              <div
-                className={
-                    `edit-entry-page__footer-wrapper
-                    edit-entry-page__footer-wrapper${showSecondarySidebar ? '' : '_full'}`
-                }
-              >
-                <div className="edit-entry-page__footer">
-                  <NewEntryTopBar />
-                  <div className="edit-entry-page__footer-timeline-wrapper">
-                    {onChain && (localChanges || latestVersion > 0) &&
-                      <div
-                        className={
-                          `edit-entry-page__footer-timeline
-                          edit-entry-page__footer-timeline${latestVersion ? '' : '_empty'}`
-                        }
-                      >
-                        <EntryVersionTimeline
-                          draftObj={draftObj}
-                          onRevertConfirm={this._showRevertConfirm}
-                          intl={intl}
-                        />
-                      </div>
-                    }
-                  </div>
-                  <div className="edit-entry-page__footer-actions">
-                    <Button
-                      size="large"
-                      onClick={this._togglePublishPanel()}
-                      className={'edit-entry-page__options-button'}
-                    >
-                      {intl.formatMessage(entryMessages.publishOptions)}
-                    </Button>
-                    <Button
-                      size="large"
-                      type="primary"
-                      className={
-                          `edit-entry-page__publish-button
-                          edit-entry-page__publish-button${draftObj.get('publishing') ? '_pending' : ''}`
-                      }
-                      onClick={this._handlePublish}
-                      loading={draftObj.get('publishing')}
-                      disabled={this._checkIfDisabled()}
-                    >
-                      {!draftObj.get('publishing') && onChain && intl.formatMessage(generalMessages.update)}
-                      {!draftObj.get('publishing') && !onChain && intl.formatMessage(generalMessages.publish)}
-                      {draftObj.get('publishing') && onChain && intl.formatMessage(generalMessages.updating)}
-                      {draftObj.get('publishing') && !onChain &&
-                        intl.formatMessage(generalMessages.publishing)
-                      }
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <EditorFooter
+                disabled={this._checkIfDisabled()}
+                draftObj={draftObj}
+                draftRevertToVersion={this.props.draftRevertToVersion}
+                latestVersion={latestVersion}
+                onPublish={this._handlePublish}
+                onPublishOptions={this._togglePublishPanel}
+                showSecondarySidebar={showSecondarySidebar}
+              />
             </Row>
           </div>
         );
@@ -629,6 +521,9 @@ NewLinkEntryPage.propTypes = {
     showSecondarySidebar: PropTypes.bool,
     searchResetResults: PropTypes.func,
     searchTags: PropTypes.func,
+    tagExists: PropTypes.func.isRequired,
+    tagExistsPending: PropTypes.shape().isRequired,
+    tags: PropTypes.shape().isRequired,
     tagSuggestions: PropTypes.shape(),
     tagSuggestionsCount: PropTypes.number,
     userDefaultLicence: PropTypes.shape(),
@@ -644,11 +539,12 @@ const mapStateToProps = (state, ownProps) => ({
     draftRemoveTag: PropTypes.func,
     drafts: state.draftState.get('drafts'),
     draftsFetched: state.draftState.get('draftsFetched'),
-    entriesFetched: state.draftState.get('entriesFetched'),
     licences: state.licenseState.get('byId'),
     resolvingEntries: state.draftState.get('resolvingEntries'),
     selectionState: state.draftState.get('selection'),
     showSecondarySidebar: state.appState.get('showSecondarySidebar'),
+    tagExistsPending: state.tagState.getIn(['flags', 'existsPending']),
+    tags: state.tagState.get('exists'),
     tagSuggestions: state.searchState.get('tags'),
     tagSuggestionsCount: state.searchState.get('tagResultsCount'),
     userDefaultLicence: state.settingsState.getIn(['userSettings', 'defaultLicense']),
@@ -668,5 +564,6 @@ export default connect(
         draftRevertToVersion,
         searchResetResults,
         searchTags,
+        tagExists
     }
 )(injectIntl(NewLinkEntryPage));

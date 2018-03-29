@@ -1,12 +1,11 @@
-/* eslint-disable indent */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { fromJS } from 'immutable';
 import { DraftJS } from 'megadraft';
-import { Row, Col, Button, Steps, Modal } from 'antd';
-import { PublishOptionsPanel, TextEntryEditor, TagEditor, EntryVersionTimeline, NewEntryTopBar,
+import { Row, Col } from 'antd';
+import { EditorFooter, NoDraftsPlaceholder, PublishOptionsPanel, TextEntryEditor, TagEditor,
     DataLoader } from '../components';
 import { genId } from '../utils/dataModule';
 import { draftAddTag, draftRemoveTag, draftCreate, draftsGet, draftUpdate, draftsGetCount,
@@ -15,23 +14,21 @@ import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { tagExists } from '../local-flux/actions/tag-actions';
-import { entryMessages, generalMessages } from '../locale-data/messages';
+import { entryMessages } from '../locale-data/messages';
 import { selectDraftById, selectLoggedProfile } from '../local-flux/selectors';
 import * as actionTypes from '../constants/action-types';
 
 const { EditorState } = DraftJS;
-
-const { confirm } = Modal;
 
 class NewEntryPage extends Component {
     state = {
         showPublishPanel: false,
         errors: {},
         shouldResetCaret: false,
-    }
-    componentWillReceiveProps (nextProps) {
-        const { match, draftObj, drafts,
-            selectionState } = nextProps;
+    };
+
+    componentWillReceiveProps (nextProps) { // eslint-disable-line complexity
+        const { match, draftObj, drafts, selectionState } = nextProps;
         const { loggedProfile, history } = this.props;
         const ethAddress = loggedProfile.get('ethAddress');
         const currentSelection = selectionState.getIn([match.params.draftId, ethAddress]);
@@ -50,8 +47,9 @@ class NewEntryPage extends Component {
         }
         if (draftObj && this.props.draftObj &&
             (draftObj.get('tags').size !== this.props.draftObj.get('tags').size) &&
-            draftObj.get('localChanges')) {
-                this.props.draftUpdate(draftObj);
+            draftObj.get('localChanges')
+        ) {
+            this.props.draftUpdate(draftObj);
         }
         if (draftObj && match.params.draftId &&
                 match.params.draftId !== this.props.match.params.draftId && this.editor) {
@@ -86,12 +84,12 @@ class NewEntryPage extends Component {
         });
         history.push(`/draft/article/${draftId}`);
         ev.preventDefault();
-    }
+    };
     _showPublishOptionsPanel = () => {
         this.setState({
             showPublishPanel: !this.state.showPublishPanel
         });
-    }
+    };
 
     _handleTitleChange = (ev) => {
         const { match, loggedProfile, draftObj } = this.props;
@@ -108,7 +106,7 @@ class NewEntryPage extends Component {
                 title: null,
             }
         }));
-    }
+    };
 
     _handleEditorChange = (editorState) => {
         const { draftObj, loggedProfile } = this.props;
@@ -124,7 +122,7 @@ class NewEntryPage extends Component {
                 draft: null,
             }
         }));
-    }
+    };
 
     _handleTagAdd = (tagName) => {
         const { draftObj } = this.props;
@@ -132,7 +130,7 @@ class NewEntryPage extends Component {
             tagName,
             draftId: draftObj.get('id')
         });
-    }
+    };
 
     _handleTagRemove = (tagName) => {
         const { draftObj } = this.props;
@@ -140,7 +138,7 @@ class NewEntryPage extends Component {
             tagName,
             draftId: draftObj.get('id')
         });
-    }
+    };
 
     _handleDraftLicenceChange = (licenceField, licence) => {
         const { draftObj, loggedProfile, licences } = this.props;
@@ -162,12 +160,12 @@ class NewEntryPage extends Component {
             return this.props.draftUpdate(
                 draftObj.merge({
                     ethAddress: loggedProfile.get('ethAddress'),
-                        content: draftObj.get('content').merge({
-                            licence: draftObj.getIn(['content', 'licence']).merge({
-                                parent: licence,
-                                id: null,
-                            })
+                    content: draftObj.get('content').merge({
+                        licence: draftObj.getIn(['content', 'licence']).merge({
+                            parent: licence,
+                            id: null,
                         })
+                    })
                 })
             );
         }
@@ -177,7 +175,7 @@ class NewEntryPage extends Component {
                 content: draftObj.get('content').setIn(['licence', licenceField], licence)
             })
         );
-    }
+    };
 
     _handleExcerptChange = (excerpt) => {
         const { draftObj, loggedProfile } = this.props;
@@ -191,7 +189,7 @@ class NewEntryPage extends Component {
                 excerpt: null,
             }
         }));
-    }
+    };
 
     _handleFeaturedImageChange = (image) => {
         const { draftObj, loggedProfile } = this.props;
@@ -201,13 +199,13 @@ class NewEntryPage extends Component {
                 content: draftObj.get('content').set('featuredImage', fromJS(image))
             })
         );
-    }
+    };
 
     _handlePublishPanelClose = () => {
         this.setState({
             showPublishPanel: false
         });
-    }
+    };
 
     validateData = () =>
         new Promise((resolve, reject) => {
@@ -219,10 +217,6 @@ class NewEntryPage extends Component {
             }
             if (!draftState.getCurrentContent().hasText()) {
                 return reject({ draft: intl.formatMessage(entryMessages.draftContentRequired) });
-            }
-
-            if (this.state.tagError) {
-                return reject({ tags: intl.formatMessage(entryMessages.oneOfTheTagsCannotBeUsed) });
             }
             if (draftObj.get('tags').size === 0) {
                 return reject({ tags: intl.formatMessage(entryMessages.errorOneTagRequired) });
@@ -265,45 +259,8 @@ class NewEntryPage extends Component {
                 this.setState({ errors });
             });
         }, 100);
-    }
+    };
 
-    _handleVersionRevert = (version) => {
-        const { draftObj, loggedProfile } = this.props;
-        this.props.draftRevertToVersion({
-            version,
-            id: draftObj.id
-        });
-        this.props.entryGetFull({
-            entryId: draftObj.id,
-            version,
-            asDraft: true,
-            revert: true,
-            ethAddress: loggedProfile.get('ethAddress'),
-        });
-    }
-
-    _showRevertConfirm = (ev, version) => {
-        const handleVersionRevert = this._handleVersionRevert.bind(null, version);
-        const { draftObj, intl } = this.props;
-        if (draftObj.localChanges) {
-            confirm({
-                content: intl.formatMessage(entryMessages.revertConfirmTitle),
-                okText: intl.formatMessage(generalMessages.yes),
-                okType: 'danger',
-                cancelText: intl.formatMessage(generalMessages.no),
-                onOk: handleVersionRevert,
-                onCancel () {}
-            });
-        } else {
-            handleVersionRevert();
-        }
-        ev.preventDefault();
-    }
-    _handleInternalTagError = (hasError) => {
-        this.setState({
-            tagError: hasError
-        });
-    }
     _handleTagInputChange = () => {
         this.setState(prevState => ({
             errors: {
@@ -311,68 +268,32 @@ class NewEntryPage extends Component {
                 tags: null
             }
         }));
-    }
-    _createTimeline = (draftObj) => {
-        const { content, localChanges } = draftObj;
-        const { latestVersion, version } = content;
-        const timelineItems = [...Array(Number(latestVersion) + 1)];
-        return (
-          <Steps
-            progressDot={this._getProgressDot}
-            current={latestVersion + 1}
-            className="edit-entry-page__timeline-steps"
-          >
-            {
-              this._getTimelineSteps(timelineItems, localChanges, version)
-            }
-          </Steps>
-        );
-    }
+    };
+
     _checkIfDisabled = () => {
         const { pendingFaucetTx } = this.props;
-        if (this.state.tagError) {
-            return true;
-        }
         if (pendingFaucetTx) {
             return true;
         }
         return false;
-    }
+    };
+
     _handleTitleKeyPress = (ev) => {
         if (ev.keyCode === 13) {
             this.editor.focus();
         }
-    }
-    /* eslint-disable complexity */
-    render () {
+    };
+
+    render () { // eslint-disable-line complexity
         const { showPublishPanel, errors, shouldResetCaret } = this.state;
         const { loggedProfile, baseUrl, drafts, darkTheme, showSecondarySidebar, intl, draftObj,
             draftsFetched, tagSuggestions, tagSuggestionsCount, match, licences, resolvingEntries,
-            selectionState, canCreateTags } = this.props;
+            selectionState, canCreateTags, tagExistsPending } = this.props;
         const draftId = match.params.draftId;
         const unpublishedDrafts = drafts.filter(drft => !drft.get('onChain'));
 
         if (!draftObj && unpublishedDrafts.size === 0 && !draftId.startsWith('0x') && draftsFetched) {
-            return (
-              <div
-                className={
-                  `edit-entry-page__no-drafts
-                  edit-entry-page__no-drafts${darkTheme ? '_dark' : ''}`
-                }
-              >
-                <div className="edit-entry-page__no-drafts_placeholder-image" />
-                <div className="edit-entry-page__no-drafts_placeholder-text">
-                  <h3>
-                    {intl.formatMessage(entryMessages.youHaveNoDrafts)}
-                  </h3>
-                  <p>
-                    <a href="#" onClick={this._createNewDraft}>
-                      {intl.formatMessage(entryMessages.startANewDraft)}
-                    </a>
-                  </p>
-                </div>
-              </div>
-            );
+            return <NoDraftsPlaceholder darkTheme={darkTheme} onNewDraft={this._createNewDraft} />;
         }
         if ((!draftObj || !draftObj.get('content'))) {
             return (
@@ -405,8 +326,7 @@ class NewEntryPage extends Component {
             );
         }
         const currentSelection = selectionState.getIn([draftObj.get('id'), loggedProfile.get('ethAddress')]);
-        // console.log(currentSelection, 'current selection');
-        const { content, tags, localChanges, onChain } = draftObj;
+        const { content, tags, onChain } = draftObj;
         const { title, excerpt, latestVersion, licence, draft, featuredImage } = content;
         let draftWithSelection = draft;
 
@@ -417,10 +337,7 @@ class NewEntryPage extends Component {
         }
         return (
           <div className="edit-entry-page article-page">
-            <Row
-              type="flex"
-              className="edit-entry-page__content"
-            >
+            <Row type="flex" className="edit-entry-page__content">
               <Col
                 span={showPublishPanel ? 17 : 24}
                 className="edit-entry-page__editor-wrapper"
@@ -434,7 +351,6 @@ class NewEntryPage extends Component {
                 >
                   <div className="edit-entry-page__editor-inner">
                     <input
-                      ref={this._createRef('titleInput')}
                       className={
                         `edit-entry-page__title-input-field
                         edit-entry-page__title-input-field${showSecondarySidebar ? '' : '_full'}`
@@ -464,26 +380,22 @@ class NewEntryPage extends Component {
                     }
                   </div>
                   <TagEditor
-                    ref={this._createRef('tagEditor')}
+                    canCreateTags={canCreateTags}
                     className="edit-entry-page__tag-editor"
-                    nodeRef={(node) => { this.tagsField = node; }}
                     intl={intl}
-                    ethAddress={loggedProfile.get('ethAddress')}
+                    isUpdate={onChain}
+                    onChange={this._handleTagInputChange}
                     onTagAdd={this._handleTagAdd}
                     onTagRemove={this._handleTagRemove}
-                    onChange={this._handleTagInputChange}
-                    tags={tags}
-                    actionAdd={this.props.actionAdd}
-                    searchTags={this.props.searchTags}
-                    tagSuggestions={tagSuggestions}
-                    tagSuggestionsCount={tagSuggestionsCount}
                     searchResetResults={this.props.searchResetResults}
-                    inputDisabled={onChain}
-                    isUpdate={onChain}
-                    onTagError={this._handleInternalTagError}
+                    searchTags={this.props.searchTags}
                     tagErrors={errors.tags}
                     tagExistsCheck={this.props.tagExists}
-                    canCreateTags={canCreateTags}
+                    tagExistsPending={tagExistsPending}
+                    tagExists={this.props.tags}
+                    tags={tags}
+                    tagSuggestions={tagSuggestions}
+                    tagSuggestionsCount={tagSuggestionsCount}
                   />
                 </div>
               </Col>
@@ -502,67 +414,21 @@ class NewEntryPage extends Component {
                   onLicenceChange={this._handleDraftLicenceChange}
                   onExcerptChange={this._handleExcerptChange}
                   onFeaturedImageChange={this._handleFeaturedImageChange}
-                  title={title}
                   excerpt={excerpt}
                   featuredImage={featuredImage}
                   selectedLicence={licence}
                   licences={licences}
                 />
               </Col>
-              <div
-                className={
-                    `edit-entry-page__footer-wrapper
-                    edit-entry-page__footer-wrapper${showSecondarySidebar ? '' : '_full'}`
-                }
-              >
-                <div className="edit-entry-page__footer">
-                  <NewEntryTopBar />
-                  <div className="edit-entry-page__footer-timeline-wrapper">
-                    {onChain && (localChanges || latestVersion > 0) &&
-                      <div
-                        className={
-                          `edit-entry-page__footer-timeline
-                          edit-entry-page__footer-timeline${latestVersion ? '' : '_empty'}`
-                        }
-                      >
-                        <EntryVersionTimeline
-                          draftObj={draftObj}
-                          onRevertConfirm={this._showRevertConfirm}
-                          intl={intl}
-                        />
-                      </div>
-                    }
-                  </div>
-                  <div className="edit-entry-page__footer-actions">
-                    <Button
-                      size="large"
-                      onClick={this._showPublishOptionsPanel}
-                      className={'edit-entry-page__options-button'}
-                    >
-                      {intl.formatMessage(entryMessages.publishOptions)}
-                    </Button>
-                    <Button
-                      size="large"
-                      type="primary"
-                      className={
-                          `edit-entry-page__publish-button
-                          edit-entry-page__publish-button${draftObj.get('publishing') ? '_pending' : ''}`
-                      }
-                      onClick={this._handlePublish}
-                      loading={draftObj.get('publishing')}
-                      disabled={this._checkIfDisabled()}
-                    >
-                      {!draftObj.get('publishing') && onChain && intl.formatMessage(generalMessages.update)}
-                      {!draftObj.get('publishing') && !onChain && intl.formatMessage(generalMessages.publish)}
-                      {draftObj.get('publishing') && onChain && intl.formatMessage(generalMessages.updating)}
-                      {draftObj.get('publishing') &&
-                        !onChain &&
-                        intl.formatMessage(generalMessages.publishing)
-                      }
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <EditorFooter
+                disabled={this._checkIfDisabled()}
+                draftObj={draftObj}
+                draftRevertToVersion={this.props.draftRevertToVersion}
+                latestVersion={latestVersion}
+                onPublish={this._handlePublish}
+                onPublishOptions={this._showPublishOptionsPanel}
+                showSecondarySidebar={showSecondarySidebar}
+              />
             </Row>
           </div>
         );
@@ -593,11 +459,13 @@ NewEntryPage.propTypes = {
     selectionState: PropTypes.shape(),
     searchResetResults: PropTypes.func,
     searchTags: PropTypes.func,
+    tagExists: PropTypes.func.isRequired,
+    tagExistsPending: PropTypes.shape().isRequired,
+    tags: PropTypes.shape().isRequired,
     tagSuggestions: PropTypes.shape(),
     tagSuggestionsCount: PropTypes.number,
     userDefaultLicence: PropTypes.shape(),
     pendingFaucetTx: PropTypes.bool,
-    tagExists: PropTypes.func,
 };
 
 const mapStateToProps = (state, ownProps) => ({
@@ -606,12 +474,13 @@ const mapStateToProps = (state, ownProps) => ({
     drafts: state.draftState.get('drafts'),
     draftsFetched: state.draftState.get('draftsFetched'),
     darkTheme: state.settingsState.getIn(['general', 'darkTheme']),
-    entriesFetched: state.draftState.get('entriesFetched'),
     licences: state.licenseState.get('byId'),
     loggedProfile: selectLoggedProfile(state),
     selectionState: state.draftState.get('selection'),
     resolvingEntries: state.draftState.get('resolvingEntries'),
     showSecondarySidebar: state.appState.get('showSecondarySidebar'),
+    tagExistsPending: state.tagState.getIn(['flags', 'existsPending']),
+    tags: state.tagState.get('exists'),
     tagSuggestions: state.searchState.get('tags'),
     tagSuggestionsCount: state.searchState.get('tagResultsCount'),
     userDefaultLicence: state.settingsState.getIn(['userSettings', 'defaultLicence']),

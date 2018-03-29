@@ -30,6 +30,7 @@ export DashboardTopBar from './top-bars/dashboard-top-bar';
 export DataLoader from './data-loader';
 export DisplayName from './display-name';
 export EditListBtn from './profile-overview/edit-list-btn';
+export EditorFooter from './editors/editor-footer';
 export EditorLinkInput from './forms/editor-link-input';
 export EntryCard from './cards/entry-card';
 export EntryCardHeader from './cards/entry-card-header';
