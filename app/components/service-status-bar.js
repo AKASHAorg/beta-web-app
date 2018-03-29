@@ -229,6 +229,7 @@ class ServiceStatusBar extends Component {
             <Popover
               content={this.renderGethPopover()}
               onVisibleChange={this.onGethVisibleChange}
+              placement="bottomLeft"
               trigger="click"
               visible={gethPopoverVisible}
             >
@@ -244,6 +245,7 @@ class ServiceStatusBar extends Component {
             <Popover
               content={this.renderIpfsPopover()}
               onVisibleChange={this.onIpfsVisibleChange}
+              placement="bottomLeft"
               trigger="click"
               visible={ipfsPopoverVisible}
             >

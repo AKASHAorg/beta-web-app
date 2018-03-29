@@ -80,9 +80,7 @@ function* watchTagExistsChannel () {
             if (resp.request.addToDraft) {
                 yield put(draftActions.draftAddTagSuccess({ ...resp.data, draftId: resp.request.draftId }));
             }
-            if (!resp.request.addToDraft) {
-                yield put(actions.tagExistsSuccess(resp.data));
-            }
+            yield put(actions.tagExistsSuccess(resp.data));
         }
     }
 }

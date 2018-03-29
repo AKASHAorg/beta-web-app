@@ -887,6 +887,11 @@ const generalMessages = defineMessages({
         id: 'app.general.version',
         description: 'version',
         defaultMessage: 'Version'
-    }
+    },
+    loadMore: {
+        id: 'app.general.loadMore',
+        description: 'load more',
+        defaultMessage: 'Load more'
+    },
 });
 export { generalMessages };

@@ -54,7 +54,7 @@ class FaucetAndManafyModal extends Component {
                 this.props.actionResetFundingRequirements();
             }
         } else if (needMana && !needAeth) {
-            window.location.href = 'http://akasha.helpscoutdocs.com/article/21-how-to-manafy-aeth';
+            window.open('http://akasha.helpscoutdocs.com/article/21-how-to-manafy-aeth', '_blank');
             this.props.actionResetFundingRequirements();
         }
         this._deleteNeedAuthActions();

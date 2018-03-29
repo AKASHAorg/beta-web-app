@@ -100,6 +100,9 @@ export const draftPublishUpdate = ({ actionId, ...payload }) =>
     action(types.DRAFT_PUBLISH_UPDATE, { actionId, ...payload });
 export const draftPublishUpdateError = error => action(types.DRAFT_PUBLISH_UPDATE_ERROR, { error });
 export const draftPublishUpdateSuccess = data => action(types.DRAFT_PUBLISH_UPDATE_SUCCESS, { data });
+
+export const draftResetIterator = () => action(types.DRAFT_RESET_ITERATOR);
+
 /**
  * Revert draft content to another version
  */
@@ -117,7 +120,8 @@ export const draftsGetCountError = error => action(types.DRAFTS_GET_COUNT_ERROR,
 /**
  * Get entries as drafts
  */
-export const entriesGetAsDraftsSuccess = data => action(types.ENTRIES_GET_AS_DRAFTS_SUCCESS, { data });
+export const entriesGetAsDraftsSuccess = (data, request) =>
+    action(types.ENTRIES_GET_AS_DRAFTS_SUCCESS, { data, request });
 export const entriesGetAsDraftsError = (error) => {
     error.code = 'EGADE01';
     error.messageId = 'entriesGetAsDrafts';

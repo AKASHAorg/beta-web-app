@@ -34,6 +34,24 @@ class TagEditor extends Component {
             selectedSuggestionIndex: 0,
         };
     }
+
+    componentDidMount () {
+        const { tagExistsCheck, tags } = this.props;
+        const tagNames = Object.keys(tags.toJS());
+        tagNames.forEach(tagName => tagExistsCheck({ tagName }));
+    }
+
+    componentWillReceiveProps (nextProps) {
+        const { isUpdate, intl } = nextProps;
+        if (isUpdate) {
+            this.setState({
+                tagInputWidth: this._getTextWidth(`
+                    ${intl.formatMessage(tagMessages.cannotEditTags)}
+                `).width + 20
+            });
+        }
+    }
+
     componentClickAway = () => {
         const { partialTag } = this.state;
         if (partialTag.length > 1 && partialTag.length <= 32) {
@@ -64,17 +82,6 @@ class TagEditor extends Component {
         return res;
     }
 
-    componentWillReceiveProps (nextProps) {
-        const { isUpdate, intl } = nextProps;
-        if (isUpdate) {
-            this.setState({
-                tagInputWidth: this._getTextWidth(`
-                    ${intl.formatMessage(tagMessages.cannotEditTags)}
-                `).width + 20
-            });
-        }
-    }
-
     _getTagInputPopoverContent = () => {
         const { tagSuggestions, tags, tagErrors } = this.props;
         if (tagErrors) {
@@ -87,7 +94,6 @@ class TagEditor extends Component {
             );
         }
         const selectionIndex = this.state.selectedSuggestionIndex;
-        /* eslint-disable react/no-array-index-key */
         return this._getFilteredSuggestions(tagSuggestions, tags).map((tag, index) => (
           <div
             key={`suggested-${tag}-${index}`}
@@ -100,26 +106,22 @@ class TagEditor extends Component {
             {tag}
           </div>
         ));
-        /* eslint-enable react/no-array-index-key */
     }
     _getFilteredSuggestions = (suggestions, tags) =>
         suggestions.filter(tag => !tags.has(tag) && !tag.includes(' '))
 
-    _getTagStatus = (tag, status) => {
-        const { intl, canCreateTags } = this.props;
-        const cannotBeUsed = !canCreateTags && (!status.checking && !status.exists);
-        const mustCreate = canCreateTags && (!status.checking && !status.exists);
+    _getTagStatus = (tag) => {
+        const { intl, canCreateTags, tagExists, tagExistsPending } = this.props;
+        const newTag = !tagExistsPending.get(tag) && !tagExists.get(tag);
+        const cannotBeUsed = !canCreateTags && newTag;
+        const mustCreate = canCreateTags && newTag;
         return (
-          <div
-            className="tag-editor__tag-item-popover-content"
-          >
+          <div className="tag-editor__tag-item-popover-content">
             <p className="tag-editor__tag-item-popover-message">
               {cannotBeUsed && intl.formatMessage(tagMessages.notEnoughKarma)}
               {mustCreate && intl.formatMessage(tagMessages.tagNotCreated)}
             </p>
-            <div
-              className="tag-editor__tag-item-popover-actions"
-            >
+            <div className="tag-editor__tag-item-popover-actions">
               {cannotBeUsed &&
                 <Button
                   onClick={this._deleteTag(tag)}
@@ -204,7 +206,7 @@ class TagEditor extends Component {
             };
         });
     }
-    /* eslint-disable no-fallthrough, consistent-return */
+
     _handleSpecialKeyPress = (ev) => {
         const pressedKey = ev.keyCode;
         const { tags } = this.props;
@@ -240,12 +242,11 @@ class TagEditor extends Component {
             }
         }
     }
-    /* eslint-enable no-fallthrough, consistent-return */
+
     _handleTagInputChange = (ev) => {
         const { tags, intl } = this.props;
         const tag = ev.target.value.trim().toLowerCase().replace('#', '');
         const alphaValid = /[a-z0-9.-]+$/.test(tag);
-        console.log('change ev!');
         const specialCharsValid = !tag.includes('.-') &&
             !tag.includes('-.') &&
             !tag.includes('--') &&
@@ -308,12 +309,13 @@ class TagEditor extends Component {
                 inputHasFocus: focusState
             });
         }
-    /* eslint-disable complexity */
-    _handleTagStatusPopover = (tag, status) =>
+
+    _handleTagStatusPopover = (tag) =>
         (visible) => {
-            const { tags, canCreateTags } = this.props;
-            const cannotBeUsed = !canCreateTags && (!status.checking && !status.exists);
-            const mustCreate = canCreateTags && (!status.checking && !status.exists);
+            const { tags, canCreateTags, tagExists, tagExistsPending } = this.props;
+            const newTag = !tagExistsPending.get(tag) && !tagExists.get(tag);
+            const cannotBeUsed = !canCreateTags && newTag;
+            const mustCreate = canCreateTags && newTag;
             if (!visible && cannotBeUsed) {
                 return this._deleteTag(tags.findLastKey(val => !val.exists))();
             }
@@ -329,38 +331,39 @@ class TagEditor extends Component {
             }
             return null;
         }
-    /* eslint-disable react/no-array-index-key */
+
     _getTagList = () => {
-        const { tags, canCreateTags, isUpdate } = this.props;
-        // return tags
-        return tags.map((status, tag) => {
-            let popoverOpen = (!status.checking && !status.exists);
+        const { tags, canCreateTags, isUpdate, tagExists, tagExistsPending } = this.props;
+        const tagNames = Object.keys(tags.toJS());
+        return tagNames.map((tag) => { // eslint-disable-line complexity
+            const pending = tagExistsPending.get(tag);
+            const exists = tagExists.get(tag);
+            const isNewTag = !pending && !exists;
+            let popoverOpen = isNewTag;
             if (typeof this.state.tagStatusPopoverOpen === 'string') {
                 popoverOpen = this.state.tagStatusPopoverOpen === tag;
             }
             return (
               <Popover
-                key={`${tag}`}
+                key={tag}
                 placement="topLeft"
-                content={
-                  this._getTagStatus(tag, status)
-                }
+                content={this._getTagStatus(tag)}
                 overlayClassName="tag-editor__tag-item-popover"
                 visible={popoverOpen}
-                onVisibleChange={this._handleTagStatusPopover(tag, status)}
+                onVisibleChange={this._handleTagStatusPopover(tag)}
                 trigger="click"
               >
                 <div
                   className={
                     `flex-center-y tag-editor__tag-item
-                    tag-editor__tag-item${(canCreateTags && (!status.checking && !status.exists)) ?
+                    tag-editor__tag-item${(canCreateTags && isNewTag) ?
                         '_should-register' : ''}
-                    tag-editor__tag-item${(!canCreateTags && (!status.checking && !status.exists)) ?
+                    tag-editor__tag-item${(!canCreateTags && isNewTag) ?
                         '_cannot-add' : ''}`
                   }
                 >
                   { tag }
-                  {(canCreateTags || status.exists) && !isUpdate &&
+                  {(canCreateTags || exists) && !isUpdate &&
                     <span
                       className="tag-item__delete-button"
                       onClick={this._deleteTag(tag)}
@@ -368,7 +371,7 @@ class TagEditor extends Component {
                       <Icon type="close" />
                     </span>
                   }
-                  {!canCreateTags && (!status.checking && !status.exists) &&
+                  {!canCreateTags && isNewTag &&
                     <span className="tag-item__info-button" >
                       <Icon type="question" />
                     </span>
@@ -376,7 +379,7 @@ class TagEditor extends Component {
                 </div>
               </Popover>
             );
-        }).toIndexedSeq();
+        });
     }
     _getSuggestionsPopoverVisibility = () => {
         const { tagSuggestionsCount, tagSuggestions, tags } = this.props;
@@ -396,20 +399,15 @@ class TagEditor extends Component {
     }
     render () {
         const { tagInputWidth } = this.state;
-        const { tags, canCreateTags,
-            inputDisabled, tagErrors } = this.props;
+        const { tags, canCreateTags, isUpdate, tagErrors, tagExists } = this.props;
+        const tagNames = Object.keys(tags.toJS());
+        const tagDoesNotExist = tagNames.length && tagNames.some(tagName => !tagExists.get(tagName));
         const suggestionsPopoverVisible = this._getSuggestionsPopoverVisibility();
 
         return (
           <div
             id="tag-editor"
             className={`tag-editor ${this.props.className}`}
-            ref={(node) => {
-                this._rootNode = node;
-                if (this.props.nodeRef) {
-                    this.props.nodeRef(node);
-                }
-            }}
             onClick={this._forceTagInputFocus}
           >
             {this._getTagList()}
@@ -433,13 +431,7 @@ class TagEditor extends Component {
                 }}
                 value={this.state.partialTag}
                 onFocus={this._changeInputFocus(true)}
-
-                disabled={
-                    (tags.size &&
-                    (!tags.every(tStatus => tStatus.exists && !tStatus.checking) && !canCreateTags)) ||
-                    (tags.size >= 10) ||
-                    inputDisabled
-                }
+                disabled={(tagDoesNotExist && !canCreateTags) || tags.size >= 10 || isUpdate}
               />
             </Popover>
           </div>
@@ -448,21 +440,22 @@ class TagEditor extends Component {
 }
 
 TagEditor.propTypes = {
-    className: PropTypes.string,
     canCreateTags: PropTypes.bool.isRequired,
+    className: PropTypes.string,
     intl: PropTypes.shape(),
-    inputDisabled: PropTypes.bool,
-    nodeRef: PropTypes.func,
-    searchTags: PropTypes.func,
-    tagSuggestions: PropTypes.shape(),
-    tagSuggestionsCount: PropTypes.number,
-    tagErrors: PropTypes.string,
-    tags: PropTypes.shape(),
-    searchResetResults: PropTypes.func,
+    isUpdate: PropTypes.bool,    
     onChange: PropTypes.func,
     onTagAdd: PropTypes.func.isRequired,
     onTagRemove: PropTypes.func.isRequired,
-    isUpdate: PropTypes.bool,
+    searchResetResults: PropTypes.func,
+    searchTags: PropTypes.func,
+    tagErrors: PropTypes.string,
+    tagExists: PropTypes.shape().isRequired,
+    tagExistsCheck: PropTypes.func.isRequired,
+    tagExistsPending: PropTypes.shape().isRequired,
+    tags: PropTypes.shape(),
+    tagSuggestions: PropTypes.shape(),
+    tagSuggestionsCount: PropTypes.number,
 };
 
 export default clickAway(TagEditor);
