@@ -29,7 +29,7 @@ export const getProfileData = {
  * Get profile data for an akasha profile address
  * @type {Function}
  */
-const execute = Promise.coroutine(function* (data: ProfileDataRequest, cb) {
+const execute: any = Promise.coroutine(function* (data: any, cb) {
     const v = new schema.Validator();
     v.validate(data, getProfileData, { throwError: true });
 
@@ -86,4 +86,6 @@ const execute = Promise.coroutine(function* (data: ProfileDataRequest, cb) {
 
 });
 
-export default { execute: execute, name: 'getProfileData', hasStream: true };
+const exported = { execute, name: 'getProfileData', hasStream: true };
+
+export default exported;
