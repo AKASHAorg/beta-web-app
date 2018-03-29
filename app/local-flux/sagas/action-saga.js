@@ -10,12 +10,11 @@ import * as tagActions from '../actions/tag-actions';
 import * as transactionActions from '../actions/transaction-actions';
 import * as types from '../constants';
 import { selectAction, selectActionsHistory, selectBatchActions, selectLoggedEthAddress,
-    selectActionToPublish, selectNeedAuthAction, selectToken, selectTokenExpiration } from '../selectors';
+    selectActionToPublish, selectNeedAuthAction, selectToken } from '../selectors';
 import * as actionService from '../services/action-service';
 import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
 import { balanceToNumber } from '../../utils/number-formatter';
-import { isEthAddress } from '../../utils/dataModule';
 import { guestAddress } from '../../constants/guest-address';
 
 const ACTION_HISTORY_LIMIT = 20;
@@ -93,7 +92,7 @@ function balanceRequired (actionType) {
     return true;
 }
 
-function hasEnoughBalance (actionType, balance, publishingCost, payload) {
+function hasEnoughBalance (actionType, balance, publishingCost, payload) {//eslint-disable-line
     const remainingMana = balanceToNumber(balance.getIn(['mana', 'remaining']), 5);
     const entryPublishingCost = balanceToNumber(publishingCost.getIn(['entry', 'cost']), 5);
     const commentPublishingCost = balanceToNumber(publishingCost.getIn(['comments', 'cost']), 5);

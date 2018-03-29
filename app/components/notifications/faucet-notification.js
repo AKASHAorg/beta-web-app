@@ -15,8 +15,41 @@ import { Icon } from '../';
 const notificationKey = 'faucet-notification';
 
 class FaucetNotification extends Component {
+    state = {
+        initialFaucetRequested: false
+    }
+
     componentDidMount () {
         const { intl, initialFaucet} = this.props;
+        notification.open({
+            key: notificationKey,
+            className: 'faucet-notification',
+            message: this.message(intl, initialFaucet),
+            description: this.description(intl, initialFaucet),
+            icon: (
+              <Icon className="faucet-notification__icon" type="akashaWelcome" />
+            ),
+            onClose: this.onClose
+        });       
+    }
+
+    componentDidUpdate () {
+        const { intl, initialFaucet } = this.props;
+        if (this.props.showFaucetNotification && !this.state.initialFaucetRequested) {
+            notification.open({
+                key: notificationKey,
+                className: 'faucet-notification',
+                message: this.message(intl, initialFaucet),
+                description: this.description(intl, initialFaucet),
+                icon: (
+                  <Icon className="faucet-notification__icon" type="akashaWelcome" />
+                ),
+                onClose: this.onClose
+            });     
+        }  
+    }
+
+    message = (intl, initialFaucet) => {
         const message = initialFaucet ? 
             (<div>
               {intl.formatMessage(notificationMessages.welcomeTitle)}
@@ -25,11 +58,21 @@ class FaucetNotification extends Component {
             (<div>
               {intl.formatMessage(notificationMessages.noFunds)}
             </div>);
-
+        return message;
+    }
+    
+    description = (intl, initialFaucet) => {
         const description = initialFaucet ?
             (<div>
               <span>{intl.formatMessage(notificationMessages.welcomeMessage)}</span>
-              <a className="faucet-notification__link" href="#" onClick={this.onClick}>
+              <a
+                className="faucet-notification__link"
+                href="#"
+                onClick={(ev) => {
+                    this.onClick(ev);
+                    this.setState({ initialFaucetRequested: true });
+                  }}
+                >
                 {intl.formatMessage(generalMessages.here)}
               </a>
             </div>) :
@@ -39,16 +82,7 @@ class FaucetNotification extends Component {
                 {intl.formatMessage(generalMessages.here)}
               </a>
             </div>);
-
-        notification.open({
-            key: notificationKey,
-            className: 'faucet-notification',
-            message,
-            description,
-            icon: (
-              <Icon className="faucet-notification__icon" type="akashaWelcome" />
-            ),
-        });       
+        return description;
     }
 
     onClick = (ev) => {
@@ -58,6 +92,10 @@ class FaucetNotification extends Component {
         actionAdd(loggedEthAddress, actionTypes.faucet, { ethAddress: loggedEthAddress });
         actionResetFundingRequirements();
     };
+
+    onClose = () => {
+        actionResetFundingRequirements();
+    }
 
     _deleteNeedAuthActions = () =>
         this.props.pendingActions.filter(action => action.get('status') === actionStatus.needAuth)
@@ -79,6 +117,7 @@ FaucetNotification.propTypes = {
     faucetRequested: PropTypes.string,
     faucetPending: PropTypes.bool,
     profileResetFaucet: PropTypes.func,
+    showFaucetNotification: PropTypes.bool
 };
 
 function mapStateToProps (state) {

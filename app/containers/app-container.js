@@ -267,6 +267,7 @@ class AppContainer extends Component {
                 {showFaucetNotification &&
                   <FaucetNotification
                     initialFaucet={initialFaucet}
+                    showFaucetNotification={showFaucetNotification}
                   />
                 }
                 {showGethDetailsModal && <GethDetailsModal />}

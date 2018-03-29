@@ -539,6 +539,7 @@ function* watchProfileBondAethChannel () {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileBondAethError(resp.error, resp.request.amount));
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -577,6 +578,7 @@ function* watchProfileCycleAethChannel () {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileCycleAethError({}, resp.request.amount));
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -713,6 +715,7 @@ function* watchProfileFreeAethChannel () {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileFreeAethError({}));
+                    yield put(actionActions.actionDelete(actionId));
                 } else {
                     yield put(actions.profileCyclingStates());
                 }
@@ -887,10 +890,12 @@ function* watchProfileRegisterChannel () {
         if (shouldApplyChanges) {
             if (resp.error) {
                 yield put(actions.profileRegisterError(resp.error, resp.request));
+                yield put(actionActions.actionDelete(actionId));
             } else if (resp.data.receipt) {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileRegisterError({}));
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -940,10 +945,12 @@ function* watchProfileToggleDonationsChannel () {
         const { actionId } = resp.request;
         if (resp.error) {
             yield put(actions.profileToggleDonationsError(resp.error, resp.request));
+            yield put(actionActions.actionDelete(actionId));
         } else if (resp.data.receipt) {
             yield put(actionActions.actionPublished(resp.data.receipt));
             if (!resp.data.receipt.success) {
                 yield put(actions.profileToggleDonationsError({}, resp.request));
+                yield put(actionActions.actionDelete(actionId));
             }
         } else {
             const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -964,6 +971,7 @@ function* watchProfileTransferChannel () {
                 } else {
                     yield put(actions.profileTransferEthError(resp.error, resp.request));
                 }
+                yield put(actionActions.actionDelete(actionId));
             } else if (resp.data.receipt) {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
@@ -972,6 +980,7 @@ function* watchProfileTransferChannel () {
                     } else {
                         yield put(actions.profileTransferEthError({}, resp.request));
                     }
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -994,6 +1003,7 @@ function* watchProfileTransformEssenceChannel () {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileTransformEssenceError({}, resp.request.amount));
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
@@ -1030,10 +1040,12 @@ function* watchProfileUpdateChannel () {
         if (shouldApplyChanges) {
             if (resp.error) {
                 yield put(actions.profileUpdateError(resp.error, resp.request));
+                yield put(actionActions.actionDelete(actionId));
             } else if (resp.data.receipt) {
                 yield put(actionActions.actionPublished(resp.data.receipt));
                 if (!resp.data.receipt.success) {
                     yield put(actions.profileUpdateError({}));
+                    yield put(actionActions.actionDelete(actionId));
                 }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
