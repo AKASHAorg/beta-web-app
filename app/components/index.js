@@ -86,6 +86,7 @@ export NewListForm from './forms/new-list-form';
 export NewListBtn from './profile-overview/new-list-btn';
 export NewSearchColumn from './columns/new-search-column';
 export NewSelectColumn from './columns/new-select-column';
+export NoDraftsPlaceholder from './editors/no-drafts-placeholder';
 export Notification from './notifications/notification';
 export NotificationHighlightNote from './notifications/notification-highlight-note';
 export NotificationLog from './panels/notification-log';

@@ -120,7 +120,8 @@ export const draftsGetCountError = error => action(types.DRAFTS_GET_COUNT_ERROR,
 /**
  * Get entries as drafts
  */
-export const entriesGetAsDraftsSuccess = data => action(types.ENTRIES_GET_AS_DRAFTS_SUCCESS, { data });
+export const entriesGetAsDraftsSuccess = (data, request) =>
+    action(types.ENTRIES_GET_AS_DRAFTS_SUCCESS, { data, request });
 export const entriesGetAsDraftsError = (error) => {
     error.code = 'EGADE01';
     error.messageId = 'entriesGetAsDrafts';
