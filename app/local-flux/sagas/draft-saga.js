@@ -190,14 +190,7 @@ function* draftPublish ({ actionId, draft }) {
 }
 /* eslint-enable max-statements */
 function* draftPublishSuccess ({ data }) {
-    const ethAddress = yield select(selectLoggedEthAddress);
     yield put(draftActions.draftDelete({ draftId: data.draft.id }));
-    yield put(draftActions.draftsGet());
-    // yield put(entryActions.entryGetFull({
-    //     entryId: data.entryId,
-    //     ethAddress,
-    //     asDraft: true
-    // }));
     const isUpdate = data.draft.id.startsWith('0x');
     yield put(appActions.showNotification({
         id: isUpdate ? 'newVersionPublishedSuccessfully' : 'draftPublishedSuccessfully',
