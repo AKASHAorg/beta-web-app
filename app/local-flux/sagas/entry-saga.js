@@ -14,7 +14,7 @@ import {
     selectListEntries, selectListEntryType, selectIsFollower, selectListNextEntries, selectLoggedEthAddress,
     selectProfileEntriesLastBlock, selectProfileEntriesLastIndex, selectToken,
     selectCurrentTotalProfileEntries, selectDrafts, selectDraftsLastBlock,
-    selectDraftsLastIndex } from '../selectors';
+    selectDraftsLastIndex, selectDraftsTotalLoaded } from '../selectors';
 import * as actionStatus from '../../constants/action-status';
 import { isEthAddress } from '../../utils/dataModule';
 
@@ -305,10 +305,12 @@ function* entryProfileIterator ({ columnId, value, limit = ITERATOR_LIMIT, asDra
     }
     const channel = getChannels().server.entry.entryProfileIterator;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
-    let akashaId, ethAddress, lastIndex, toBlock; // eslint-disable-line
+    let akashaId, ethAddress, lastIndex, toBlock, totalLoaded; // eslint-disable-line
     if (asDrafts) {
         toBlock = (yield select(selectDraftsLastBlock)) || (yield select(selectBlockNumber));
         lastIndex = yield select(selectDraftsLastIndex);
+        totalLoaded = yield select(selectDraftsTotalLoaded);
+        console.log('total loaded', totalLoaded);
     } else {
         toBlock = reversed ?
             yield select(state => selectColumnFirstBlock(state, columnId)) :
@@ -322,7 +324,7 @@ function* entryProfileIterator ({ columnId, value, limit = ITERATOR_LIMIT, asDra
     yield apply(
         channel,
         channel.send,
-        [{ columnId, limit, akashaId, ethAddress, asDrafts, toBlock, reversed, lastIndex, entryType }]
+        [{ columnId, limit, akashaId, ethAddress, asDrafts, toBlock, reversed, lastIndex, entryType, totalLoaded }]
     );
 }
 

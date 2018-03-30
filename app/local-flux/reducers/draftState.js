@@ -128,6 +128,7 @@ const draftState = createReducer(initialState, {
     // data.draft
     [types.DRAFT_PUBLISH_SUCCESS]: (state, { data }) =>
         state.merge({
+            draftList: state.get('draftList').filter(id => id !== data.draft.id),
             drafts: state.get('drafts').delete(data.draft.id)
         }),
 
@@ -182,7 +183,8 @@ const draftState = createReducer(initialState, {
             mState.set('iterator', new DraftsIterator({
                 lastBlock,
                 lastIndex,
-                moreEntries: request.limit === collection.length
+                moreEntries: request.limit === collection.length,
+                totalLoaded: mState.getIn(['iterator', 'totalLoaded']) + collection.length
             }));
         }),
 

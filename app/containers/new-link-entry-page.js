@@ -13,7 +13,6 @@ import { entryMessages } from '../locale-data/messages';
 import { WebsiteParser } from '../utils/extract-website-info';
 import { draftAddTag, draftRemoveTag, draftCreate, draftUpdate,
     draftRevertToVersion } from '../local-flux/actions/draft-actions';
-import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
 import { tagExists } from '../local-flux/actions/tag-actions';
@@ -512,7 +511,6 @@ NewLinkEntryPage.propTypes = {
     draftRevertToVersion: PropTypes.func,
     drafts: PropTypes.shape(),
     draftsFetched: PropTypes.bool,
-    entryGetFull: PropTypes.func,
     intl: PropTypes.shape(),
     licences: PropTypes.shape(),
     loggedProfile: PropTypes.shape(),
@@ -558,7 +556,6 @@ export default connect(
         actionAdd,
         draftAddTag,
         draftRemoveTag,
-        entryGetFull,
         draftCreate,
         draftUpdate,
         draftRevertToVersion,

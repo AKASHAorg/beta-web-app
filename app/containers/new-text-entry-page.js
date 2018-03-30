@@ -10,7 +10,6 @@ import { EditorFooter, NoDraftsPlaceholder, PublishOptionsPanel, TextEntryEditor
 import { genId } from '../utils/dataModule';
 import { draftAddTag, draftRemoveTag, draftCreate, draftsGet, draftUpdate, draftsGetCount,
     draftRevertToVersion } from '../local-flux/actions/draft-actions';
-import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { tagExists } from '../local-flux/actions/tag-actions';
@@ -448,7 +447,6 @@ NewEntryPage.propTypes = {
     draftRevertToVersion: PropTypes.func,
     draftsFetched: PropTypes.bool,
     darkTheme: PropTypes.bool,
-    entryGetFull: PropTypes.func,
     history: PropTypes.shape(),
     intl: PropTypes.shape(),
     licences: PropTypes.shape(),
@@ -499,7 +497,6 @@ export default connect(
         draftUpdate,
         draftsGetCount,
         draftRevertToVersion,
-        entryGetFull,
         searchTags,
         searchResetResults,
         tagExists,

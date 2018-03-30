@@ -61,6 +61,7 @@ export const draftDelete = ({draftId}) => {
 
 export const draftsGet = (ethAddress) => {
     try {
+        console.log('eth address', ethAddress);
         const records = getEntriesCollection().find({ethAddress: ethAddress});
         return Promise.resolve(records.slice(0));
     } catch (error) {

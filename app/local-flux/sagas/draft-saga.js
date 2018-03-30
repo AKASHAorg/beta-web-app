@@ -59,6 +59,7 @@ function* draftAddTag ({ data }) {
  */
 function* draftsGet ({ data }) {
     try {
+        console.log('drafts get', data);
         const response = yield call([draftService, draftService.draftsGet], data.ethAddress);
         let drafts = new Map();
         if (response.length > 0) {
@@ -191,12 +192,12 @@ function* draftPublish ({ actionId, draft }) {
 function* draftPublishSuccess ({ data }) {
     const ethAddress = yield select(selectLoggedEthAddress);
     yield put(draftActions.draftDelete({ draftId: data.draft.id }));
-    yield put(entryActions.entryProfileIterator({
-        column: null,
-        value: ethAddress,
-        limit: 1000000,
-        asDrafts: true
-    }));
+    yield put(draftActions.draftsGet());
+    // yield put(entryActions.entryGetFull({
+    //     entryId: data.entryId,
+    //     ethAddress,
+    //     asDraft: true
+    // }));
     const isUpdate = data.draft.id.startsWith('0x');
     yield put(appActions.showNotification({
         id: isUpdate ? 'newVersionPublishedSuccessfully' : 'draftPublishedSuccessfully',
