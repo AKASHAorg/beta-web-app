@@ -11,15 +11,15 @@ const execute = Promise.coroutine(function*() {
         connected = web3Api.instance.isConnected();
     }
     if (connected) {
-        if (web3Api.instance.version.network === 'loading') {
-            throw new Error('METAMASK needs to be unlocked.');
-        }
         gethStatus.process = true;
         gethStatus.api = true;
         gethStatus.version = yield web3Api.instance.version.getNodeAsync();
         gethStatus.networkID = yield web3Api.instance.version.getNetworkAsync();
 
         const accounts = yield web3Api.instance.eth.getAccountsAsync();
+        if (!accounts.length) {
+            throw new Error('No account found, create or unlock one from web3 provider!')
+        }
         gethStatus.ethKey = accounts[0];
     }
     yield contracts.init();

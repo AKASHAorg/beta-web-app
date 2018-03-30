@@ -42,7 +42,6 @@ docs
 main/**/*.js
 *.d.ts
 *.map
-!main/typings/*
 test-repo
 !gulpfile.old.js
 dist
