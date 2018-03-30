@@ -75,8 +75,8 @@ export class Auth {
         return randomBytesAsync(40)
             .then((buff: Buffer) => {
                 const token = addHexPrefix(buff.toString('hex'));
-                return this._signSession(token, acc)
-                    .then((signedString: string) => {
+                // return this._signSession(token, acc)
+                //     .then((signedString: string) => {
                         const expiration = new Date();
                         gethStatus.akashaKey = acc;
                         expiration.setMinutes(expiration.getMinutes() + timer);
@@ -84,7 +84,7 @@ export class Auth {
                         this._session = {
                             expiration,
                             address: acc,
-                            sig: signedString
+                            sig: token
                         };
                         this._generateCipher(stripHexPrefix(token));
                         localStorage.setItem(this._key,
@@ -95,7 +95,7 @@ export class Auth {
                             )
                         );
                         return { token, expiration, ethAddress: acc };
-                    });
+                    // });
             });
     }
 
