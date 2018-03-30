@@ -1022,6 +1022,9 @@ function* watchProfileUnfollowChannel () {
                 yield put(actionActions.actionDelete(actionId));
             } else if (resp.data.receipt) {
                 yield put(actionActions.actionPublished(resp.data.receipt));
+                if (!resp.data.receipt.success) {
+                    yield put(actions.profileUnfollowError({}, resp.request));
+                }
             } else {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
                 yield put(actionActions.actionUpdate(changes));
