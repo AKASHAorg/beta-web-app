@@ -6,7 +6,6 @@ import { notification, Modal } from 'antd';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { actionAdd } from '../local-flux/actions/action-actions';
 import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
     toggleNavigationModal, toggleOutsideNavigation, navForwardCounterReset,
     navCounterIncrement, showNotification, showTerms } from '../local-flux/actions/app-actions';
@@ -17,7 +16,7 @@ import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-act
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
-import { AppErrorBoundary, AppPreferences, FaucetAndManafyModal, NavigateAwayModal,
+import { AppErrorBoundary, AppPreferences, ManafyModal, NavigateAwayModal,
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
@@ -158,10 +157,11 @@ class AppContainer extends Component {
         const showIpfsDetailsModal = appState.get('showIpfsDetailsModal');
         const showWallet = appState.get('showWallet');
         const isOverlay = location.state && location.state.overlay && this.previousLocation !== location;
-        const needFunds = needEth || needAeth || needMana;
+        const needFunds = needEth || needAeth;
         const ethBalance = balance.get('eth');
         const noFunds = ethBalance && !Number(ethBalance) && !Number(balance.getIn(['aeth', 'total']));
-        const showInitialFaucetModal = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
+        const initialFaucet = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
+        const showFaucetNotification = needFunds || initialFaucet;
 
         return (
           <div className="flex-center-x app-container__root">
@@ -263,9 +263,12 @@ class AppContainer extends Component {
                   navigation={appState.get('outsideNavigation')}
                   onClick={this.props.toggleOutsideNavigation}
                 />
-                {needFunds && <FaucetAndManafyModal />}
-                {showInitialFaucetModal &&
-                  <FaucetNotification actionAdd={this.props.actionAdd} loggedEthAddress={loggedEthAddress} />
+                {needMana && !needFunds && <ManafyModal />}
+                {showFaucetNotification &&
+                  <FaucetNotification
+                    initialFaucet={initialFaucet}
+                    showFaucetNotification={showFaucetNotification}
+                  />
                 }
                 {showGethDetailsModal && <GethDetailsModal />}
                 {showGuestModal && <GuestModal />}
@@ -284,7 +287,6 @@ class AppContainer extends Component {
 }
 
 AppContainer.propTypes = {
-    actionAdd: PropTypes.func.isRequired,
     activeDashboard: PropTypes.string,
     appState: PropTypes.shape().isRequired,
     balance: PropTypes.shape().isRequired,
@@ -334,7 +336,6 @@ export { AppContainer };
 export default DragDropContext(HTML5Backend)(connect(
     mapStateToProps,
     {
-        actionAdd,
         bootstrapHome,
         entryVoteCost,
         errorDeleteFatal,

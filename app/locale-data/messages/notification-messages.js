@@ -294,5 +294,15 @@ const notificationMessages = defineMessages({
         description: 'welcome/faucet notification message',
         defaultMessage: 'To claim your test ETH gift, please click'
     },
+    noFunds: {
+        id: 'app.notification.noFunds',
+        description: 'title for faucet notification',
+        defaultMessage: 'No more funds'
+    },
+    renewBalance: {
+        id: 'app.notification.renewBalance',
+        description: 'description for faucet notification',
+        defaultMessage: 'To renew your balance, please click'
+    },
 });
 export { notificationMessages };

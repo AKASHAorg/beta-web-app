@@ -295,6 +295,21 @@ const errorMessages = defineMessages({
         id: 'app.error.profileFaucet',
         description: 'error message for faucet request',
         defaultMessage: 'An error occurred while requesting funds from faucet'
+    },
+    profileRegister: {
+        id: 'app.error.profileRegister',
+        description: 'error message for registering your profile',
+        defaultMessage: 'An error occured while registering your profile'
+    },
+    profileFollow: {
+        id: 'app.error.profileFollow',
+        description: 'error message for profile follow',
+        defaultMessage: 'An error occurred while following {ethAddress}'
+    },
+    profileUnfollow: {
+        id: 'app.error.profileUnfollow',
+        description: 'error message for profile unfollow',
+        defaultMessage: 'An error occurred while unfollowing {ethAddress}'
     }
 });
 
