@@ -20,7 +20,7 @@ import { AppErrorBoundary, AppPreferences, ManafyModal, NavigateAwayModal,
     DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
-    ProfilePage, ProfileEdit, SecondarySidebar, SetupPages, Sidebar, Terms, TopBar,
+    ProfilePage, ProfileEdit, SecondarySidebar, Sidebar, Terms, TopBar,
     TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder,
     FaucetNotification } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
@@ -106,7 +106,7 @@ class AppContainer extends Component {
     // all bootstrapping logic should be here
     // avoid spreading it over multiple components/containers
     _bootstrapApp = (props) => {
-        const { location, appState, unlocked, web3 } = props;
+        const { location, appState, web3 } = props;
         const nonLoginRoutes = ['/setup'];
         const shouldBootstrapHome = !nonLoginRoutes.every(route =>
             location.pathname === '/' || location.pathname.includes(route)
@@ -194,9 +194,6 @@ class AppContainer extends Component {
                           }
                           {unlocked &&
                             <Route exact path="/profileoverview/lists" component={Lists} />
-                          }    
-                          {unlocked &&
-                            <Route exact path="/profileoverview/lists" component={Lists} />
                           }
                           {unlocked &&
                             <Route path="/profileoverview/lists/:listId" component={ListEntries} />
@@ -254,7 +251,6 @@ class AppContainer extends Component {
                   }
                 </AppErrorBoundary>
                 <Sidebar unlocked={unlocked} />
-                <Route path="/setup" component={SetupPages} />
                 <FullSizeImageViewer />
                 <ErrorNotification />
                 <NavigateAwayModal

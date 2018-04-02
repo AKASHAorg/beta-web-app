@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import classNames from 'classnames';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { Button, Card } from 'antd';
 import { Icon, Terms } from '../';
@@ -12,15 +11,15 @@ const WebPlaceholder = (props) => {
     const userAgent = navigator.userAgent;
 
     const termsShow = (ev) => {
-      ev.preventDefault();
-      if (showTerms) return showTerms();
-      return null;
+        ev.preventDefault();
+        if (showTerms) return showTerms();
+        return null;
     }
 
-     if (userAgent.indexOf("Firefox") > -1) {
-      metamaskLink = "https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/";
+    if (userAgent.indexOf("Firefox") > -1) {
+        metamaskLink = "https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/";
     } else if (userAgent.indexOf("OPR") > -1) {
-      metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
+        metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
     }
 
     const icons = (
@@ -109,67 +108,67 @@ const WebPlaceholder = (props) => {
     );
 
     return (
-        <div className="web-placeholder">
-          <div className="web-placeholder__header">
-            <div className="web-placeholder__header-left">
-              <Icon type="akasha" />
-              <div className="web-placeholder__header-left-title">
-                {intl.formatMessage(generalMessages.akasha)}
-              </div>
-            </div>
-            <div className="web-placeholder__header-right">
-              <a href="https://www.facebook.com/AkashaProject" target="_blank">
-                <Icon type="facebook" />
-              </a>
-              <a href="https://twitter.com/AkashaProject" target="_blank">
-                <Icon type="twitter" />
-              </a>
-              <a href="https://www.reddit.com/r/AkashaProject" target="_blank">
-                <Icon type="reddit" />
-              </a>
-              <a href="https://discord.gg/JqqKasJ" target="_blank">
-                <Icon type="discord" />
-              </a>
-              <a href="https://github.com/AkashaProject" target="_blank">
-                <Icon type="github" />
-              </a>
+      <div className="web-placeholder">
+        <div className="web-placeholder__header">
+          <div className="web-placeholder__header-left">
+            <Icon type="akasha" />
+            <div className="web-placeholder__header-left-title">
+              {intl.formatMessage(generalMessages.akasha)}
             </div>
           </div>
-          <div className="web-placeholder__body">
-            <div className="web-placeholder__body-title">
-              {intl.formatMessage(placeholderMessages.welcome)}
-            </div>
-            <div className="web-placeholder__body-subtitle">
-              {intl.formatMessage(placeholderMessages.welcomeSubtitle)}
-            </div>
-            {gethErr ? gethErrCard : noMetamaskCards}
+          <div className="web-placeholder__header-right">
+            <a href="https://www.facebook.com/AkashaProject" target="_blank" rel="noopener noreferrer">
+              <Icon type="facebook" />
+            </a>
+            <a href="https://twitter.com/AkashaProject" target="_blank" rel="noopener noreferrer">
+              <Icon type="twitter" />
+            </a>
+            <a href="https://www.reddit.com/r/AkashaProject" target="_blank" rel="noopener noreferrer">
+              <Icon type="reddit" />
+            </a>
+            <a href="https://discord.gg/JqqKasJ" target="_blank" rel="noopener noreferrer">
+              <Icon type="discord" />
+            </a>
+            <a href="https://github.com/AkashaProject" target="_blank" rel="noopener noreferrer">
+              <Icon type="github" />
+            </a>
           </div>
-          <div className="web-placeholder__footer">
-            <div className="web-placeholder__subfooter">
-              <div className="web-placeholder__subfooter-title">
-                {intl.formatMessage(placeholderMessages.akasha)}
-              </div>
-              <a href={"https://blog.akasha.world"} target="_blank" className="mail">
-                {intl.formatMessage(placeholderMessages.blog)}
-              </a>
-              <a href={"https://github.com/AkashaProject/dapp/releases"} target="_blank" className="mail">
-                {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
-              </a>
-              <a onClick={termsShow} className="mail">
-                {intl.formatMessage(placeholderMessages.termsOfService)}
-              </a>
-            </div>
-            <div className="web-placeholder__subfooter">
-              <div className="web-placeholder__subfooter-title">
-                {intl.formatMessage(placeholderMessages.contacts)}
-              </div>
-              <a href={"mailto:hello@akasha.world"} target="_top" className="mail">hello@akasha.world</a>
-              <a href={"mailto:careers@akasha.world"} target="_top" className="mail">careers@akasha.world</a>
-              <a href={"mailto:press@akasha.world"} target="_top" className="mail">press@akasha.world</a>
-            </div>
-          </div>
-          {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
         </div>
+        <div className="web-placeholder__body">
+          <div className="web-placeholder__body-title">
+            {intl.formatMessage(placeholderMessages.welcome)}
+          </div>
+          <div className="web-placeholder__body-subtitle">
+            {intl.formatMessage(placeholderMessages.welcomeSubtitle)}
+          </div>
+          {gethErr ? gethErrCard : noMetamaskCards}
+        </div>
+        <div className="web-placeholder__footer">
+          <div className="web-placeholder__subfooter">
+            <div className="web-placeholder__subfooter-title">
+              {intl.formatMessage(placeholderMessages.akasha)}
+            </div>
+            <a href={"https://blog.akasha.world"} target="_blank" className="mail">
+              {intl.formatMessage(placeholderMessages.blog)}
+            </a>
+            <a href={"https://github.com/AkashaProject/dapp/releases"} target="_blank" className="mail">
+              {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
+            </a>
+            <a onClick={termsShow} className="mail">
+              {intl.formatMessage(placeholderMessages.termsOfService)}
+            </a>
+          </div>
+          <div className="web-placeholder__subfooter">
+            <div className="web-placeholder__subfooter-title">
+              {intl.formatMessage(placeholderMessages.contacts)}
+            </div>
+            <a href={"mailto:hello@akasha.world"} target="_top" className="mail">hello@akasha.world</a>
+            <a href={"mailto:careers@akasha.world"} target="_top" className="mail">careers@akasha.world</a>
+            <a href={"mailto:press@akasha.world"} target="_top" className="mail">press@akasha.world</a>
+          </div>
+        </div>
+        {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
+      </div>
     );
 }
 
