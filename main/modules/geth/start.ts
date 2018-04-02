@@ -17,10 +17,9 @@ const execute = Promise.coroutine(function*() {
         gethStatus.networkID = yield web3Api.instance.version.getNetworkAsync();
 
         const accounts = yield web3Api.instance.eth.getAccountsAsync();
-        if (!accounts.length) {
-            throw new Error('No account found, create or unlock one from web3 provider!')
+        if (accounts.length) {
+            gethStatus.ethKey = accounts[0];
         }
-        gethStatus.ethKey = accounts[0];
     }
     yield contracts.init();
     return { started: connected };
