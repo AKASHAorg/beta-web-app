@@ -200,6 +200,11 @@ const dashboardMessages = defineMessages({
         id: 'app.dashboard.addFirstColumn',
         description: 'add first column button label',
         defaultMessage: 'Add first column'
-    }
+    },
+    createNewListColumnSubtitle: {
+        id: 'app.dashboard.createNewListColumnSubtitle',
+        description: 'panel subtitle for creating a new list and adding it to a column',
+        defaultMessage: 'Please create a list'
+    },
 });
 export { dashboardMessages };

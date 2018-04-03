@@ -2,9 +2,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { Button } from 'antd';
+import { Button, Input, Form } from 'antd';
 import classNames from 'classnames';
 import * as columnTypes from '../../constants/columns';
+import { listAdd } from '../../local-flux/actions/list-actions';
 import { dashboardAddColumn, dashboardAddNewColumn, dashboardDeleteNewColumn,
     dashboardResetNewColumn, dashboardUpdateNewColumn } from '../../local-flux/actions/dashboard-actions';
 import { entryListIterator, entryMoreListIterator, entryMoreProfileIterator, entryMoreTagIterator,
@@ -12,7 +13,7 @@ import { entryListIterator, entryMoreListIterator, entryMoreProfileIterator, ent
 import { searchProfiles, searchResetResults, searchTags } from '../../local-flux/actions/search-actions';
 import { selectActiveDashboard, selectColumn, selectColumnEntries, selectListsAll, selectNewColumn,
     selectProfileSearchResults, selectTagSearchResults } from '../../local-flux/selectors';
-import { dashboardMessages, generalMessages } from '../../locale-data/messages';
+import { dashboardMessages, generalMessages, listMessages } from '../../locale-data/messages';
 import { getDisplayName } from '../../utils/dataModule';
 import { Icon, NewSearchColumn, NewSelectColumn } from '../';
 
@@ -29,7 +30,9 @@ const iconTypes = {
 
 class NewColumn extends Component {
     state = {
-        selectedColumn: null
+        selectedColumn: null,
+        newListName: '',
+        newListDescription: ''
     };
 
     componentWillReceiveProps (nextProps) {
@@ -42,7 +45,7 @@ class NewColumn extends Component {
     shouldComponentUpdate (nextProps, nextState) { // eslint-disable-line complexity
         const { activeDashboard, column, dashboardId, lists, newColumn, previewEntries, profileResults,
             tagResults } = nextProps;
-        const { selectedColumn } = nextState;
+        const { newListDescription, newListName, selectedColumn } = nextState;
         if (
             !activeDashboard.equals(this.props.activeDashboard) ||
             !column.equals(this.props.column) ||
@@ -53,7 +56,9 @@ class NewColumn extends Component {
             !previewEntries.equals(this.props.previewEntries) ||
             !profileResults.equals(this.props.profileResults) ||
             !tagResults.equals(this.props.tagResults) ||
-            selectedColumn !== this.state.selectedColumn
+            selectedColumn !== this.state.selectedColumn ||
+            newListDescription !== this.state.newListDescription ||
+            newListName !== this.state.newListName
         ) {
             return true;
         }
@@ -65,12 +70,15 @@ class NewColumn extends Component {
     }
 
     isDisabled = () => {
-        const { newColumn } = this.props;
-        const { selectedColumn } = this.state;
+        const { lists, newColumn } = this.props;
+        const { newListName, selectedColumn } = this.state;
         if (!selectedColumn) {
             return true;
         }
         if (oneStepColumns.includes(selectedColumn)) {
+            return false;
+        }
+        if (newColumn.get('type') === columnTypes.list && lists.size === 0 && newListName) {
             return false;
         }
         if (newColumn.get('type')) {
@@ -79,13 +87,28 @@ class NewColumn extends Component {
         return false;
     };
 
+    onListNameChange = (ev) => {
+        this.setState({ newListName: ev.target.value });
+    };
+
+    onListDescriptionChange = (ev) => {
+        this.setState({ newListDescription: ev.target.value });
+    };
+
     updateNewColumn = type => this.props.dashboardUpdateNewColumn({ type });
 
     onAddColumn = () => {
         const { newColumn } = this.props;
-        const { selectedColumn } = this.state;
+        const { newListDescription, newListName, selectedColumn } = this.state;
         if (oneStepColumns.includes(selectedColumn)) {
             this.props.dashboardAddColumn(selectedColumn);
+        } else if (newListName) {
+            this.props.listAdd({
+                name: newListName,
+                description: newListDescription,
+                entryIds: [],
+                addColumn: true
+            });
         } else if (newColumn.get('value')) {
             this.props.dashboardAddColumn(newColumn.get('type'), newColumn.get('value'));
         } else {
@@ -98,7 +121,11 @@ class NewColumn extends Component {
         if (!newColumn.get('type')) {
             this.props.dashboardDeleteNewColumn();
         } else {
-            this.setState({ selectedColumn: null });
+            this.setState({
+                selectedColumn: null,
+                newListName: '',
+                newListDescription: ''
+            });
             this.props.dashboardUpdateNewColumn({ type: null, value: null });
         }
     }
@@ -236,17 +263,48 @@ class NewColumn extends Component {
                 break;
             case columnTypes.list:
                 previewMessage = intl.formatMessage(dashboardMessages.previewList, { listName });
-                component = (
-                  <NewSelectColumn
-                    entryIterator={this.props.entryListIterator}
-                    entryMoreIterator={this.props.entryMoreListIterator}
-                    options={lists}
-                    previewMessage={previewMessage}
-                    {...props}
-                  />
-                );
+                component = (lists.size !== 0) ?
+                    (
+                      <NewSelectColumn
+                        entryIterator={this.props.entryListIterator}
+                        entryMoreIterator={this.props.entryMoreListIterator}
+                        options={lists}
+                        previewMessage={previewMessage}
+                        {...props}
+                      />
+                    ) :
+                    (
+                      <div className="new-column__new-list">
+                        <Form>
+                          <Form.Item
+                            label={intl.formatMessage(listMessages.listName)}
+                            colon={false}
+                          >
+                            <div className="new-column__new-list-input">
+                              <Input
+                                value={this.state.newListName}
+                                onChange={this.onListNameChange}
+                              />
+                            </div>
+                          </Form.Item>
+                          <Form.Item
+                            label={intl.formatMessage(listMessages.shortDescription)}
+                            colon={false}
+                          >
+                            <div className="new-column__new-list-input">
+                              <Input
+                                value={this.state.newListDescription}
+                                onChange={this.onListDescriptionChange}
+                              />
+                            </div>
+                          </Form.Item>
+                        </Form>
+                      </div>
+                    );
                 title = dashboardMessages.addNewListColumn;
-                subtitle = dashboardMessages.addNewListColumnSubtitle;
+                subtitle = (lists.size !== 0) ? 
+                    dashboardMessages.addNewListColumnSubtitle :
+                    dashboardMessages.createNewListColumnSubtitle
                 break;
             default:
                 title = dashboardMessages.addNewColumn;
@@ -312,6 +370,7 @@ NewColumn.propTypes = {
     entryTagIterator: PropTypes.func.isRequired,
     intl: PropTypes.shape(),
     lists: PropTypes.shape().isRequired,
+    listAdd: PropTypes.func.isRequired,
     newColumn: PropTypes.shape(),
     previewEntries: PropTypes.shape().isRequired,
     profileResults: PropTypes.shape().isRequired,
@@ -347,6 +406,7 @@ export default connect(
         entryMoreTagIterator,
         entryProfileIterator,
         entryTagIterator,
+        listAdd,
         searchProfiles,
         searchResetResults,
         searchTags
