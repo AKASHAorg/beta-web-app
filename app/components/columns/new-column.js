@@ -109,6 +109,10 @@ class NewColumn extends Component {
                 entryIds: [],
                 addColumn: true
             });
+            this.setState({
+                newListName: '',
+                newListDescription: ''
+            });
         } else if (newColumn.get('value')) {
             this.props.dashboardAddColumn(newColumn.get('type'), newColumn.get('value'));
         } else {
