@@ -11,7 +11,7 @@ import searchCollection from './search';
 import settingsCollection from './settings';
 
 const idbAdapter = new LokiIndexedAdapter('aka-shard');
-const pa = new Loki.LokiPartitioningAdapter(idbAdapter, {paging: true});
+// const pa = new LokiPartitioningAdapter(idbAdapter, {paging: true});
 const collections = [
     actionCollection,
     dashboardCollection,
@@ -24,7 +24,7 @@ const collections = [
 ];
 
 export const akashaDB = new Loki('akashaDB-beta', {
-    adapter: pa,
+    adapter: idbAdapter,
     autoload: false,
     autosave: false,
     env: 'BROWSER'
@@ -36,8 +36,9 @@ export const loadAkashaDB  = () => Promise.fromCallback(cb =>
             if (!akashaDB.getCollection(record.collectionName)) {
                 akashaDB.addCollection(record.collectionName, record.options);
             }
+            akashaDB.getCollection(record.collectionName).checkAllIndexes({ repair: true, randomSampling: false })
         });
-        cb();
+        cb('', akashaDB);
     })
 );
 
