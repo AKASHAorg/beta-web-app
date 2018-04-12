@@ -31,3 +31,4 @@ export const regenWeb3 = () => {
 
 export const web3Api = new Service();
 export const ipfsApi = new Service();
+export const ipfsProvider = new Service();

@@ -9,6 +9,7 @@
     "flow": "./node_modules/.bin/flow",
     "prestart": "tsc -p tsconfig.json && npm run build-lang",
     "start": "cross-env NODE_ENV=development node -r babel-register ./node_modules/webpack-dev-server/bin/webpack-dev-server --config ./webpack.config.development.js",
+    "start-dark": "cross-env NODE_ENV=development DARK_THEME=1 node -r babel-register ./node_modules/webpack-dev-server/bin/webpack-dev-server --config ./webpack.config.development.js",
     "production": "tsc -p tsconfig.json && cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
     "build-worker": "cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.worker.js --progress --profile --colors",
     "build-renderer": "cross-env NODE_ENV=production node --max-old-space-size=5096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
@@ -31,7 +32,7 @@
   "homepage": "https://github.com/AkashaProject/web-app#readme",
   "dependencies": {
     "@akashaproject/contracts.js": "1.3.11",
-    "@akashaproject/ipfs-js-connector": "1.0.19",
+    "@akashaproject/ipfs-js-connector": "1.0.20",
     "@types/loglevel": "1.5.3",
     "bluebird": "3.5.1",
     "bs58": "4.0.1",
