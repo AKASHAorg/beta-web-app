@@ -14,7 +14,7 @@ import * as draftService from '../services/draft-service';
 import * as draftActions from '../actions/draft-actions';
 import * as actionActions from '../actions/action-actions';
 import * as appActions from '../actions/app-actions';
-import * as entryActions from '../actions/entry-actions';
+import * as claimableActions from '../actions/claimable-actions';
 import * as actionStatus from '../../constants/action-status';
 import * as eProcActions from '../actions/external-process-actions';
 import * as tagActions from '../actions/tag-actions';
@@ -197,6 +197,7 @@ function* draftPublishSuccess ({ data }) {
         duration: 4,
         values: { title: data.draft.title }
     }));
+    yield put(claimableActions.claimableIterator());
 }
 
 function* draftPublishUpdate ({ actionId, draft }) {
