@@ -22,7 +22,7 @@ import { AppErrorBoundary, AppPreferences, ManafyModal, NavigateAwayModal,
     Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
     ProfilePage, ProfileEdit, SecondarySidebar, Sidebar, Terms, TopBar,
     TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder,
-    FaucetNotification } from '../components';
+    FaucetNotification, CustomDragLayer } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
 import { selectLoggedEthAddress, selectBalance } from '../local-flux/selectors/index';
 import { guestAddress } from '../constants/guest-address';
@@ -124,9 +124,7 @@ class AppContainer extends Component {
             // make requests for geth status every 30s for updating the current block
             this.props.gethGetStatus();
             if (!this.interval) {
-                this.interval = setInterval(() => {
-                    this.props.gethGetStatus();
-                }, 30000);
+                this.interval = setInterval(this.props.gethGetStatus, 30000);
             }
             this.bootstrappingHome = true;
         }
@@ -274,6 +272,7 @@ class AppContainer extends Component {
                 }
                 {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
                 {appState.get('showProfileEditor') && <ProfileEdit />}
+                <CustomDragLayer />
                 <Notification />
               </div>
             </DataLoader>

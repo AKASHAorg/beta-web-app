@@ -43,12 +43,12 @@ const createEntryWithAuthor = entry =>
     new EntryRecord(entry).set('author', new EntryAuthor(entry.author));
 
 const entryIteratorHandler = (state, { data, request }) => {
-    if (!request || request.reverse) {
+    if (!request) {
         return state;
     }
     let byId = state.get('byId');
     data.collection.forEach((entry) => {
-        if (!state.getIn(['byId', entry.entryId])) {
+        if (!state.get('byId').has(entry.entryId)) {
             const newEntry = createEntryWithAuthor(entry);
             byId = byId.set(entry.entryId, newEntry);
         }
@@ -221,7 +221,6 @@ const entryState = createReducer(initialState, {
             }
             return newVal;
         }, createEntryRecord(data));
-
         return state.merge({
             byId: state.get('byId').set(entryId, newEntry),
             flags: state.get('flags').setIn(['pendingEntries', context], pendingEntries)

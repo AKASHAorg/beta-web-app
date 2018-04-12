@@ -10,6 +10,7 @@ import { EditorFooter, NoDraftsPlaceholder, PublishOptionsPanel, TextEntryEditor
 import { genId } from '../utils/dataModule';
 import { draftAddTag, draftRemoveTag, draftCreate, draftsGet, draftUpdate, draftsGetCount,
     draftRevertToVersion } from '../local-flux/actions/draft-actions';
+import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { tagExists } from '../local-flux/actions/tag-actions';
@@ -287,7 +288,7 @@ class NewEntryPage extends Component {
         const { showPublishPanel, errors, shouldResetCaret } = this.state;
         const { loggedProfile, baseUrl, drafts, darkTheme, showSecondarySidebar, intl, draftObj,
             draftsFetched, tagSuggestions, tagSuggestionsCount, match, licences, resolvingEntries,
-            selectionState, canCreateTags, tagExistsPending } = this.props;
+            selectionState, canCreateTags } = this.props;
         const draftId = match.params.draftId;
         const unpublishedDrafts = drafts.filter(drft => !drft.get('onChain'));
 
@@ -389,9 +390,6 @@ class NewEntryPage extends Component {
                     searchResetResults={this.props.searchResetResults}
                     searchTags={this.props.searchTags}
                     tagErrors={errors.tags}
-                    tagExistsCheck={this.props.tagExists}
-                    tagExistsPending={tagExistsPending}
-                    tagExists={this.props.tags}
                     tags={tags}
                     tagSuggestions={tagSuggestions}
                     tagSuggestionsCount={tagSuggestionsCount}
@@ -447,6 +445,7 @@ NewEntryPage.propTypes = {
     draftRevertToVersion: PropTypes.func,
     draftsFetched: PropTypes.bool,
     darkTheme: PropTypes.bool,
+    entryGetFull: PropTypes.func,
     history: PropTypes.shape(),
     intl: PropTypes.shape(),
     licences: PropTypes.shape(),
@@ -457,13 +456,11 @@ NewEntryPage.propTypes = {
     selectionState: PropTypes.shape(),
     searchResetResults: PropTypes.func,
     searchTags: PropTypes.func,
-    tagExists: PropTypes.func.isRequired,
-    tagExistsPending: PropTypes.shape().isRequired,
-    tags: PropTypes.shape().isRequired,
     tagSuggestions: PropTypes.shape(),
     tagSuggestionsCount: PropTypes.number,
     userDefaultLicence: PropTypes.shape(),
     pendingFaucetTx: PropTypes.bool,
+    tagExists: PropTypes.func,
 };
 
 const mapStateToProps = (state, ownProps) => ({
@@ -477,8 +474,6 @@ const mapStateToProps = (state, ownProps) => ({
     selectionState: state.draftState.get('selection'),
     resolvingEntries: state.draftState.get('resolvingEntries'),
     showSecondarySidebar: state.appState.get('showSecondarySidebar'),
-    tagExistsPending: state.tagState.getIn(['flags', 'existsPending']),
-    tags: state.tagState.get('exists'),
     tagSuggestions: state.searchState.get('tags'),
     tagSuggestionsCount: state.searchState.get('tagResultsCount'),
     userDefaultLicence: state.settingsState.getIn(['userSettings', 'defaultLicence']),
@@ -497,6 +492,7 @@ export default connect(
         draftUpdate,
         draftsGetCount,
         draftRevertToVersion,
+        entryGetFull,
         searchTags,
         searchResetResults,
         tagExists,

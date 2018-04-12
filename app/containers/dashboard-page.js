@@ -5,8 +5,8 @@ import { injectIntl } from 'react-intl';
 import { Button, Carousel, Modal } from 'antd';
 import { Dashboard, DataLoader } from '../components';
 import { dashboardCreateNew, dashboardHideTutorial, dashboardSetActive,
-    dashboardUpdateNewColumn } from '../local-flux/actions/dashboard-actions';
-import { selectEntryFlag, selectFullEntry } from '../local-flux/selectors';
+    dashboardUpdateNewColumn, dashboardReorderColumn  } from '../local-flux/actions/dashboard-actions';
+import { selectEntryFlag, selectFullEntry, selectColumnPendingEntries } from '../local-flux/selectors';
 import { setupMessages, generalMessages } from '../locale-data/messages';
 
 class DashboardPage extends Component {
@@ -16,13 +16,6 @@ class DashboardPage extends Component {
     }
 
     dashboardRef = null;
-
-    componentWillMount () {
-        const { allDashboards, activeDashboard, match } = this.props;
-        if (!allDashboards.includes(match.params.dashboardId)) {
-            this.props.history.push(`/dashboard/${activeDashboard || ''}`)
-        }
-    }
 
     componentWillReceiveProps (nextProps) {
         if (!nextProps.activeDashboard) {
@@ -113,6 +106,9 @@ class DashboardPage extends Component {
                   getDashboardRef={this.getDashboardRef}
                   navigateRight={this.navigateRight}
                   updateNewColumn={this.props.dashboardUpdateNewColumn}
+                  dashboardReorderColumn={this.props.dashboardReorderColumn}
+                  activeDashboardId={this.props.activeDashboard}
+                  pendingEntries={this.props.pendingEntries}
                 />
               </div>
             </DataLoader>
@@ -130,17 +126,18 @@ DashboardPage.propTypes = {
     dashboardHideTutorial: PropTypes.func,
     dashboardSetActive: PropTypes.func.isRequired,
     dashboardUpdateNewColumn: PropTypes.func.isRequired,
+    dashboardReorderColumn: PropTypes.func,
     firstDashboardReady: PropTypes.bool,
     homeReady: PropTypes.bool,
     intl: PropTypes.shape(),
     isHidden: PropTypes.bool,
     match: PropTypes.shape(),
     newColumn: PropTypes.shape(),
+    pendingEntries: PropTypes.shape(),
 };
 
 function mapStateToProps (state) {
     return {
-        allDashboards: state.dashboardState.get('allDashboards'),
         activeDashboard: state.dashboardState.get('activeDashboard'),
         columns: state.dashboardState.get('columnById'),
         darkTheme: state.settingsState.getIn(['general', 'darkTheme']),
@@ -149,7 +146,8 @@ function mapStateToProps (state) {
         firstDashboardReady: state.dashboardState.getIn(['flags', 'firstDashboardReady']),
         homeReady: state.appState.get('homeReady'),
         isHidden: !!selectFullEntry(state) || !!selectEntryFlag(state, 'fetchingFullEntry'),
-        newColumn: state.dashboardState.get('newColumn')
+        newColumn: state.dashboardState.get('newColumn'),
+        pendingEntries: selectColumnPendingEntries(state, state.dashboardState.get('activeDashboard')),
     };
 }
 
@@ -160,5 +158,6 @@ export default connect(
         dashboardHideTutorial,
         dashboardSetActive,
         dashboardUpdateNewColumn,
+        dashboardReorderColumn
     }
 )(injectIntl(DashboardPage));

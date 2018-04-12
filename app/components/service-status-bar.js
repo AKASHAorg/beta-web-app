@@ -2,24 +2,18 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { Button, Popover, Switch, Tooltip } from 'antd';
+import { Select, Tooltip } from 'antd';
 import serviceState from '../constants/serviceState';
-import { gethStart, gethStop, ipfsStart, ipfsStop } from '../local-flux/actions/external-process-actions';
-import { ipfsSaveSettings } from '../local-flux/actions/settings-actions';
-import { formMessages, generalMessages, setupMessages } from '../locale-data/messages';
-import { Icon, Input } from './';
+import { generalMessages, settingsMessages } from '../locale-data/messages';
+import { appSettingsToggle, toggleGethDetailsModal,
+    toggleIpfsDetailsModal } from '../local-flux/actions/app-actions';
+import { saveGeneralSettings } from '../local-flux/actions/settings-actions';
+import { selectGeneralSettings } from '../local-flux/selectors';
+import { Icon } from './';
 
-const IS_EMPTY = 'requiredError';
-const INVALID_CHARACTER = 'storageNameInvalid';
+const { Option } = Select;
 
 class ServiceStatusBar extends Component {
-    state = {
-        gethPopoverVisible: false,
-        ipfsPopoverVisible: false,
-        storagePath: this.props.ipfsSettings.get('storagePath'),
-        storagePathError: null
-    };
-
     getCircleColor = (state) => {
         switch (state) {
             case serviceState.stopped:
@@ -34,7 +28,14 @@ class ServiceStatusBar extends Component {
                 return '';
         }
     };
-
+    shouldComponentUpdate (nextProps) {
+        const props = this.props;
+        return !nextProps.generalSettings.equals(props.generalSettings) ||
+            nextProps.gethStarting !== props.gethStarting ||
+            !nextProps.gethStatus.equals(props.gethStatus) ||
+            nextProps.ipfsStarting !== props.ipfsStarting ||
+            !nextProps.ipfsStatus.equals(props.ipfsStatus);
+    }
     getIpfsState () {
         const { ipfsStarting, ipfsStatus } = this.props;
         let ipfsState = serviceState.stopped;
@@ -85,207 +86,88 @@ class ServiceStatusBar extends Component {
         }
     }
 
-    saveSettings = () => {
-        const { storagePath } = this.state;
-        this.setState({
-            ipfsPopoverVisible: false
-        });
-        this.props.ipfsSaveSettings({ storagePath }, true);
-    };
-
-    onGethVisibleChange = (visible) => {
-        this.setState({
-            gethPopoverVisible: visible
-        });
-    };
-
-    onIpfsVisibleChange = (visible) => {
-        this.setState({
-            ipfsPopoverVisible: visible,
-            storagePath: this.props.ipfsSettings.get('storagePath'),
-            storagePathError: null
-        });
-    };
-
-    onPathChange = (ev) => {
-        let error = null;
-        if (!ev.target.value) {
-            error = IS_EMPTY;
-        } else if (ev.target.value.includes('/')) {
-            error = INVALID_CHARACTER;
+    handleChange = (value) => {
+        if (value !== 'translate') {
+            this.props.saveGeneralSettings({
+                locale: value
+            });
         }
-        this.setState({
-            storagePath: ev.target.value,
-            storagePathError: error
-        });
-    };
-
-    onGethToggle = () => {
-        this.props.gethStatus.get('process') ?
-            this.props.gethStop() :
-            this.props.gethStart();
-    };
-
-    renderGethPopover = () => {
-        const { gethBusyState, gethStatus, intl } = this.props;
-        const toggleLabel = gethStatus.get('process') ?
-            intl.formatMessage(generalMessages.gethServiceOn) :
-            intl.formatMessage(generalMessages.gethServiceOff);
-
-        return (
-          <div>
-            <div className="service-status-bar__title">
-              {gethStatus.get('version')}
-            </div>
-            <div className="service-status-bar__description">
-              {intl.formatMessage(setupMessages.gethDescription)}
-            </div>
-            <div className="service-status-bar__actions">
-              <div className="service-status-bar__actions-left">
-                <Switch
-                  checked={gethStatus.get('process')}
-                  disabled={gethBusyState}
-                  onChange={this.onGethToggle}
-                  style={{ marginRight: '10px' }}
-                />
-                <div className="service-status-bar__toggle-label">
-                  {toggleLabel}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-    };
-
-    renderIpfsPopover = () => {
-        const { intl, ipfsBusyState, ipfsSettings, ipfsStatus } = this.props;
-        const { storagePath, storagePathError } = this.state;
-        const toggleLabel = ipfsStatus.get('process') ?
-            intl.formatMessage(generalMessages.ipfsServiceOn) :
-            intl.formatMessage(generalMessages.ipfsServiceOff);
-        const onToggle = ipfsStatus.get('process') ?
-            this.props.ipfsStop :
-            this.props.ipfsStart;
-        const storageChanged = storagePath !== ipfsSettings.get('storagePath');
-        const saveDisabled = storagePathError || ipfsBusyState || !storageChanged;
-
-        return (
-          <div>
-            <div className="service-status-bar__title">              
-              {intl.formatMessage(generalMessages.version)} {ipfsStatus.get('version')}
-            </div>
-            <div className="service-status-bar__description">
-              {intl.formatMessage(setupMessages.ipfsDescription)}
-            </div>
-            <div className="service-status-bar__input-wrapper">
-              <Input
-                label={intl.formatMessage(setupMessages.ipfsStorageName)}
-                onChange={this.onPathChange}
-                value={storagePath}
-              />
-              {storagePathError &&
-                <div className="service-status-bar__error">
-                  {intl.formatMessage(formMessages[storagePathError])}
-                </div>
-              }
-            </div>
-            <div className="service-status-bar__actions">
-              <div className="service-status-bar__actions-left">
-                <Switch
-                  checked={ipfsStatus.get('process')}
-                  disabled={ipfsBusyState}
-                  onChange={onToggle}
-                  style={{ marginRight: '10px' }}
-                />
-                <div className="service-status-bar__toggle-label">
-                  {toggleLabel}
-                </div>
-              </div>
-              <div className="service-status-bar__actions-right">
-                <Button
-                  disabled={saveDisabled}
-                  onClick={this.saveSettings}
-                  type="primary"
-                >
-                  <div className="service-status-bar__button-label">
-                    {intl.formatMessage(generalMessages.save)}
-                  </div>
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
     };
 
     render () {
-        const { gethPopoverVisible, ipfsPopoverVisible } = this.state;
+        const { generalSettings, intl, toggleGethDetails, toggleIpfsDetails, withCircles } = this.props;
         const gethState = this.getGethState();
         const ipfsState = this.getIpfsState();
         const gethColor = this.getCircleColor(gethState);
         const ipfsColor = this.getCircleColor(ipfsState);
+        const gethIcon = withCircles ? `geth${gethColor}` : 'geth';
+        const ipfsIcon = withCircles ? `ipfs${ipfsColor}` : 'ipfs';
 
         return (
           <div className="service-status-bar">
-            <Popover
-              content={this.renderGethPopover()}
-              onVisibleChange={this.onGethVisibleChange}
-              placement="bottomLeft"
-              trigger="click"
-              visible={gethPopoverVisible}
-            >
-              <Tooltip title={this.getTooltip(gethState)}>
-                <div className="content-link flex-center service-status-bar__button">
-                  <Icon className="service-status-bar__geth-icon" type="geth" />
-                  {gethColor === 'Red' &&
-                    <div className="service-status-bar__dot" />
-                  }
-                </div>
-              </Tooltip>
-            </Popover>
-            <Popover
-              content={this.renderIpfsPopover()}
-              onVisibleChange={this.onIpfsVisibleChange}
-              placement="bottomLeft"
-              trigger="click"
-              visible={ipfsPopoverVisible}
-            >
-              <Tooltip title={this.getTooltip(ipfsState)}>
-                <div className="content-link flex-center service-status-bar__button">
-                  <Icon className="service-status-bar__ipfs-icon" type="ipfs" />
-                  {ipfsColor === 'Red' &&
-                    <div className="service-status-bar__dot" />
-                  }
-                </div>
-              </Tooltip>
-            </Popover>
+            <Tooltip title={this.getTooltip(gethState)}>
+              <div
+                className="content-link flex-center service-status-bar__button"
+                onClick={toggleGethDetails}
+              >
+                <Icon className="service-status-bar__geth-icon" type={gethIcon} />
+                {!withCircles && gethColor === 'Red' &&
+                  <div className="service-status-bar__dot" />
+                }
+              </div>
+            </Tooltip>
+            <Tooltip title={this.getTooltip(ipfsState)}>
+              <div
+                className="content-link flex-center service-status-bar__button"
+                onClick={toggleIpfsDetails}
+              >
+                <Icon className="service-status-bar__ipfs-icon" type={ipfsIcon} />
+                {!withCircles && ipfsColor === 'Red' &&
+                  <div className="service-status-bar__dot" />
+                }
+              </div>
+            </Tooltip>
+            {withCircles &&
+              <Select
+                className="service-status-bar__select"
+                dropdownClassName="service-status-bar__select-dropdown"
+                onChange={this.handleChange}
+                size="small"
+                value={generalSettings.get('locale')}
+              >
+                <Option value="en">{intl.formatMessage(settingsMessages.english)}</Option>
+                <Option value="es">{intl.formatMessage(settingsMessages.spanish)}</Option>
+                <Option className="flex-center-y service-status-bar__translate-option" value="translate">
+                  <a className="unstyled-link" href="https://crowdin.com/project/akasha" >
+                    {intl.formatMessage(generalMessages.translate)}
+                  </a>
+                  <Icon className="service-status-bar__link-icon" type="link" />
+                </Option>
+              </Select>
+            }
           </div>
         );
     }
 }
 
 ServiceStatusBar.propTypes = {
-    gethBusyState: PropTypes.bool,    
-    gethStart: PropTypes.func.isRequired,
+    generalSettings: PropTypes.shape().isRequired,
     gethStarting: PropTypes.bool,
     gethStatus: PropTypes.shape().isRequired,
-    gethStop: PropTypes.func.isRequired,    
     intl: PropTypes.shape().isRequired,
-    ipfsBusyState: PropTypes.bool,
-    ipfsSaveSettings: PropTypes.func.isRequired,
-    ipfsSettings: PropTypes.shape().isRequired,
-    ipfsStart: PropTypes.func.isRequired,
     ipfsStarting: PropTypes.bool,
     ipfsStatus: PropTypes.shape().isRequired,
-    ipfsStop: PropTypes.func.isRequired,
+    saveGeneralSettings: PropTypes.func.isRequired,
+    toggleGethDetails: PropTypes.func.isRequired,
+    toggleIpfsDetails: PropTypes.func.isRequired,
+    withCircles: PropTypes.bool
 };
 
 function mapStateToProps (state) {
     return {
-        gethBusyState: state.externalProcState.getIn(['geth', 'flags', 'busyState']),        
+        generalSettings: selectGeneralSettings(state),
         gethStarting: state.externalProcState.getIn(['geth', 'flags', 'gethStarting']),
         gethStatus: state.externalProcState.getIn(['geth', 'status']),
-        ipfsBusyState: state.externalProcState.getIn(['ipfs', 'flags', 'busyState']),
-        ipfsSettings: state.settingsState.get('ipfs'),
         ipfsStarting: state.externalProcState.getIn(['ipfs', 'flags', 'ipfsStarting']),
         ipfsStatus: state.externalProcState.getIn(['ipfs', 'status']),
     };
@@ -295,11 +177,10 @@ export { ServiceStatusBar };
 export default connect(
     mapStateToProps,
     {
-        gethStart,
-        gethStop,
-        ipfsSaveSettings,
-        ipfsStart,
-        ipfsStop,
+        appSettingsToggle,
+        saveGeneralSettings,
+        toggleGethDetails: toggleGethDetailsModal,
+        toggleIpfsDetails: toggleIpfsDetailsModal
     },
     null,
     { pure: false }
