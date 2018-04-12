@@ -1,3 +1,5 @@
+import getChannels from 'akasha-channels';
+
 // export const backupKeys = ({ target, onSuccess, onError }) => {
 //     const clientChannel = Channel.client.utils.backupKeys;
 //     const serverChannel = Channel.server.utils.backupKeys;
@@ -16,12 +18,12 @@
 // };
 
 export const uploadImage = (files, imgId) => {
-    const serverChannel = window.Channel.server.utils.uploadImage;
-    const clientChannel = window.Channel.client.utils.uploadImage;
-    const managerChannel = window.Channel.client.utils.manager;
+    const serverChannel = getChannels().server.utils.uploadImage;
+    const clientChannel = getChannels().client.utils.uploadImage;
+    getChannels().server.utils.uploadImage.enable();
 
     return new Promise((resolve, reject) => {
-        clientChannel.once((ev, { data }) => {
+        clientChannel.once(({ data }) => {
             if (data.error) return reject(data.error);
             if (files instanceof Uint8Array) {
                 return resolve(data.collection[0].hash);
@@ -30,21 +32,19 @@ export const uploadImage = (files, imgId) => {
             filesArr.forEach((file) => {
                 files[file.size].src = file.hash;
             });
+            // console.log(files, 'the new files with ipfs hash');
             return resolve(files);
         });
-        managerChannel.once(() => {
-            if (files instanceof Uint8Array) {
-                serverChannel.send([{ source: files }]);
-            } else {
-                serverChannel.send(
-                    Object.keys(files)
-                        .map(fileKey => ({
-                            size: fileKey,
-                            id: imgId,
-                            source: files[fileKey].src
-                        })));
-            }
-        });
-        serverChannel.enable();
+        if (files instanceof Uint8Array) {
+            serverChannel.send([{ source: files }]);
+        } else {
+            serverChannel.send(
+                Object.keys(files)
+                    .map(fileKey => ({
+                        size: fileKey,
+                        id: imgId,
+                        source: files[fileKey].src
+                    })));
+        }
     });
 };
