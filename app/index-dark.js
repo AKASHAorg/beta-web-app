@@ -12,7 +12,8 @@ import configureStore from './local-flux/store/configureStore';
 import sagaMiddleware from './local-flux/store/sagaMiddleware';
 import { AppContainer } from './containers';
 import './styles/core.scss';
-import './styles/ant-vars/extract-default-theme.less'
+import './styles/ant-vars/extract-dark-theme.less';
+
 
 export const bootstrap = (web3Enabled = false, vault = false) => {
     const history = createHashHistory();

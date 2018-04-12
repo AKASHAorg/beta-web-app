@@ -14,23 +14,6 @@ export default {
             }
         }]
     },
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    chunks: "initial",
-                    minChunks: 2
-                },
-                vendor: {
-                    test: /node_modules/,
-                    chunks: "initial",
-                    name: "vendor",
-                    priority: 10,
-                    enforce: true
-                }
-            }
-        }
-    },
     output: {
         path: path.join(__dirname, 'app'),
         filename: 'bundle.js',
@@ -49,8 +32,7 @@ export default {
         ],
         alias: {
             joi: 'joi-browser',
-            "akasha-channels$": path.resolve(__dirname, 'main/channels.js'),
-            zlib: 'browserify-zlib-next'
+            "akasha-channels$": path.resolve(__dirname, 'main/channels.js')
         }
     },
 
@@ -59,7 +41,7 @@ export default {
     ],
     node: {
         fs: 'empty',
-        net: false,
-        tls: false
+        net: 'empty',
+        tls: 'empty'
     }
 };

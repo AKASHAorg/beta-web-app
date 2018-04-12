@@ -1,5 +1,5 @@
 import IpfsConnector from '@akashaproject/ipfs-js-connector';
-import { bootstrap } from '../app/index';
+import { bootstrap } from '../app/index-dark';
 import initModules from './init-modules';
 import { ipfsApi, regenWeb3, web3Api } from './services';
 import web3Helper from './modules/helpers/web3-helper';
@@ -13,12 +13,12 @@ window.addEventListener('load', function () {
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
         return web3Local.eth.getAccounts((err, accList) => {
-           if (err) {
-               throw err;
-           }
+            if (err) {
+                throw err;
+            }
             web3Api.instance = web3Local;
             web3Api.instance.eth.defaultAccount = accList[0];
-           return startApp(web3Local, !!accList.length);
+            return startApp(web3Local, !!accList.length);
         });
 
     }
