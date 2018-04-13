@@ -34,9 +34,7 @@ const Column = ({ onBeginDrag, onEndDrag, isColumnDragging, baseWidth, type, ...
     const passedProps = columnProps[type]({
         baseWidth,
         type,
-        onRetry: (data) => {
-            other.entryGetShort({ ...data });
-        },
+        onRetry: other.entryGetShort,
         // onUnmount: (col) => other.dashboardResetColumnEntries(col.get('id')),
         iconType: 'entries',
         ...other,
@@ -108,7 +106,7 @@ const mapStateToProps = (state, ownProps) => {
         profiles: state.profileState.get('byEthAddress'),
         searchQuery: state.searchState.get('query'),
         entries: state.entryState.get('byId'),
-        profileEntriesList: selectProfileEntries(state, ethAddress),
+        profileEntriesList: state.entryState.getIn(['profileEntries', ethAddress, 'entryIds']),
         fetchingEntries,
         fetchingMoreEntries,
         moreEntries,

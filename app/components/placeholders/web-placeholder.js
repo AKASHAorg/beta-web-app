@@ -8,6 +8,7 @@ import { generalMessages, placeholderMessages } from '../../locale-data/messages
 const WebPlaceholder = (props) => {
     const { appState, intl, hideTerms, showTerms, gethErr } = props;
     let metamaskLink = "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en";
+    let ipfsCompanionLink = "https://chrome.google.com/webstore/detail/ipfs-companion/nibjojkomfdiaoajekhjakgkdhaomnch";
     const userAgent = navigator.userAgent;
 
     const termsShow = (ev) => {
@@ -18,8 +19,7 @@ const WebPlaceholder = (props) => {
 
     if (userAgent.indexOf("Firefox") > -1) {
         metamaskLink = "https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/";
-    } else if (userAgent.indexOf("OPR") > -1) {
-        metamaskLink = "https://addons.opera.com/en/extensions/details/metamask/";
+        ipfsCompanionLink = "https://addons.mozilla.org/en-US/firefox/addon/ipfs-companion/";
     }
 
     const icons = (
@@ -30,12 +30,12 @@ const WebPlaceholder = (props) => {
             {intl.formatMessage(placeholderMessages.getExtension)}
           </div>
         </a>
-        <div className="web-placeholder__or">
-          {intl.formatMessage(generalMessages.or)}
+        <div className="web-placeholder__and">
+          {intl.formatMessage(generalMessages.and)}
         </div>
-        <a target={"_blank"} href={"https://brave.com/download/"}>
-          <div className="web-placeholder__icon-brave" />
-          {intl.formatMessage(placeholderMessages.getBrave)}
+        <a target={"_blank"} href={ipfsCompanionLink}>
+          <div className="web-placeholder__icon-ipfs" />
+          {intl.formatMessage(placeholderMessages.getCompanion)}
         </a>
       </div>
     );
@@ -49,6 +49,9 @@ const WebPlaceholder = (props) => {
             </div>
             <div className="web-placeholder__card-subtitle">
               {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle)}
+            </div>
+            <div className="web-placeholder__card-sec-subtitle">
+              {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle1)}
             </div>
             <div className="web-placeholder__download-btn">
               <Button
@@ -82,6 +85,9 @@ const WebPlaceholder = (props) => {
             </div>
             <div className="web-placeholder__card-subtitle">
               {intl.formatMessage(placeholderMessages.tryBrowserSubtitle)}
+            </div>
+            <div className="web-placeholder__card-sec-subtitle">
+              {intl.formatMessage(placeholderMessages.tryBrowserSubtitle1)}
             </div>
             {icons}
           </Card>

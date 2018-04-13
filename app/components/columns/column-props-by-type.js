@@ -28,18 +28,21 @@ const getLatestColumnProps = props => ({
     onNewEntriesResolveRequest: data => props.entryGetShort(data),
 });
 
-const getListColumnProps = props => ({
-    ...props,
-    onItemRequest: props.entryListIterator,
-    onItemMoreRequest: props.entryMoreListIterator,
-    title: props.lists.find(lst => lst.get('id') === props.column.get('value')).get('name') || ' ',
-    onColumnRefresh: (column) => {
-        props.dashboardResetColumnEntries(column.id);
-        props.entryMoreListIterator(column)
-    },
-    dataSource: props.lists,
-    entries: props.entries
-});
+const getListColumnProps = props => {
+    const list = props.lists.find(lst => lst.get('id') === props.column.get('value'));
+    return {
+        ...props,
+        onItemRequest: props.entryListIterator,
+        onItemMoreRequest: props.entryMoreListIterator,
+        title: list.get('name') || ' ',
+        onColumnRefresh: (column) => {
+            props.dashboardResetColumnEntries(column.id);
+            props.entryMoreListIterator(column)
+        },
+        dataSource: props.lists,
+        entries: props.entries
+    }
+};
 
 const getTagColumnProps = props => ({
     ...props,
@@ -90,7 +93,7 @@ const getProfileEntriesColumnProps = props => ({
     ...props,
     column: new TempRec({
         id: 'profileEntries',
-        entriesList: props.profileEntriesList.map(entry => entry.entryId),
+        entriesList: props.profileEntriesList,
         ethAddress: props.ethAddress,
         value: props.ethAddress,
         context: 'profileEntries'
@@ -140,12 +143,11 @@ const getProfileFollowingsColumnProps = props => ({
     fetching: props.fetchingFollowings,
     fetchingMore: props.fetchingMoreFollowings,
     title: props.intl.formatMessage(profileMessages.followings),
-    onItemRequest: (column) => {
-        props.dashboardResetColumnEntries(column.id);
-        props.profileFollowingsIterator(column)
-    },
+    onItemRequest: column => props.profileFollowingsIterator(column),
     onItemMoreRequest: props.profileMoreFollowingsIterator,
-    onColumnRefresh: props.profileFollowingsIterator,
+    onColumnRefresh: (column) => {
+        props.profileFollowingsIterator(column);
+    },
     itemCard: <ProfileCard />
 });
 

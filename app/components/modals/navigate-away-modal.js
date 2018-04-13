@@ -34,7 +34,7 @@ class NavigateAway extends Component {
             userSettingsAddTrustedDomain(loggedEthAddress, domain);
         }
         onClick();
-        window.location.href = navigation.get('url');
+        window.open(navigation.get('url'), '_blank');
         this.setState({ trustedDomain: false });
     }
 
@@ -46,7 +46,7 @@ class NavigateAway extends Component {
     render () {
         const { intl, navigation } = this.props;
         if (this.state.redirect) {
-            window.location.href = navigation.get('url');
+            window.open(navigation.get('url'), '_blank');
             return null;
         }
 

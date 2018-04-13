@@ -17,6 +17,13 @@ class DashboardPage extends Component {
 
     dashboardRef = null;
 
+    componentWillMount () {
+        const { allDashboards, activeDashboard, match } = this.props;
+        if (!allDashboards.includes(match.params.dashboardId)) {
+            this.props.history.push(`/dashboard/${activeDashboard || ''}`)
+        }
+    }
+
     componentWillReceiveProps (nextProps) {
         if (!nextProps.activeDashboard) {
             return;
@@ -119,6 +126,7 @@ class DashboardPage extends Component {
 
 DashboardPage.propTypes = {
     activeDashboard: PropTypes.string,
+    allDashboards: PropTypes.shape(),
     columns: PropTypes.shape(),
     darkTheme: PropTypes.bool,
     dashboards: PropTypes.shape(),
@@ -129,6 +137,7 @@ DashboardPage.propTypes = {
     dashboardReorderColumn: PropTypes.func,
     firstDashboardReady: PropTypes.bool,
     homeReady: PropTypes.bool,
+    history: PropTypes.shape(),
     intl: PropTypes.shape(),
     isHidden: PropTypes.bool,
     match: PropTypes.shape(),
@@ -138,6 +147,7 @@ DashboardPage.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        allDashboards: state.dashboardState.get('allDashboards'),
         activeDashboard: state.dashboardState.get('activeDashboard'),
         columns: state.dashboardState.get('columnById'),
         darkTheme: state.settingsState.getIn(['general', 'darkTheme']),
