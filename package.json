@@ -14,7 +14,7 @@
     "build-worker": "cross-env NODE_ENV=production node --max-old-space-size=4096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.worker.js --progress --profile --colors",
     "build-renderer": "cross-env NODE_ENV=production node --max-old-space-size=5096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
     "build-renderer-dark": "cross-env NODE_ENV=production DARK_THEME=1 node --max-old-space-size=5096 --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.production.js --progress --profile --colors",
-    "build": "tsc -p tsconfig.json && npm run build-renderer"
+    "build": "tsc -p tsconfig.json && npm run build-renderer && npm run build-renderer-dark"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
   "homepage": "https://github.com/AkashaProject/web-app#readme",
   "dependencies": {
     "@akashaproject/contracts.js": "1.3.11",
-    "@akashaproject/ipfs-js-connector": "1.0.21",
+    "@akashaproject/ipfs-js-connector": "1.0.22",
     "@types/loglevel": "1.5.3",
     "bluebird": "3.5.1",
     "bs58": "4.0.1",
@@ -46,7 +46,7 @@
     "prop-types": "15.6.1",
     "ramda": "0.25.0",
     "request": "2.85.0",
-    "rxjs": "5.5.9",
+    "rxjs": "5.5.10",
     "safe-buffer": "5.1.1",
     "search-index": "0.15.0",
     "web3": "0.20.6"
@@ -126,10 +126,10 @@
     "lokijs": "^1.5.3",
     "megadraft": "0.4.37",
     "minimist": "1.2.0",
-    "mocha": "5.0.5",
+    "mocha": "5.1.0",
     "mock-css-modules": "1.0.0",
     "node-libs-browser": "2.1.0",
-    "node-pre-gyp": "0.9.0",
+    "node-pre-gyp": "0.9.1",
     "node-sass": "4.8.3",
     "optimize-css-assets-webpack-plugin": "4.0.0",
     "pica": "4.1.1",
