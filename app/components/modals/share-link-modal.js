@@ -43,9 +43,6 @@ class ShareLinkModal extends Component {
                 <div className="flex-center-x share-link-modal__title">
                   {intl.formatMessage(formMessages.shareLinkTitle)}
                 </div>
-                <div className="flex-center-x share-link-modal__subtitle">
-                  {intl.formatMessage(formMessages.shareLinkSubtitle)}
-                </div>
                 <UrlInput
                   onSubmit={this.toggleModal}
                   readOnly

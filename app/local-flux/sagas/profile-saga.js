@@ -1,4 +1,4 @@
-import { apply, call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, apply, call, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import getChannels from 'akasha-channels';
 import { reject, isNil } from 'ramda';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
@@ -20,8 +20,8 @@ import * as actionTypes from '../../constants/action-types';
 import { getDisplayName } from '../../utils/dataModule';
 
 const TRANSFERS_ITERATOR_LIMIT = 20;
-const FOLLOWERS_ITERATOR_LIMIT = 3;
-const FOLLOWINGS_ITERATOR_LIMIT = 3;
+const FOLLOWERS_ITERATOR_LIMIT = 2;
+const FOLLOWINGS_ITERATOR_LIMIT = 2;
 
 function* profileAethTransfersIterator () {
     const channel = getChannels().server.profile.transfersIterator;
@@ -168,7 +168,7 @@ function* profileGetBalance ({ unit = 'ether' }) {
         return;
     }
     yield call(enableChannel, channel, getChannels().client.profile.manager);
-    yield apply(channel, channel.send, [{ ethAddress, unit }]);
+    yield apply(channel, channel.send, [{ etherBase: ethAddress, unit }]);
 }
 
 function* profileGetByAddress ({ ethAddress }) {
@@ -176,24 +176,21 @@ function* profileGetByAddress ({ ethAddress }) {
     yield apply(channel, channel.send, [{ ethAddress }]);
 }
 
-function* profileGetData ({ akashaId, context, ethAddress, full = false }) {
+function* profileGetData ({ akashaId, context, ethAddress, full = false, batching }) {
     const channel = getChannels().server.profile.getProfileData;
-    yield apply(channel, channel.send, [{ akashaId, context, ethAddress, full }]);
+    yield apply(channel, channel.send, [{ akashaId, context, ethAddress, full, batching }]);
 }
 
 export function* profileGetExtraOfList (collection, context) {
-    const ethAddresses = [];
-    collection.forEach((profile) => {
-        const { ethAddress } = profile;
-        if (ethAddress && !ethAddresses.includes(ethAddress)) {
-            ethAddresses.push(ethAddress);
-        }
-    });
-    for (let i = 0; i < ethAddresses.length; i++) {
-        yield put(actions.profileGetData({ context, ethAddress: ethAddresses[i] }));
-    }
-    if (ethAddresses.length) {
-        yield fork(profileIsFollower, { followings: ethAddresses });// eslint-disable-line
+    const acs = yield all([
+        ...collection.filter(prof => prof.ethAddress).map(prof => put(actions.profileGetData({
+            context,
+            ethAddress: prof.ethAddress,
+            batching: true
+        })))
+    ]);
+    if (acs.length) {
+        yield fork(profileIsFollower, { followings: acs.map(action => action.ethAddress) });
     }
 }
 
@@ -493,7 +490,7 @@ function* profileRegisterSuccess (payload) {
 }
 
 
-// getChannels() watchers
+// Channel watchers
 
 function* watchProfileAethTransfersIteratorChannel () {
     while (true) {
@@ -515,12 +512,17 @@ function* watchProfileEssenceIteratorChannel () {
             const entries = yield select(state => state.entryState.get('byId'));
             const entryEvents = ['entry:claim', 'entry:vote:claim'];
             const { collection } = resp.data;
-            for (let i = 0; i < collection.length; i++) {
-                const { action, sourceId } = collection[i];
-                if (entryEvents.indexOf(action) !== -1 && !entries.get(sourceId)) {
-                    yield put(entryActions.entryGetShort({ context: 'essenceEvents', entryId: sourceId }));
-                }
-            }
+            yield all([
+                ...collection
+                    .filter(col =>
+                        entryEvents.indexOf(col.action) !== -1 && !entries.get(col.sourceId)
+                    ).map(col =>
+                        put(entryActions.entryGetShort({
+                            context: 'essenceEvents',
+                            entryId: col.sourceId
+                        }))
+                    )
+            ]);
             yield put(actions.profileEssenceIteratorSuccess(resp.data, resp.request));
         }
     }
@@ -736,7 +738,6 @@ function* watchProfileGetBalanceChannel () {
                 yield put(actions.profileGetBalanceSuccess(resp.data));
             }
         } catch (ex) {
-            console.error(ex, 'error');
             yield put(actions.profileGetBalanceError(ex));
         }
     }

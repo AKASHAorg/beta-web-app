@@ -7,7 +7,7 @@ export const LAST_BLOCK_TYPE = 'lastBlockNrs';
 export const profileDeleteLogged = () => {
     try {
         getProfileCollection().findAndRemove({opType: IS_LOGGED_TYPE});
-        return Promise.fromCallback(cb => akashaDB.save(cb));
+        return Promise.fromCallback(cb => akashaDB.saveDatabase(cb));
     } catch (error) {
         return Promise.reject(error);
     }
@@ -34,7 +34,7 @@ export const profileSaveLogged = profile => {
             .then(() => {
                 const record = Object.assign({opType: IS_LOGGED_TYPE}, profile);
                 getProfileCollection().insertOne(record, false);
-                return Promise.fromCallback(cb => akashaDB.save(cb));
+                return Promise.fromCallback(cb => akashaDB.saveDatabase(cb));
             });
     } catch (error) {
         return Promise.reject(error);
@@ -56,7 +56,7 @@ export const profileSaveLastBlockNr = payload => {
                     (rec) => Object.assign(rec, payload, {opType: LAST_BLOCK_TYPE})
                 )
         }
-        return Promise.fromCallback(cb => akashaDB.save(cb)).then(() => payload);
+        return Promise.fromCallback(cb => akashaDB.saveDatabase(cb)).then(() => payload);
     } catch (error) {
         return Promise.reject(error);
     }

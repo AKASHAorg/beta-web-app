@@ -1,4 +1,4 @@
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { ProfileRecord } from '../reducers/records';
 
 /* eslint-disable no-use-before-define */
@@ -61,6 +61,9 @@ export const selectBatchActions = state =>
 
 export const selectBlockNumber = state => state.externalProcState.getIn(['geth', 'status', 'blockNr']);
 
+export const selectClaimableActions = state =>
+    state.actionState.get('claimable').map(actionId => selectAction(state, actionId));
+
 export const selectClaimableEntries = state => state.claimableState.get('entryList');
 
 export const selectClaimableLoading = state => !!state.claimableState.get('entriesLoading').size;
@@ -77,6 +80,15 @@ export const selectColumnEntries = (state, columnId) =>
     state.dashboardState
         .getIn(['columnById', columnId, 'entriesList'])
         .map(id => selectEntry(state, id));
+
+export const selectColumnPendingEntries = (state, dashboardId) => {
+    if (!dashboardId || !state.dashboardState.getIn(['byId', dashboardId])) {
+        return new Map();
+    }
+    return state.dashboardState.getIn(['byId', dashboardId, 'columns']).map(colId =>
+        state.entryState.getIn(['flags', 'pendingEntries', colId])
+    );
+}
 
 export const selectColumnFirstBlock = (state, columnId) =>
     state.dashboardState.getIn(['columnById', columnId, 'firstBlock']);
@@ -142,7 +154,7 @@ export const selectDrafts = state => state.draftState.get('drafts');
 
 export const selectDraftsLastBlock = state => state.draftState.getIn(['iterator', 'lastBlock']);
 
-export const selectDraftsLastIndex = state => state.draftState.getIn(['iterator', 'lastIndex']);    
+export const selectDraftsLastIndex = state => state.draftState.getIn(['iterator', 'lastIndex']);
 
 export const selectDraftsTotalLoaded = state => state.draftState.getIn(['iterator', 'totalLoaded']);
 
@@ -244,17 +256,14 @@ export const selectLastFollower = (state, ethAddress) =>
 export const selectLastFollowing = (state, ethAddress) =>
     state.profileState.getIn(['lastFollowing', ethAddress]);
 
-export const selectCurrentTotalFollowing = (state, ethAddress) => {
-    return (state.profileState.getIn(['followings', ethAddress])).size;
-};
+export const selectCurrentTotalFollowing = (state, ethAddress) =>
+    (state.profileState.getIn(['followings', ethAddress])).size;
 
-export const selectCurrentTotalFollowers = (state, ethAddress) => {
-    return (state.profileState.getIn(['followers', ethAddress])).size;
-};
+export const selectCurrentTotalFollowers = (state, ethAddress) =>
+    (state.profileState.getIn(['followers', ethAddress])).size;
 
-export const selectCurrentTotalProfileEntries = (state, ethAddress) => {
-    return (state.entryState.getIn(['profileEntries', ethAddress, 'entryIds'])).size;
-};
+export const selectCurrentTotalProfileEntries = (state, ethAddress) =>
+    (state.entryState.getIn(['profileEntries', ethAddress, 'entryIds'])).size;
 
 export const selectLastGethLog = state =>
     state.externalProcState.getIn(['geth', 'lastLogTimestamp']);

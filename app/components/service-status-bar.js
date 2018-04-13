@@ -229,9 +229,10 @@ class ServiceStatusBar extends Component {
             <Popover
               content={this.renderGethPopover()}
               onVisibleChange={this.onGethVisibleChange}
-              placement="bottomLeft"
+              placement="bottomRight"
               trigger="click"
               visible={gethPopoverVisible}
+              arrowPointAtCenter
             >
               <Tooltip title={this.getTooltip(gethState)}>
                 <div className="content-link flex-center service-status-bar__button">
@@ -245,9 +246,10 @@ class ServiceStatusBar extends Component {
             <Popover
               content={this.renderIpfsPopover()}
               onVisibleChange={this.onIpfsVisibleChange}
-              placement="bottomLeft"
+              placement="bottomRight"
               trigger="click"
               visible={ipfsPopoverVisible}
+              arrowPointAtCenter
             >
               <Tooltip title={this.getTooltip(ipfsState)}>
                 <div className="content-link flex-center service-status-bar__button">
@@ -304,4 +306,3 @@ export default connect(
     null,
     { pure: false }
 )(injectIntl(ServiceStatusBar));
-

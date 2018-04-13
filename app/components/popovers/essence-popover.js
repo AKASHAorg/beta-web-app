@@ -32,14 +32,15 @@ class EssencePopover extends Component {
     }
 
     onVisibleChange = (popoverVisible) => {
+        if (popoverVisible) {
+            this.props.claimableGetEntries();
+        }
         this.wasVisible = true;
 
         this.setState({
             popoverVisible
         });
-        if (popoverVisible) {
-            this.props.claimableGetEntries();
-        } else {
+        if (!popoverVisible) {
             // Delay state reset until popover animation is finished
             this.timeout = setTimeout(() => {
                 this.timeout = null;

@@ -89,7 +89,6 @@ const eProcState = createReducer(initialState, {
         const syncActionId = oldSyncActionId === 2 ? oldSyncActionId : 3;
         // action.data.upgrading = state.getIn(['geth', 'status', 'upgrading']) || null;
         const status = Object.assign({}, data, services.geth);
-        status.version = status.version || state.getIn(['geth', 'status', 'version']);
         const newStatus = computeGethStatus(status);
 
         return state.mergeIn(['geth'], {
@@ -99,9 +98,12 @@ const eProcState = createReducer(initialState, {
     },
 
     [types.GETH_GET_STATUS_SUCCESS]: (state, { data, services }) =>
-        state.setIn(
-            ['geth', 'status'],
-            state.getIn(['geth', 'status']).merge(Object.assign({}, data, services.geth)),
+        state.mergeIn(
+            ['geth'],
+            {
+                flags: state.getIn(['geth', 'flags']).set('statusFetched', true),
+                status: state.getIn(['geth', 'status']).merge(Object.assign({}, data, services.geth)),
+            }
         ),
 
     [types.IPFS_START]: state =>
@@ -156,6 +158,7 @@ const eProcState = createReducer(initialState, {
 
     [types.IPFS_GET_STATUS_SUCCESS]: (state, { data, services }) =>
         state.mergeIn(['ipfs'], {
+            flags: state.getIn(['ipfs', 'flags']).set('statusFetched', true),
             status: state.getIn(['ipfs', 'status']).merge(Object.assign({}, data, services.ipfs))
         }),
 

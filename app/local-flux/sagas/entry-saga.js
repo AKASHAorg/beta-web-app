@@ -4,14 +4,13 @@ import getChannels from 'akasha-channels';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
 import * as actionActions from '../actions/action-actions';
 import * as appActions from '../actions/app-actions';
-import * as claimableActions from '../actions/claimable-actions';
 import * as actions from '../actions/entry-actions';
+import * as claimableActions from '../actions/claimable-actions';
 import * as draftActions from '../actions/draft-actions';
 import * as profileActions from '../actions/profile-actions';
 import * as tagActions from '../actions/tag-actions';
 import * as types from '../constants';
-import {
-    selectBlockNumber, selectColumnFirstBlock, selectColumnLastBlock, selectColumnLastIndex,
+import { selectBlockNumber, selectColumnFirstBlock, selectColumnLastBlock, selectColumnLastIndex,
     selectListEntries, selectListEntryType, selectIsFollower, selectListNextEntries, selectLoggedEthAddress,
     selectProfileEntriesLastBlock, selectProfileEntriesLastIndex, selectToken,
     selectCurrentTotalProfileEntries, selectDrafts, selectDraftsLastBlock,
@@ -149,7 +148,7 @@ export function* entryGetExtraOfList (collection, columnId, asDrafts) { // eslin
         const { ethAddress } = entry.author;
         allEntries.push({ ethAddress: loggedEthAddress, entryId: entry.entryId });
         if (!ethAddress) {
-            console.error('entry with no author found', collection);
+            console.error('entry with no author found', entry); //eslint-disable-line
         }
         if (ethAddress && !ethAddresses.includes(ethAddress)) {
             ethAddresses.push(ethAddress);
@@ -158,23 +157,28 @@ export function* entryGetExtraOfList (collection, columnId, asDrafts) { // eslin
             ownEntries.push(entry.entryId);
         }
     });
+
     if (ethAddresses.length) {
         yield put(profileActions.profileIsFollower(ethAddresses));
     }
+
     if (allEntries.length) {
         yield apply(getVoteOf, getVoteOf.send, [{ list: allEntries }]);
     }
+
     if (ownEntries.length) {
         yield apply(getEntryBalance, getEntryBalance.send, [{ list: ownEntries }]);
         yield apply(canClaim, canClaim.send, [{ entryId: ownEntries }]);
     }
-    for (let i = 0; i < ethAddresses.length; i++) {
-        yield put(profileActions.profileGetData({ ethAddress: ethAddresses[i] }));
-    }
-    for (let i = 0; i < collection.length; i++) {
-        const { author, entryId } = collection[i];
-        yield put(actions.entryGetShort({ entryId, ethAddress: author.ethAddress, context: columnId }));
-    }
+    yield all([
+        ...ethAddresses.map(ethAddress => put(profileActions.profileGetData({ ethAddress, batching: true }))),
+        ...collection.map(collection => put(actions.entryGetShort({
+            entryId: collection.entryId,
+            ethAddress: collection.author.ethAddress,
+            context: columnId,
+            batching: true
+        })))
+    ]);
 }
 
 function* entryGetFull ({
@@ -210,9 +214,9 @@ function* entryGetScore ({ entryId }) {
     yield apply(channel, channel.send, [{ entryId }]);
 }
 
-function* entryGetShort ({ context, entryId, ethAddress }) {
+function* entryGetShort ({ context, entryId, ethAddress, batching }) {
     const channel = getChannels().server.entry.getEntry;
-    yield apply(channel, channel.send, [{ context, entryId, ethAddress }]);
+    yield apply(channel, channel.send, [{ context, entryId, ethAddress, batching }]);
 }
 
 function* entryGetVoteOf ({ entryIds, claimable }) {
@@ -222,37 +226,39 @@ function* entryGetVoteOf ({ entryIds, claimable }) {
     yield apply(channel, channel.send, [{ list: request, claimable }]);
 }
 
-function* entryListIterator ({ columnId, value, limit = ENTRY_LIST_ITERATOR_LIMIT }) {
+function* entryListIterator ({ column }) {
+    const { id, value, limit = ENTRY_LIST_ITERATOR_LIMIT } = column;
     const collection = yield select(state => selectListEntries(state, value, limit));
-    yield call(entryGetExtraOfList, collection, columnId);
-    yield put(actions.entryListIteratorSuccess({ collection }, { columnId, value, limit }));
+    yield call(entryGetExtraOfList, collection, id);
+    yield put(actions.entryListIteratorSuccess({ collection }, { columnId: id, value, limit }));
 }
 
-function* entryMoreListIterator ({ columnId, value, limit = ENTRY_LIST_ITERATOR_LIMIT }) {
+function* entryMoreListIterator ({ column }) {
+    const { value, id, limit = ENTRY_LIST_ITERATOR_LIMIT } = column;
     const collection = yield select(state => selectListNextEntries(state, value, limit));
-    yield call(entryGetExtraOfList, collection, columnId);
-    yield put(actions.entryMoreListIteratorSuccess({ collection }, { columnId, value, limit }));
+    yield call(entryGetExtraOfList, collection, id);
+    yield put(actions.entryMoreListIteratorSuccess({ collection }, { columnId: id, value, limit }));
 }
 
-function* entryMoreNewestIterator ({ columnId }) {
+function* entryMoreNewestIterator ({ column }) {
     const channel = getChannels().server.entry.allStreamIterator;
-    const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
-    const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
+    const { id, lastIndex, lastBlock } = column;
     yield apply(
         channel,
         channel.send,
-        [{ columnId, limit: ALL_STREAM_LIMIT, toBlock, lastIndex, more: true }]
+        [{ columnId: id, limit: ALL_STREAM_LIMIT, toBlock: lastBlock, lastIndex, more: true }]
     );
 }
 
-function* entryMoreProfileIterator ({ columnId, value }) {
+function* entryMoreProfileIterator ({ column }) {
     const channel = getChannels().server.entry.entryProfileIterator;
-    const isProfileEntries = columnId === 'profileEntries';
+    const { id, value } = column;
+    const isProfileEntries = id === 'profileEntries';
     const toBlock = !isProfileEntries ?
-        yield select(state => selectColumnLastBlock(state, columnId)) :
+        yield select(state => selectColumnLastBlock(state, id)) :
         yield select(state => selectProfileEntriesLastBlock(state, value));
     const lastIndex = !isProfileEntries ?
-        yield select(state => selectColumnLastIndex(state, columnId)) :
+        yield select(state => selectColumnLastIndex(state, id)) :
         yield select(state => selectProfileEntriesLastIndex(state, value));
     let akashaId, ethAddress, totalLoaded; // eslint-disable-line
     if (isEthAddress(value)) {
@@ -261,47 +267,56 @@ function* entryMoreProfileIterator ({ columnId, value }) {
     } else {
         akashaId = value;
     }
-
     yield apply(
         channel,
         channel.send,
-        [{ columnId, ethAddress, akashaId, limit: ITERATOR_LIMIT, toBlock, lastIndex, totalLoaded, more: true }]
+        [{
+            columnId: id, ethAddress,
+            akashaId, limit: ITERATOR_LIMIT,
+            toBlock, lastIndex, totalLoaded,
+            more: true
+        }]
     );
 }
 
-function* entryMoreStreamIterator ({ columnId }) {
+function* entryMoreStreamIterator ({ column }) {
     const channel = getChannels().server.entry.followingStreamIterator;
-    const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
-    const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
+    const { lastBlock, lastIndex, id } = column;
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(
         channel,
         channel.send,
-        [{ columnId, ethAddress, limit: ITERATOR_LIMIT, toBlock, lastIndex, more: true }]
+        [{ columnId: id, ethAddress, limit: ITERATOR_LIMIT, toBlock: lastBlock, lastIndex, more: true }]
     );
 }
 
-function* entryMoreTagIterator ({ columnId, value }) {
+function* entryMoreTagIterator ({ column }) {
     const channel = getChannels().server.entry.entryTagIterator;
-    const toBlock = yield select(state => selectColumnLastBlock(state, columnId));
-    const lastIndex = yield select(state => selectColumnLastIndex(state, columnId));
+    const { id, value, lastBlock, lastIndex } = column;
     yield apply(
         channel,
         channel.send,
-        [{ columnId, limit: ITERATOR_LIMIT, toBlock, lastIndex, tagName: value, more: true }]
+        [{
+            columnId: id,
+            limit: ITERATOR_LIMIT,
+            toBlock: lastBlock,
+            lastIndex,
+            tagName: value,
+            more: true
+        }]
     );
 }
 
-function* entryNewestIterator ({ columnId, reversed }) {
+function* entryNewestIterator ({ column }) {
     const channel = getChannels().server.entry.allStreamIterator;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
-    const toBlock = reversed ?
-        yield select(state => selectColumnFirstBlock(state, columnId)) :
-        yield select(selectBlockNumber);
-    yield apply(channel, channel.send, [{ columnId, limit: ALL_STREAM_LIMIT, reversed, toBlock }]);
+    const { id, firstBlock, reversed } = column;
+    const toBlock = reversed ? firstBlock : yield select(selectBlockNumber);
+    yield apply(channel, channel.send, [{ columnId: id, limit: ALL_STREAM_LIMIT, reversed, toBlock }]);
 }
 
-function* entryProfileIterator ({ columnId, value, limit = ITERATOR_LIMIT, asDrafts, reversed, entryType }) {
+function* entryProfileIterator ({ column }) {
+    const { id, value, asDrafts, reversed, limit = ITERATOR_LIMIT, entryType } = column;
     if (value && !isEthAddress(value)) {
         yield put(profileActions.profileExists(value));
     }
@@ -312,10 +327,9 @@ function* entryProfileIterator ({ columnId, value, limit = ITERATOR_LIMIT, asDra
         toBlock = (yield select(selectDraftsLastBlock)) || (yield select(selectBlockNumber));
         lastIndex = yield select(selectDraftsLastIndex);
         totalLoaded = yield select(selectDraftsTotalLoaded);
-        console.log('total loaded', totalLoaded);
     } else {
         toBlock = reversed ?
-            yield select(state => selectColumnFirstBlock(state, columnId)) :
+            yield select(state => selectColumnFirstBlock(state, id)) :
             yield select(selectBlockNumber);
     }
     if (isEthAddress(value)) {
@@ -326,7 +340,10 @@ function* entryProfileIterator ({ columnId, value, limit = ITERATOR_LIMIT, asDra
     yield apply(
         channel,
         channel.send,
-        [{ columnId, limit, akashaId, ethAddress, asDrafts, toBlock, reversed, lastIndex, entryType, totalLoaded }]
+        [{ columnId: id, limit, akashaId,
+            ethAddress, asDrafts, toBlock, reversed,
+            lastIndex, entryType, totalLoaded
+        }]
     );
 }
 
@@ -340,31 +357,33 @@ function* entryResolveIpfsHash ({ entryId, ipfsHash }) {
     );
 }
 
-function* entryStreamIterator ({ columnId, reversed }) {
+function* entryStreamIterator ({ column }) {
     const channel = getChannels().server.entry.followingStreamIterator;
+    const { id, reversed } = column;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
-        yield select(state => selectColumnFirstBlock(state, columnId)) :
+        yield select(state => selectColumnFirstBlock(state, id)) :
         yield select(selectBlockNumber);
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(
         channel,
         channel.send,
-        [{ columnId, ethAddress, limit: ITERATOR_LIMIT, toBlock, reversed }]
+        [{ columnId: id, ethAddress, limit: ITERATOR_LIMIT, toBlock, reversed }]
     );
 }
 
-function* entryTagIterator ({ columnId, value, reversed }) {
+function* entryTagIterator ({ column }) {
+    const { id, value, reversed, firstBlock } = column;
     yield put(tagActions.tagExists({ tagName: value }));
     const channel = getChannels().server.entry.entryTagIterator;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
     const toBlock = reversed ?
-        yield select(state => selectColumnFirstBlock(state, columnId)) :
+        firstBlock :
         yield select(selectBlockNumber);
     yield apply(
         channel,
         channel.send,
-        [{ columnId, limit: ITERATOR_LIMIT, tagName: value, toBlock, reversed }]
+        [{ columnId: id, limit: ITERATOR_LIMIT, tagName: value, toBlock, reversed }]
     );
 }
 
@@ -403,7 +422,7 @@ function* entryVoteCost () {
     yield apply(channel, channel.send, [weights]);
 }
 
-// getChannels() watchers
+// Channel watchers
 
 function* watchEntryCanClaimChannel () {
     while (true) {
@@ -496,10 +515,19 @@ function* watchEntryDownvoteChannel () {
 function* watchEntryGetBalanceChannel () {
     while (true) {
         const resp = yield take(actionChannels.entry.getEntryBalance);
+        const { collection } = resp.data;
         if (resp.error) {
             yield put(actions.entryGetBalanceError(resp.error));
         } else {
-            yield put(actions.entryGetBalanceSuccess(resp.data));
+            if (resp.request.claimable) {
+                for (let i = 0; i < collection.length; i++) {
+                    const balance = collection[i];
+                    if (balance.claimed) {
+                        yield put(claimableActions.claimableDeleteEntry(balance.entryId));
+                    }
+                }
+            }
+            yield put(actions.entryGetBalanceSuccess(resp.data, resp.request));
         }
     }
 }
@@ -577,19 +605,29 @@ function* watchEntryGetScoreChannel () {
 function* watchEntryGetVoteOfChannel () {
     while (true) {
         const resp = yield take(actionChannels.entry.getVoteOf);
+        const { collection } = resp.data;
         if (resp.error) {
             yield put(actions.entryGetVoteOfError(resp.error));
         } else {
-            const voteEntries = [];
-            resp.data.collection.forEach((vote) => {
-                if (vote.vote !== '0') {
-                    voteEntries.push(vote.entryId);
+            if (!resp.request.claimable) {
+                const voteEntries = [];
+                collection.forEach((vote) => {
+                    if (vote.vote !== '0') {
+                        voteEntries.push(vote.entryId);
+                    }
+                });
+                if (voteEntries.length) {
+                    yield put(actions.entryCanClaimVote(voteEntries));
                 }
-            });
-            if (voteEntries.length) {
-                yield put(actions.entryCanClaimVote(voteEntries));
+            } else {
+                for (let i = 0; i < collection.length; i++) {
+                    const vote = collection[i];
+                    if (vote.claimed) {
+                        yield put(claimableActions.claimableDeleteEntry(vote.entryId));
+                    }
+                }
             }
-            yield put(actions.entryGetVoteOfSuccess(resp.data));
+            yield put(actions.entryGetVoteOfSuccess(resp.data, resp.request));
         }
     }
 }
@@ -655,7 +693,7 @@ function* watchEntryProfileIteratorChannel () {
     }
 }
 
-function* handleEntryProfileIteratorResponse (resp) { // eslint-disable-line complexity, max-statements
+function* handleEntryProfileIteratorResponse (resp) { // eslint-disable-line max-statements, complexity
     const { columnId, asDrafts, reversed } = resp.request;
     if (resp.error) {
         if (resp.request.more) {
@@ -675,12 +713,18 @@ function* handleEntryProfileIteratorResponse (resp) { // eslint-disable-line com
             resp.data.collection.every(entry => !!drafts.get(entry.entryId));
         yield put(draftActions.entriesGetAsDraftsSuccess(resp.data, resp.request));
         const ethAddress = resp.request.ethAddress;
-        for (let i = resp.data.collection.length - 1; i >= 0; i--) {
-            yield put(actions.entryGetFull({
-                entryId: resp.data.collection[i].entryId,
-                ethAddress,
-                asDraft: true
-            }));
+        const incomingDrafts = resp.data.collection;
+        yield all(incomingDrafts.map(draft => put(actions.entryGetFull({
+            entryId: draft.entryId,
+            ethAddress,
+            asDraft: true
+        }))));
+        /* If the iterator is called with "entryType" filter and it returns no new entries, automatically
+         * continue to iterate until at least one entry is found or the end of the chain is reached
+         */
+        if (resp.request.entryType != null && resp.data.lastBlock && (noResults || duplicatedResults)) {
+            const args = { ...resp.request, value: resp.request.ethAddress };
+            yield fork(entryProfileIterator, args);
         }
         /* If the iterator is called with "entryType" filter and it returns no new entries, automatically
          * continue to iterate until at least one entry is found or the end of the chain is reached

@@ -13,9 +13,9 @@ import { entryMessages } from '../locale-data/messages';
 import { WebsiteParser } from '../utils/extract-website-info';
 import { draftAddTag, draftRemoveTag, draftCreate, draftUpdate,
     draftRevertToVersion } from '../local-flux/actions/draft-actions';
+import { entryGetFull } from '../local-flux/actions/entry-actions';
 import { actionAdd } from '../local-flux/actions/action-actions';
 import { searchResetResults, searchTags } from '../local-flux/actions/search-actions';
-import { tagExists } from '../local-flux/actions/tag-actions';
 import * as actionTypes from '../constants/action-types';
 import { entryTypes } from '../constants/entry-types';
 
@@ -138,7 +138,8 @@ class NewLinkEntryPage extends Component {
                     infoExtracted: true,
                     parsingUrl: false
                 });
-            }).catch(() => {
+            }).catch((error) => {
+                console.error('parser crashed!', error);
                 this.setState({
                     errors: {
                         card: intl.formatMessage(entryMessages.websiteInfoFetchingError),
@@ -359,7 +360,8 @@ class NewLinkEntryPage extends Component {
     render () { // eslint-disable-line complexity
         const { intl, baseUrl, darkTheme, draftObj, drafts, draftsFetched, licences,
             match, tagSuggestions, tagSuggestionsCount, showSecondarySidebar,
-            loggedProfile, selectionState, canCreateTags, tagExistsPending } = this.props;
+            loggedProfile, selectionState, canCreateTags } = this.props;
+
         const { showPublishPanel, errors, shouldResetCaret, parsingInfo,
             infoExtracted, urlInputHidden } = this.state;
         const unpublishedDrafts = drafts.filter(drft => !drft.get('onChain'));
@@ -452,9 +454,6 @@ class NewLinkEntryPage extends Component {
                         searchResetResults={this.props.searchResetResults}                        
                         searchTags={this.props.searchTags}
                         tagErrors={errors.tags}
-                        tagExists={this.props.tags}
-                        tagExistsCheck={this.props.tagExists}
-                        tagExistsPending={tagExistsPending}
                         tags={tags}
                         tagSuggestions={tagSuggestions}
                         tagSuggestionsCount={tagSuggestionsCount}
@@ -511,6 +510,7 @@ NewLinkEntryPage.propTypes = {
     draftRevertToVersion: PropTypes.func,
     drafts: PropTypes.shape(),
     draftsFetched: PropTypes.bool,
+    entryGetFull: PropTypes.func,
     intl: PropTypes.shape(),
     licences: PropTypes.shape(),
     loggedProfile: PropTypes.shape(),
@@ -519,9 +519,6 @@ NewLinkEntryPage.propTypes = {
     showSecondarySidebar: PropTypes.bool,
     searchResetResults: PropTypes.func,
     searchTags: PropTypes.func,
-    tagExists: PropTypes.func.isRequired,
-    tagExistsPending: PropTypes.shape().isRequired,
-    tags: PropTypes.shape().isRequired,
     tagSuggestions: PropTypes.shape(),
     tagSuggestionsCount: PropTypes.number,
     userDefaultLicence: PropTypes.shape(),
@@ -541,8 +538,6 @@ const mapStateToProps = (state, ownProps) => ({
     resolvingEntries: state.draftState.get('resolvingEntries'),
     selectionState: state.draftState.get('selection'),
     showSecondarySidebar: state.appState.get('showSecondarySidebar'),
-    tagExistsPending: state.tagState.getIn(['flags', 'existsPending']),
-    tags: state.tagState.get('exists'),
     tagSuggestions: state.searchState.get('tags'),
     tagSuggestionsCount: state.searchState.get('tagResultsCount'),
     userDefaultLicence: state.settingsState.getIn(['userSettings', 'defaultLicense']),
@@ -556,11 +551,11 @@ export default connect(
         actionAdd,
         draftAddTag,
         draftRemoveTag,
+        entryGetFull,
         draftCreate,
         draftUpdate,
         draftRevertToVersion,
         searchResetResults,
         searchTags,
-        tagExists
     }
 )(injectIntl(NewLinkEntryPage));

@@ -3,19 +3,18 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { entryProfileIterator, entryMoreProfileIterator } from '../../local-flux/actions/entry-actions';
-import { ACTIVITY } from '../../constants/context-types';
 import { selectLoggedEthAddress, selectProfileEntries } from '../../local-flux/selectors';
 import { EntryList } from '../';
 
 class Highlights extends Component {
     componentDidMount () {
         const { ethAddress } = this.props;
-        this.props.entryProfileIterator({ columnId: 'profileEntries', value: ethAddress });
+        this.props.entryProfileIterator({ id: 'profileEntries', value: ethAddress });
     }
 
     fetchMoreProfileEntries = () => {
         const { ethAddress } = this.props;
-        this.props.entryMoreProfileIterator({ columnId: 'profileEntries', value: ethAddress });
+        this.props.entryMoreProfileIterator({ id: 'profileEntries', value: ethAddress });
     };
 
     render () {
@@ -25,7 +24,7 @@ class Highlights extends Component {
         return (
           <div className="myentries">
             <EntryList
-              contextId={ACTIVITY}
+              contextId="profileEntries"
               entries={profileEntries}
               fetchingEntries={fetchingProfileEntries}
               fetchingMoreEntries={fetchingMoreProfileEntries}

@@ -12,8 +12,8 @@ import clickAway from '../../utils/clickAway';
 
 class PreviewPanel extends Component {
     componentDidMount () {
-        const { preview } = this.props;
-        this.props.entryTagIterator({ columnId: 'previewColumn', value: preview.get('value') });
+        const { preview, column } = this.props;
+        this.props.entryTagIterator({ id: 'previewColumn', value: preview.get('value'), ...column });
     }
 
     componentClickAway = () => {
@@ -21,13 +21,12 @@ class PreviewPanel extends Component {
     };
 
     loadMoreEntries = () => {
-        const { preview } = this.props;
-        this.props.entryMoreTagIterator({ columnId: 'previewColumn', value: preview.get('value') });
+        const { column } = this.props;
+        this.props.entryMoreTagIterator(column);
     };
 
     render () {
         const { column, intl, preview, previewEntries } = this.props;
-
         return (
           <div className="preview-panel">
             <div className="preview-panel__header">

@@ -20,7 +20,12 @@ const placeholderMessages = defineMessages({
     downloadDesktopAppSubtitle: {
         id: 'app.placeholder.downloadDesktopAppSubtitle',
         description: 'subtitle for web placeholder card',
-        defaultMessage: 'For the full experience try our desktop application'
+        defaultMessage: 'The fully decentralized experience.'
+    },
+    downloadDesktopAppSubtitle1: {
+        id: 'app.placeholder.downloadDesktopAppSubtitle1',
+        description: 'subtitle for web placeholder card',
+        defaultMessage: 'Be your own node in the network'
     },
     welcome: {
         id: 'app.placeholder.welcome',
@@ -30,17 +35,22 @@ const placeholderMessages = defineMessages({
     welcomeSubtitle: {
         id: 'app.placeholder.welcomeSubtitle',
         description: 'subtitle for web placeholder page',
-        defaultMessage: 'Decentralised Social Media Platform based on Ethereum and IPFS'
+        defaultMessage: 'Decentralized Social Media Platform powered by Ethereum and IPFS'
     },
     tryBrowser: {
         id: 'app.placeholder.tryBrowser',
         description: 'title for web placeholder card',
-        defaultMessage: 'Try Akasha on browser'
+        defaultMessage: 'Try Web App'
     },
     tryBrowserSubtitle: {
         id: 'app.placeholder.tryBrowserSubtitle',
         description: 'subtitle for web placeholder card',
-        defaultMessage: 'Fast and easy to use'
+        defaultMessage: 'The fast and easy Web experience.'
+    },
+    tryBrowserSubtitle1: {
+        id: 'app.placeholder.tryBrowserSubtitle1',
+        description: 'subtitle for web placeholder card',
+        defaultMessage: 'Extensions communicate with the network'
     },
     getExtension: {
         id: 'app.placeholder.getExtension',
@@ -81,6 +91,11 @@ const placeholderMessages = defineMessages({
         id: 'app.placeholder.wrongNetwork',
         description: 'title for geth error card',
         defaultMessage: 'Please set Metamask to run on the Rinkeby test network.'
-    }
+    },
+    getCompanion: {
+        id: 'app.placeholder.getCompanion',
+        description: 'button title',
+        defaultMessage: 'Get Companion'
+    },
 });
 export { placeholderMessages };

@@ -230,9 +230,9 @@ VotePopover.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        loggedEthAddress: selectLoggedEthAddress(state),
         mana: selectManaBalance(state),
-        voteCost: selectVoteCost(state),
-        loggedEthAddress: selectLoggedEthAddress(state)
+        voteCost: selectVoteCost(state)
     };
 }
 

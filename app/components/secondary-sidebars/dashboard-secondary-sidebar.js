@@ -5,6 +5,7 @@ import { injectIntl } from 'react-intl';
 import { Tooltip } from 'antd';
 import { equals } from 'ramda';
 import { dashboardMessages } from '../../locale-data/messages';
+import { entryNewestIteratorSuccess } from '../../local-flux/actions/entry-actions';
 import { dashboardAdd, dashboardDelete, dashboardDeleteNew,
     dashboardRename, dashboardReorder } from '../../local-flux/actions/dashboard-actions';
 import { selectActiveDashboardId, selectAllDashboards } from '../../local-flux/selectors';
@@ -99,7 +100,27 @@ class DashboardSecondarySidebar extends Component {
     onToggleNewDashboard = () => {
         this.setState({ newDashboard: '' });
     };
-
+    _deleteDashboard = (dashBoardId) => {
+        const {history, dashboardDelete} = this.props;
+        dashboardDelete(dashBoardId);
+        history.push('/dashboard');
+    }
+    // _simNewEntries = () => {
+    //     const { entries } = this.props;
+    //     const { author, blockNumber, entryType, tags } = entries.first().toJS();
+    //     this.props.entryNewestIteratorSuccess({
+    //         collection: [{
+    //             author,
+    //             blockNumber,
+    //             entryType,
+    //             tags,
+    //             entryId: '0x3543e25511384ce4fb4eaf1908fb424096566d920f7f89db11d67ee9d91ca5f2'
+    //         }]
+    //     }, {
+    //         columnId: 'd20c386e-b934-4d26-8739-7fc796ff5cd7',
+    //         reversed: true
+    //     });
+    // }
     renderEditRow = () => {
         const { newDashboard, renameDashboard, renameValue } = this.state;
         const value = this.state.newDashboard === null ? renameValue : newDashboard;
@@ -144,7 +165,7 @@ class DashboardSecondarySidebar extends Component {
                     <DashboardSidebarRow
                       activeDashboard={activeDashboard}
                       dashboard={dashboard}
-                      dashboardDelete={this.props.dashboardDelete}
+                      dashboardDelete={this._deleteDashboard}
                       isRenamed={isRenamed}
                       key={dashboard.get('id')}
                       index={i}
@@ -158,6 +179,7 @@ class DashboardSecondarySidebar extends Component {
                   );
               })}
               {this.state.newDashboard !== null && this.renderEditRow()}
+              {/* <div onClick={this._simNewEntries}>Sim new Entries</div> */}
             </div>
           </div>
         );
@@ -183,6 +205,7 @@ DashboardSecondarySidebar.propTypes = {
 function mapStateToProps (state) {
     return {
         activeDashboard: state.dashboardState.get('activeDashboard'),
+        entries: state.entryState.get('byId'),
         dashboards: selectAllDashboards(state),
         activeDashboardId: selectActiveDashboardId(state),
         lists: state.listState.get('byName'),
@@ -198,6 +221,7 @@ export default connect(
         dashboardDelete,
         dashboardDeleteNew,
         dashboardRename,
-        dashboardReorder
+        dashboardReorder,
+        entryNewestIteratorSuccess,
     }
 )(injectIntl(DashboardSecondarySidebar));

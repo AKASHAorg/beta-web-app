@@ -893,5 +893,10 @@ const generalMessages = defineMessages({
         description: 'load more',
         defaultMessage: 'Load more'
     },
+    and: {
+        id: 'app.general.and',
+        description: 'and',
+        defaultMessage: 'and'
+    },
 });
 export { generalMessages };
