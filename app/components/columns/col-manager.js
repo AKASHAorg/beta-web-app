@@ -28,7 +28,6 @@ class ColManager extends Component {
         this.poolingInterval = {};
         this.poolingTimeout = null;
         this.poolingDelay = 60000;
-        this._debouncedOffsetUpdate = throttle(this._updateOffsets, 150, {trailing: true});
         this.colFirstEntry = new Map();
         this.scrollPending = -1;
         this.alreadyRendered = [];
@@ -53,7 +52,7 @@ class ColManager extends Component {
             if(!this.colFirstEntry.has(id)) {
                 this.colFirstEntry = this.colFirstEntry.set(id, column.entriesList.first());
             }
-            this._mapItemsToState(column.entriesList);
+            this._mapItemsToState(column.entriesList, column);
         }
     }
 
@@ -69,7 +68,7 @@ class ColManager extends Component {
         }
         if (newContainerHeight !== this.containerHeight) {
             this.containerHeight = newContainerHeight;
-            this._updateOffsets(this.lastScrollTop[id]);
+            this._updateOffsets(this.lastScrollTop[id], column);
         }
         if(this.props.onRefLink) {
             this.props.onRefLink(this);
@@ -109,7 +108,7 @@ class ColManager extends Component {
         const { column } = this.props;
         const { id } = column;
         if(this.lastScrollTop[id] !== 0) {
-            this._mapItemsToState(column.get('newEntries'), { prepend: true });
+            this._mapItemsToState(column.get('newEntries'), column, { prepend: true });
             this.setState({
                 [id]: 0
             }, () => {
@@ -212,7 +211,7 @@ class ColManager extends Component {
         const { canUpdateState } = options;
         const { id } = column;
         if (hasUnseenNewItems && this.lastScrollTop[id] === 0 && canUpdateState) {
-            this._mapItemsToState(column.get('newEntries'), { prepend: true });
+            this._mapItemsToState(column.get('newEntries'), column, { prepend: true });
             this._resolveNewEntries(column.get('newEntries'));
         }
 
@@ -226,7 +225,7 @@ class ColManager extends Component {
             if (!this.colFirstEntry.has(id)) {
                 this.colFirstEntry = this.colFirstEntry.set(id, column.entriesList.first());
             }
-            this._mapItemsToState(column.entriesList);
+            this._mapItemsToState(column.entriesList, column);
             this.loadingMore = remove(indexOf(id, this.loadingMore), 1, this.loadingMore);
         }
     }
@@ -253,9 +252,9 @@ class ColManager extends Component {
         }
     }
 
-    _mapItemsToState = (items, options = {}) => {
-        const { props, itemCount } = this;
-        const { id } = props.column;
+    _mapItemsToState = (items, column, options = {}) => {
+        const { itemCount } = this;
+        const { id } = column;
         const mappedItems = this.items[id].slice();
         let diff = [];
         // when loadMore triggers
@@ -280,7 +279,7 @@ class ColManager extends Component {
         this.itemCount = items.size;
         if (this.itemCount !== itemCount && this.scrollPending === -1) {
             this.loadingMore = remove(indexOf(id, this.loadingMore), 1, this.loadingMore);
-            this._updateOffsets(this.lastScrollTop[id]);
+            this._updateOffsets(this.lastScrollTop[id], column);
         }
     }
 
@@ -289,9 +288,9 @@ class ColManager extends Component {
         ((this.avgItemHeight * (this.itemCount - 1)) + newSize) / this.itemCount;
 
     // load more entries
-    _loadMoreIfNeeded = () => {
+    _loadMoreIfNeeded = (column) => {
         const { props } = this;
-        const { column, isVisible, fetchingMore } = props;
+        const { isVisible, fetchingMore } = props;
         const { id } = column;
         const alreadyLoading = this.loadingMore.includes(id);
         if (!alreadyLoading && isVisible && !fetchingMore) {
@@ -303,9 +302,9 @@ class ColManager extends Component {
      * this method slices the items based on the user's current scroll position
      * it is called both onScroll() and on cellUpdate handlers;
      */
-    _updateOffsets = (scrollTop) => { // eslint-disable-line max-statements
-        const { items, state, props } = this;
-        const { id } = props.column;
+    _updateOffsets = (scrollTop, column) => { // eslint-disable-line max-statements
+        const { items, state } = this;
+        const { id } = column;
         let accHeight = 0;
         let topIndex = state[id];
         for (let i = 0; i < items[id].length; i++) {
@@ -333,11 +332,11 @@ class ColManager extends Component {
         const bottomPadderHeight = this._getSliceMeasure(this._getBottomIndex(topIndex), items[id].length)
         const bottomPadding = Math.ceil(bottomPadderHeight);
         const bottomBufferHeight = Math.ceil(this.containerHeight * 1.5);
-        const hasMoreEntries = (props.column &&
-            (props.column.moreEntries || (props.column.flags && props.column.flags.moreEntries))) ||
+        const hasMoreEntries = (column &&
+            (column.moreEntries || (column.flags && column.flags.moreEntries))) ||
             true;
         if ((bottomPadding <= bottomBufferHeight) && hasMoreEntries) {
-            this._loadMoreIfNeeded();
+            this._loadMoreIfNeeded(column);
         }
         this.scrollPending = -1;
     }
@@ -377,7 +376,7 @@ class ColManager extends Component {
                 this.items[id] = update(stateCellIdx, { id: cellId, height: cellHeight }, this.items[id]);
                 if(this.scrollPending === -1) {
                     requestAnimationFrame(() => {
-                        this._updateOffsets(this.lastScrollTop[id]);
+                        this._updateOffsets(this.lastScrollTop[id], props.column);
                     });
                 }
             }
@@ -399,7 +398,7 @@ class ColManager extends Component {
     }
 
     _onScrollMove = (scrollTop) => {
-        this._updateOffsets(scrollTop);
+        this._updateOffsets(scrollTop, this.props.column);
     }
 
     _createRootNodeRef = (node) => {
