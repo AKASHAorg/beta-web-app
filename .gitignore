@@ -40,7 +40,6 @@ bin
 .idea
 docs
 main/**/*.js
-*.d.ts
 *.map
 test-repo
 !gulpfile.old.js
