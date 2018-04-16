@@ -12,7 +12,7 @@ import { bootstrapHome, hideTerms, toggleAethWallet, toggleEthWallet,
 import { entryVoteCost } from '../local-flux/actions/entry-actions';
 import { gethGetStatus, gethStop } from '../local-flux/actions/external-process-actions';
 import { licenseGetAll } from '../local-flux/actions/license-actions';
-import { userSettingsAddTrustedDomain } from '../local-flux/actions/settings-actions';
+import { userSettingsAddTrustedDomain, userSettingsSave } from '../local-flux/actions/settings-actions';
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
@@ -103,18 +103,35 @@ class AppContainer extends Component {
         }
     }
 
+    acceptTerms =  () => {
+        const { hideTerms, loggedEthAddress, userSettingsSave } = this.props;
+        hideTerms();
+        userSettingsSave(loggedEthAddress, { termsAccepted: true });
+    }
+
+    declineTerms = () => {
+        const { hideTerms } = this.props;
+        hideTerms();
+        window.location = "https://akasha.world";
+    }
+
     // all bootstrapping logic should be here
     // avoid spreading it over multiple components/containers
-    _bootstrapApp = (props) => {
-        const { location, appState, web3 } = props;
+    _bootstrapApp = (props) => { //eslint-disable-line complexity
+        const { location, appState, web3, loggedEthAddress, userSettings } = props;
         const nonLoginRoutes = ['/setup'];
         const shouldBootstrapHome = !nonLoginRoutes.every(route =>
             location.pathname === '/' || location.pathname.includes(route)
         );
+        const termsAccepted = userSettings.get('termsAccepted');
 
         // when home bootstrapping finishes reset the flag
         if (appState.get('homeReady') && this.bootstrappingHome) {
             this.bootstrappingHome = false;
+            // after user settings are loaded show terms if user hasn't accepted yet
+            if ((loggedEthAddress !== guestAddress) && !termsAccepted) {
+                this.props.showTerms();
+            }
         }
 
         // check if we need to bootstrap home
@@ -137,15 +154,15 @@ class AppContainer extends Component {
     }
 
     render () { // eslint-disable-line complexity
-        const { activeDashboard, appState, balance, hideTerms, history, intl, location,
-            loggedEthAddress, needEth, needAeth, needMana, web3, unlocked } = this.props;
+        const { activeDashboard, appState, balance, history, hideTerms, intl, location, loggedEthAddress,
+            needEth, needAeth, needMana, showTerms, web3, unlocked, userSettings } = this.props;
 
         if (!web3 || this.state.gethErr) {
             return (
               <WebPlaceholder
                 appState={appState}
-                hideTerms={this.props.hideTerms}
-                showTerms={this.props.showTerms}
+                hideTerms={hideTerms}
+                showTerms={showTerms}
                 gethErr={this.state.gethErr}
               />
             )
@@ -160,6 +177,8 @@ class AppContainer extends Component {
         const noFunds = ethBalance && !Number(ethBalance) && !Number(balance.getIn(['aeth', 'total']));
         const initialFaucet = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
         const showFaucetNotification = needFunds || initialFaucet;
+        const termsAccepted = userSettings.get('termsAccepted');
+        const isGuest = loggedEthAddress === guestAddress;
 
         return (
           <div className="flex-center-x app-container__root">
@@ -169,6 +188,10 @@ class AppContainer extends Component {
                   showNotification={this.props.showNotification}
                 >
                   {location.pathname === '/' && <Redirect to="/dashboard" />}
+                  {isGuest &&
+                    (location.pathname.startsWith('/draft') || location.pathname.startsWith('/profileoverview')) &&
+                    <Redirect to="/dashboard" />
+                  }
                   {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
                   {!location.pathname.startsWith('/setup') &&
                     <DataLoader flag={!appState.get('homeReady')} size="large" style={{ paddingTop: '100px' }}>
@@ -270,7 +293,13 @@ class AppContainer extends Component {
                 {appState.get('showNavigationModal') &&
                   <NavigationModal toggleNavigationModal={this.props.toggleNavigationModal} />
                 }
-                {appState.get('showTerms') && <Terms hideTerms={hideTerms} />}
+                {appState.get('showTerms') && 
+                  <Terms
+                    acceptTerms={this.acceptTerms}
+                    declineTerms={this.declineTerms}
+                    termsAccepted={termsAccepted}
+                    hideTerms={hideTerms}
+                  />}
                 {appState.get('showProfileEditor') && <ProfileEdit />}
                 <CustomDragLayer />
                 <Notification />
@@ -309,7 +338,9 @@ AppContainer.propTypes = {
     showNotification: PropTypes.func.isRequired,
     web3: PropTypes.bool,
     unlocked: PropTypes.bool,
+    userSettings: PropTypes.shape(),
     userSettingsAddTrustedDomain: PropTypes.func,
+    userSettingsSave: PropTypes.func,
     showTerms: PropTypes.func
 };
 
@@ -324,6 +355,7 @@ function mapStateToProps (state) {
         needEth: state.actionState.get('needEth'),
         needAeth: state.actionState.get('needAeth'),
         needMana: state.actionState.get('needMana'),
+        userSettings: state.settingsState.get('userSettings')
     };
 }
 
@@ -345,6 +377,7 @@ export default DragDropContext(HTML5Backend)(connect(
         navCounterIncrement,
         navForwardCounterReset,
         userSettingsAddTrustedDomain,
+        userSettingsSave,
         showTerms,
         showNotification
     }

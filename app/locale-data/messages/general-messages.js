@@ -898,5 +898,15 @@ const generalMessages = defineMessages({
         description: 'and',
         defaultMessage: 'and'
     },
+    accept: {
+        id: 'app.general.accept',
+        description: 'accept',
+        defaultMessage: 'Accept'
+    },
+    decline: {
+        id: 'app.general.decline',
+        description: 'decline',
+        defaultMessage: 'Decline'
+    },
 });
 export { generalMessages };
