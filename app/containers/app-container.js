@@ -178,6 +178,7 @@ class AppContainer extends Component {
         const initialFaucet = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
         const showFaucetNotification = needFunds || initialFaucet;
         const termsAccepted = userSettings.get('termsAccepted');
+        const isGuest = loggedEthAddress === guestAddress;
 
         return (
           <div className="flex-center-x app-container__root">
@@ -187,6 +188,10 @@ class AppContainer extends Component {
                   showNotification={this.props.showNotification}
                 >
                   {location.pathname === '/' && <Redirect to="/dashboard" />}
+                  {isGuest &&
+                    (location.pathname.startsWith('/draft') || location.pathname.startsWith('/profileoverview')) &&
+                    <Redirect to="/dashboard" />
+                  }
                   {isInternalLink(location.pathname) && <Redirect to={removePrefix(location.pathname)} />}
                   {!location.pathname.startsWith('/setup') &&
                     <DataLoader flag={!appState.get('homeReady')} size="large" style={{ paddingTop: '100px' }}>
