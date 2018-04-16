@@ -18,6 +18,7 @@ import {
 import * as actionStatus from '../../constants/action-status';
 import * as actionTypes from '../../constants/action-types';
 import { getDisplayName } from '../../utils/dataModule';
+import { guestAddress } from '../../constants/guest-address';
 
 const TRANSFERS_ITERATOR_LIMIT = 20;
 const FOLLOWERS_ITERATOR_LIMIT = 2;
@@ -216,8 +217,8 @@ export function* profileGetLogged () {
         }
         const profile = yield apply(profileService, profileService.profileGetLogged);
         yield put(actions.profileGetLoggedSuccess(profile));
-        yield put(actions.profileGetBalance());
-        if (profile && profile.ethAddress) {
+        if (profile && profile.ethAddress && profile.ethAddress !== guestAddress) {
+            yield put(actions.profileGetBalance());
             yield call(profileGetData, { ethAddress: profile.ethAddress, full: true });
         }
     } catch (error) {

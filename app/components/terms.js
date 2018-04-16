@@ -1,12 +1,27 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { injectIntl } from 'react-intl';
 import { FormattedMessage, FormattedHTMLMessage } from 'react-intl';
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
+import { generalMessages } from '../locale-data/messages';
 
-const TermsPanel = ({ hideTerms }) => (
+const TermsPanel = ({ acceptTerms, intl, declineTerms, termsAccepted, hideTerms }) => (
   <Modal
-    footer={null}
-    onCancel={hideTerms}
+    closable={termsAccepted || false}
+    maskClosable={termsAccepted || false}
+    onCancel={termsAccepted ? hideTerms : declineTerms}
+    onOk={termsAccepted ? hideTerms : acceptTerms}
+    footer={ termsAccepted ?
+      null :
+      [
+        <Button key="back" onClick={declineTerms}>
+          {intl.formatMessage(generalMessages.decline)}
+        </Button>,
+        <Button key="submit" type="primary" onClick={acceptTerms}>
+          {intl.formatMessage(generalMessages.accept)}
+        </Button>,
+      ]
+    }
     title={
       <FormattedMessage
         id="app.terms.title"
@@ -15,7 +30,7 @@ const TermsPanel = ({ hideTerms }) => (
       />
     }
     visible
-    width={600}
+    width={800}
     wrapClassName="terms"
   >
     <div className="terms__inner">
@@ -231,7 +246,11 @@ shall be finally settled by the ordinary courts of Zug, Switzerland.</p>`}
 );
 
 TermsPanel.propTypes = {
+    acceptTerms: PropTypes.func.isRequired,
+    intl: PropTypes.shape().isRequired,
+    declineTerms: PropTypes.func.isRequired,
+    termsAccepted: PropTypes.bool.isRequired,
     hideTerms: PropTypes.func.isRequired
 };
 
-export default TermsPanel;
+export default injectIntl(TermsPanel);
