@@ -12,12 +12,13 @@ import { entryListIterator, entryMoreListIterator, entryMoreProfileIterator, ent
     entryProfileIterator, entryTagIterator } from '../../local-flux/actions/entry-actions';
 import { searchProfiles, searchResetResults, searchTags } from '../../local-flux/actions/search-actions';
 import { selectActiveDashboard, selectColumn, selectColumnEntries, selectListsAll, selectNewColumn,
-    selectProfileSearchResults, selectTagSearchResults } from '../../local-flux/selectors';
+    selectProfileSearchResults, selectTagSearchResults, selectLoggedEthAddress } from '../../local-flux/selectors';
 import { dashboardMessages, generalMessages, listMessages } from '../../locale-data/messages';
 import { getDisplayName } from '../../utils/dataModule';
 import { Icon, NewSearchColumn, NewSelectColumn } from '../';
+import { guestAddress } from '../../constants/guest-address';
 
-const columns = [columnTypes.latest, columnTypes.stream, columnTypes.profile, columnTypes.tag,
+let columns = [columnTypes.latest, columnTypes.stream, columnTypes.profile, columnTypes.tag,
     columnTypes.list];
 const oneStepColumns = [columnTypes.latest, columnTypes.stream];
 const iconTypes = {
@@ -202,9 +203,14 @@ class NewColumn extends Component {
         );
     };
 
-    render () { // eslint-disable-line complexity
-        const { activeDashboard, column, entries, dashboardId, intl, lists, newColumn, previewEntries,
-            profileResults, tagResults } = this.props;
+    render () { // eslint-disable-line 
+        const { activeDashboard, column, entries, dashboardId, intl, lists, loggedEthAddress,
+            newColumn, previewEntries, profileResults, tagResults } = this.props;
+        // remove following feed from column types if in guest mode
+        if (loggedEthAddress === guestAddress) {
+            columns = [columnTypes.latest, columnTypes.profile, columnTypes.tag,
+                columnTypes.list];
+        }
         if (dashboardId !== activeDashboard.get('id')) {
             return null;
         }
@@ -379,6 +385,7 @@ NewColumn.propTypes = {
     intl: PropTypes.shape(),
     lists: PropTypes.shape().isRequired,
     listAdd: PropTypes.func.isRequired,
+    loggedEthAddress: PropTypes.string,
     newColumn: PropTypes.shape(),
     previewEntries: PropTypes.shape().isRequired,
     profileResults: PropTypes.shape().isRequired,
@@ -398,7 +405,8 @@ function mapStateToProps (state) {
         previewEntries: selectColumnEntries(state, 'newColumn'),
         entries: state.entryState.get('byId'),
         profileResults: selectProfileSearchResults(state),
-        tagResults: selectTagSearchResults(state)
+        tagResults: selectTagSearchResults(state),
+        loggedEthAddress: selectLoggedEthAddress(state)
     };
 }
 

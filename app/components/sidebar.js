@@ -11,7 +11,7 @@ import { genId } from '../utils/dataModule';
 import { Avatar, EssencePopover, Icon, KarmaPopover, ManaPopover, SidebarIcon } from './';
 import { generalMessages } from '../locale-data/messages';
 import { draftCreate, draftsGet } from '../local-flux/actions/draft-actions';
-import { profileEditToggle } from '../local-flux/actions/app-actions';
+import { profileEditToggle, toggleGuestModal } from '../local-flux/actions/app-actions';
 import { profileLogout } from '../local-flux/actions/profile-actions';
 import { selectLoggedProfileData, selectLoggedProfile,
     selectProfileEditToggle } from '../local-flux/selectors';
@@ -203,7 +203,7 @@ class Sidebar extends Component {
         );
     }
     render () {
-        const { activeDashboard, intl, location, loggedProfileData } = this.props;
+        const { activeDashboard, intl, location, loggedProfileData, unlocked } = this.props;
         const menu = (
           <div onClick={this.hide}>
             <div
@@ -228,32 +228,40 @@ class Sidebar extends Component {
                 {intl.formatMessage(generalMessages.appPreferences)}
               </Link>
             </div>
-            <div
-              onClick={this._handleLogout}
-              className="popover-menu__item"
-            >
-              {intl.formatMessage(generalMessages.logout)}
-            </div>
           </div>
         );
+
+        const newEntryIcon = unlocked ?
+            (<Popover
+              arrowPointAtCenter
+              placement="rightTop"
+              content={this._getEntryMenu()}
+              overlayClassName="entry-menu-popover"
+            >
+              <div className="content-link flex-center sidebar__new-entry-wrapper">
+                <Icon
+                  className="sidebar__new-entry-icon"
+                  type="newEntry"
+                />
+              </div>
+            </Popover>) :
+            (<div
+              className="content-link flex-center sidebar__new-entry-wrapper"
+              onClick={() => this.props.toggleGuestModal()}
+            >
+              <Icon
+                className="sidebar__new-entry-icon"
+                type="newEntry"
+              />
+            </div>
+            );
+
 
         return (
           <div className={`sidebar ${this._isSidebarVisible(location) && 'sidebar_shown'}`}>
             <div className="sidebar__top-icons">
               <div className="flex-center-x sidebar__new-entry">
-                <Popover
-                  arrowPointAtCenter
-                  placement="rightTop"
-                  content={this._getEntryMenu()}
-                  overlayClassName="entry-menu-popover"
-                >
-                  <div className="content-link flex-center sidebar__new-entry-wrapper">
-                    <Icon
-                      className="sidebar__new-entry-icon"
-                      type="newEntry"
-                    />
-                  </div>
-                </Popover>
+                {newEntryIcon}
               </div>
               <SidebarIcon
                 activePath="/dashboard"
@@ -267,6 +275,8 @@ class Sidebar extends Component {
                 linkTo="/profileoverview/myentries"
                 iconType="profileOverview"
                 tooltipTitle={intl.formatMessage(generalMessages.sidebarTooltipProfile)}
+                guestTooltip={intl.formatMessage(generalMessages.sidebarTooltipGuest)}
+                unlocked={unlocked}
               />
               {/* <SidebarIcon
                 activePath="/community"
@@ -289,33 +299,37 @@ class Sidebar extends Component {
                 disabled
               />
             </div>
-            <div className="flex-center-x content-link sidebar__progress-wrapper">
-              <ManaPopover />
-            </div>
-            <div className="flex-center-x content-link sidebar__progress-wrapper">
-              <EssencePopover />
-            </div>
-            <div className="flex-center-x content-link sidebar__progress-wrapper">
-              <KarmaPopover />
-            </div>
-            <div className="flex-center-x sidebar__avatar">
-              <Popover
-                arrowPointAtCenter
-                placement="topRight"
-                content={this.wasVisible ? menu : null}
-                trigger="click"
-                overlayClassName="popover-menu"
-                visible={this.state.visible}
-                onVisibleChange={this.handleVisibleChange}
-              >
-                <Avatar
-                  firstName={loggedProfileData.get('firstName')}
-                  image={loggedProfileData.get('avatar')}
-                  lastName={loggedProfileData.get('lastName')}
-                  size="small"
-                />
-              </Popover>
-            </div>
+            {unlocked &&
+              <div>
+                <div className="flex-center-x content-link sidebar__progress-wrapper">
+                  <ManaPopover />
+                </div>
+                <div className="flex-center-x content-link sidebar__progress-wrapper">
+                  <EssencePopover />
+                </div>
+                <div className="flex-center-x content-link sidebar__progress-wrapper">
+                  <KarmaPopover />
+                </div>
+                <div className="flex-center-x sidebar__avatar">
+                  <Popover
+                    arrowPointAtCenter
+                    placement="topRight"
+                    content={this.wasVisible ? menu : null}
+                    trigger="click"
+                    overlayClassName="popover-menu"
+                    visible={this.state.visible}
+                    onVisibleChange={this.handleVisibleChange}
+                  >
+                    <Avatar
+                      firstName={loggedProfileData.get('firstName')}
+                      image={loggedProfileData.get('avatar')}
+                      lastName={loggedProfileData.get('lastName')}
+                      size="small"
+                    />
+                  </Popover>
+                </div>
+              </div>
+            }
           </div>
         );
     }
@@ -336,7 +350,9 @@ Sidebar.propTypes = {
     loggedProfileData: PropTypes.shape(),
     profileEditToggle: PropTypes.func,
     profileLogout: PropTypes.func,
+    toggleGuestModal: PropTypes.func,
     userSelectedLicense: PropTypes.shape(),
+    unlocked: PropTypes.bool
 };
 
 function mapStateToProps (state) {
@@ -360,6 +376,7 @@ export default connect(
         profileEditToggle,
         profileLogout,
         draftsGet,
+        toggleGuestModal
     },
     null,
     {

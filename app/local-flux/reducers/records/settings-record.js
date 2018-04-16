@@ -50,7 +50,8 @@ export const UserSettings = Record({
     hideEntryContent: new HiddenContent(),
     notificationsPreference: new NotificationsPreference(),
     passwordPreference: new PasswordPreference(),
-    trustedDomains: new List()
+    trustedDomains: new List(),
+    termsAccepted: false
 });
 
 export const GeneralSettings = Record({

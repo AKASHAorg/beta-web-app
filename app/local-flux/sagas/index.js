@@ -30,6 +30,7 @@ import * as transactionSaga from './transaction-saga';
 import * as utilsSaga from './utils-saga';
 import * as types from '../constants';
 import { loadAkashaDB } from '../services/db/dbs';
+import { guestAddress } from '../../constants/guest-address';
 
 function* registerListeners () {
     yield fork(claimableSaga.registerClaimableListeners);
@@ -74,18 +75,20 @@ function* launchHomeActions () {
     if (loggedEthAddress) {
         yield fork(dashboardSaga.dashboardGetActive);
         yield fork(dashboardSaga.dashboardGetAll);
-        yield fork(highlightSaga.highlightGetAll);
-        yield fork(listSaga.listGetAll);
-        yield call(getUserSettings);
-        yield put(actionActions.actionGetPending());
-        yield put(claimableActions.claimableIterator());
-        yield put(profileActions.profileFollowingsIterator({
-            ethAddress: loggedEthAddress,
-            allFollowings: true,
-            limit: 1000
-        }));
+        if (loggedEthAddress !== guestAddress) {
+            yield fork(highlightSaga.highlightGetAll);
+            yield fork(listSaga.listGetAll);
+            yield call(getUserSettings);
+            yield put(actionActions.actionGetPending());
+            yield put(claimableActions.claimableIterator());
+            yield put(profileActions.profileFollowingsIterator({
+                ethAddress: loggedEthAddress,
+                allFollowings: true,
+                limit: 1000
+            }));
+            yield put(profileActions.profileManaBurned());
+        }
     }
-    yield put(profileActions.profileManaBurned());
 }
 
 function* bootstrapApp () {

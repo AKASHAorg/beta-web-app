@@ -5,7 +5,7 @@ import {ipfsProvider} from '../../services';
 import initSearchDbs from '../search/indexes';
 import {
     AKASHA_BOOTSTRAP_PEERS,
-    BASE_URL,
+    BASE_URL, DEFAULT_CIRCUIT_RELAYS,
     defaultPath,
     generalSettings,
     IPFS_CIRCUIT_RELAYS
@@ -23,9 +23,9 @@ const execute = Promise.coroutine(function* (data: IpfsStartRequest) {
     if (!isEmpty(ipfsProvider.instance)) {
         const nodeId = yield IpfsConnector.getInstance().api.apiClient.idAsync();
         if (nodeId && (nodeId.agentVersion).includes('go-ipfs')) {
-            peers = IPFS_CIRCUIT_RELAYS;
+            peers = IPFS_CIRCUIT_RELAYS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS);
         } else {
-            peers = AKASHA_BOOTSTRAP_PEERS;
+            peers = AKASHA_BOOTSTRAP_PEERS.concat(DEFAULT_CIRCUIT_RELAYS);
         }
 
         peers.forEach(peer => {
