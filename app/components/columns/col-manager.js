@@ -30,6 +30,7 @@ class ColManager extends Component {
         this.poolingDelay = 60000;
         this.colFirstEntry = new Map();
         this.scrollPending = -1;
+        this.requestPoolingTimeout = -1;
         this.alreadyRendered = [];
     }
 
@@ -134,7 +135,7 @@ class ColManager extends Component {
         this._clearIntervals();
         const isPooling = this.poolingInterval[id] > 0;
         if (typeof onItemPooling === 'function' && !isPooling && isVisible) {
-            setTimeout(() => this._createRequestPooling(id), this.poolingDelay);
+            this.requestPoolingTimeout = setTimeout(() => this._createRequestPooling(id), this.poolingDelay);
         }
     }
 
@@ -237,10 +238,13 @@ class ColManager extends Component {
         }
         this._rootNodeRef.removeEventListener('scroll', this._debouncedScroll);
         window.removeEventListener('resize', this._debouncedResize);
+        window.clearTimeout(this.scrollPending);
+        window.clearTimeout(this.requestPoolingTimeout);
         if(this.props.onUnmount) {
             this.props.onUnmount(this.props.column);
         }
         this._resetColState(this.props.column.id);
+        this.unmounting = true;
     }
 
     _onResize = () => {
@@ -307,17 +311,17 @@ class ColManager extends Component {
         const { id } = column;
         let accHeight = 0;
         let topIndex = state[id];
-        for (let i = 0; i < items[id].length; i++) {
-            const item = items[id][i];
-            if (accHeight >= Math.ceil(scrollTop - (this.avgItemHeight * VIEWPORT_VISIBLE_BUFFER_SIZE))) {
-                topIndex = i;
-                accHeight = 0;
-                break;
+        window.requestAnimationFrame(() => {
+            for (let i = 0; i < items[id].length; i++) {
+                const item = items[id][i];
+                if (accHeight >= Math.ceil(scrollTop - (this.avgItemHeight * VIEWPORT_VISIBLE_BUFFER_SIZE))) {
+                    topIndex = i;
+                    accHeight = 0;
+                    break;
+                }
+                accHeight = Math.ceil(accHeight + item.height);
             }
-            accHeight = Math.ceil(accHeight + item.height);
-        }
-        if (state[id] !== topIndex || items[id].length === 0) {
-            ReactDOM.unstable_batchedUpdates(() => {
+            if (state[id] !== topIndex || items[id].length === 0) {
                 this.setState({
                     [id]: topIndex
                 }, () => {
@@ -327,18 +331,18 @@ class ColManager extends Component {
                         this.forceUpdate();
                     }
                 });
-            });
-        }
-        const bottomPadderHeight = this._getSliceMeasure(this._getBottomIndex(topIndex), items[id].length)
-        const bottomPadding = Math.ceil(bottomPadderHeight);
-        const bottomBufferHeight = Math.ceil(this.containerHeight * 1.5);
-        const hasMoreEntries = (column &&
-            (column.moreEntries || (column.flags && column.flags.moreEntries))) ||
-            true;
-        if ((bottomPadding <= bottomBufferHeight) && hasMoreEntries) {
-            this._loadMoreIfNeeded(column);
-        }
-        this.scrollPending = -1;
+            }
+            const bottomPadderHeight = this._getSliceMeasure(this._getBottomIndex(topIndex), items[id].length)
+            const bottomPadding = Math.ceil(bottomPadderHeight);
+            const bottomBufferHeight = Math.ceil(this.containerHeight * 1.5);
+            const hasMoreEntries = (column &&
+                (column.moreEntries || (column.flags && column.flags.moreEntries))) ||
+                true;
+            if ((bottomPadding <= bottomBufferHeight) && hasMoreEntries) {
+                this._loadMoreIfNeeded(column);
+            }
+            this.scrollPending = -1;
+        })
     }
     /**
      * get the index of the last visible element based on top index;
@@ -374,10 +378,8 @@ class ColManager extends Component {
             if (!sameHeight) {
                 this.avgItemHeight = Math.ceil(this._calculateAverage(cellHeight));
                 this.items[id] = update(stateCellIdx, { id: cellId, height: cellHeight }, this.items[id]);
-                if(this.scrollPending === -1) {
-                    requestAnimationFrame(() => {
-                        this._updateOffsets(this.lastScrollTop[id], props.column);
-                    });
+                if(this.scrollPending === -1 && !this.unmounting) {
+                    this._updateOffsets(this.lastScrollTop[id], props.column);
                 }
             }
         }
@@ -398,7 +400,9 @@ class ColManager extends Component {
     }
 
     _onScrollMove = (scrollTop) => {
-        this._updateOffsets(scrollTop, this.props.column);
+        window.requestAnimationFrame(() => {
+            this._updateOffsets(scrollTop, this.props.column);
+        });
     }
 
     _createRootNodeRef = (node) => {
@@ -485,7 +489,7 @@ class ColManager extends Component {
 }
 
 ColManager.defaultProps = {
-    initialItemHeight: 170,
+    initialItemHeight: 270,
     itemCard: <EntryCard />,
     columnHeight: 600
 };
