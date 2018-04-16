@@ -137,7 +137,7 @@ function* entryGetExtraOfEntry (entryId, ethAddress) {
     }
 }
 
-export function* entryGetExtraOfList (collection, columnId, asDrafts) { // eslint-disable-line
+export function* entryGetExtraOfList (collection, columnId, asDrafts, batching) { // eslint-disable-line
     const { canClaim, getEntryBalance, getVoteOf } = getChannels().server.entry;
     yield call(enableExtraChannels);
     const loggedEthAddress = yield select(selectLoggedEthAddress);
@@ -171,12 +171,12 @@ export function* entryGetExtraOfList (collection, columnId, asDrafts) { // eslin
         yield apply(canClaim, canClaim.send, [{ entryId: ownEntries }]);
     }
     yield all([
-        ...ethAddresses.map(ethAddress => put(profileActions.profileGetData({ ethAddress, batching: true }))),
+        ...ethAddresses.map(ethAddress => put(profileActions.profileGetData({ ethAddress, batching }))),
         ...collection.map(collection => put(actions.entryGetShort({
             entryId: collection.entryId,
             ethAddress: collection.author.ethAddress,
             context: columnId,
-            batching: true
+            batching
         })))
     ]);
 }
@@ -226,31 +226,31 @@ function* entryGetVoteOf ({ entryIds, claimable }) {
     yield apply(channel, channel.send, [{ list: request, claimable }]);
 }
 
-function* entryListIterator ({ column }) {
+function* entryListIterator ({ column, batching }) {
     const { id, value, limit = ENTRY_LIST_ITERATOR_LIMIT } = column;
     const collection = yield select(state => selectListEntries(state, value, limit));
-    yield call(entryGetExtraOfList, collection, id);
+    yield call(entryGetExtraOfList, collection, id, null, batching);
     yield put(actions.entryListIteratorSuccess({ collection }, { columnId: id, value, limit }));
 }
 
-function* entryMoreListIterator ({ column }) {
+function* entryMoreListIterator ({ column, batching }) {
     const { value, id, limit = ENTRY_LIST_ITERATOR_LIMIT } = column;
     const collection = yield select(state => selectListNextEntries(state, value, limit));
-    yield call(entryGetExtraOfList, collection, id);
+    yield call(entryGetExtraOfList, collection, id, null, batching);
     yield put(actions.entryMoreListIteratorSuccess({ collection }, { columnId: id, value, limit }));
 }
 
-function* entryMoreNewestIterator ({ column }) {
+function* entryMoreNewestIterator ({ column, batching }) {
     const channel = getChannels().server.entry.allStreamIterator;
     const { id, lastIndex, lastBlock } = column;
     yield apply(
         channel,
         channel.send,
-        [{ columnId: id, limit: ALL_STREAM_LIMIT, toBlock: lastBlock, lastIndex, more: true }]
+        [{ columnId: id, limit: ALL_STREAM_LIMIT, toBlock: lastBlock, lastIndex, more: true, batching }]
     );
 }
 
-function* entryMoreProfileIterator ({ column }) {
+function* entryMoreProfileIterator ({ column, batching }) {
     const channel = getChannels().server.entry.entryProfileIterator;
     const { id, value } = column;
     const isProfileEntries = id === 'profileEntries';
@@ -274,23 +274,32 @@ function* entryMoreProfileIterator ({ column }) {
             columnId: id, ethAddress,
             akashaId, limit: ITERATOR_LIMIT,
             toBlock, lastIndex, totalLoaded,
-            more: true
+            more: true,
+            batching
         }]
     );
 }
 
-function* entryMoreStreamIterator ({ column }) {
+function* entryMoreStreamIterator ({ column, batching }) {
     const channel = getChannels().server.entry.followingStreamIterator;
     const { lastBlock, lastIndex, id } = column;
     const ethAddress = yield select(selectLoggedEthAddress);
     yield apply(
         channel,
         channel.send,
-        [{ columnId: id, ethAddress, limit: ITERATOR_LIMIT, toBlock: lastBlock, lastIndex, more: true }]
+        [{
+            columnId: id,
+            ethAddress,
+            limit: ITERATOR_LIMIT,
+            toBlock: lastBlock,
+            lastIndex,
+            more: true,
+            batching
+        }]
     );
 }
 
-function* entryMoreTagIterator ({ column }) {
+function* entryMoreTagIterator ({ column, batching }) {
     const channel = getChannels().server.entry.entryTagIterator;
     const { id, value, lastBlock, lastIndex } = column;
     yield apply(
@@ -302,20 +311,27 @@ function* entryMoreTagIterator ({ column }) {
             toBlock: lastBlock,
             lastIndex,
             tagName: value,
-            more: true
+            more: true,
+            batching
         }]
     );
 }
 
-function* entryNewestIterator ({ column }) {
+function* entryNewestIterator ({ column, batching }) {
     const channel = getChannels().server.entry.allStreamIterator;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
     const { id, firstBlock, reversed } = column;
     const toBlock = reversed ? firstBlock : yield select(selectBlockNumber);
-    yield apply(channel, channel.send, [{ columnId: id, limit: ALL_STREAM_LIMIT, reversed, toBlock }]);
+    yield apply(channel, channel.send, [{
+        columnId: id,
+        limit: ALL_STREAM_LIMIT,
+        reversed,
+        toBlock,
+        batching
+    }]);
 }
 
-function* entryProfileIterator ({ column }) {
+function* entryProfileIterator ({ column, batching }) {
     const { id, value, asDrafts, reversed, limit = ITERATOR_LIMIT, entryType } = column;
     if (value && !isEthAddress(value)) {
         yield put(profileActions.profileExists(value));
@@ -342,7 +358,7 @@ function* entryProfileIterator ({ column }) {
         channel.send,
         [{ columnId: id, limit, akashaId,
             ethAddress, asDrafts, toBlock, reversed,
-            lastIndex, entryType, totalLoaded
+            lastIndex, entryType, totalLoaded, batching
         }]
     );
 }
@@ -357,7 +373,7 @@ function* entryResolveIpfsHash ({ entryId, ipfsHash }) {
     );
 }
 
-function* entryStreamIterator ({ column }) {
+function* entryStreamIterator ({ column, batching }) {
     const channel = getChannels().server.entry.followingStreamIterator;
     const { id, reversed } = column;
     yield call(enableChannel, channel, getChannels().client.entry.manager);
@@ -368,11 +384,18 @@ function* entryStreamIterator ({ column }) {
     yield apply(
         channel,
         channel.send,
-        [{ columnId: id, ethAddress, limit: ITERATOR_LIMIT, toBlock, reversed }]
+        [{
+            columnId: id,
+            ethAddress,
+            limit: ITERATOR_LIMIT,
+            toBlock,
+            reversed,
+            batching
+        }]
     );
 }
 
-function* entryTagIterator ({ column }) {
+function* entryTagIterator ({ column, batching }) {
     const { id, value, reversed, firstBlock } = column;
     yield put(tagActions.tagExists({ tagName: value }));
     const channel = getChannels().server.entry.entryTagIterator;
@@ -383,7 +406,14 @@ function* entryTagIterator ({ column }) {
     yield apply(
         channel,
         channel.send,
-        [{ columnId: id, limit: ITERATOR_LIMIT, tagName: value, toBlock, reversed }]
+        [{
+            columnId: id,
+            limit: ITERATOR_LIMIT,
+            tagName: value,
+            toBlock,
+            reversed,
+            batching
+        }]
     );
 }
 
