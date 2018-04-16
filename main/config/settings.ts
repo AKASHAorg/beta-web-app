@@ -22,10 +22,11 @@ export const IPFS_LOGGER = 'ipfs';
 
 export const defaultPath = 'ipfs#akasha-beta';
 
-
-export const IPFS_CIRCUIT_RELAYS = [
+export const DEFAULT_CIRCUIT_RELAYS = [
     '/p2p-circuit/ipfs/QmSgTsiHrubEkLKEvdEjNtWHRasU1dUSgPfMjJpkR8KkBU',
-    '/p2p-circuit/ipfs/QmUjM53zcSRhsA8BCK28DchCdSJCNmEU6W6jPJHiSgxwTW',
+    '/p2p-circuit/ipfs/QmUjM53zcSRhsA8BCK28DchCdSJCNmEU6W6jPJHiSgxwTW'
+];
+export const IPFS_CIRCUIT_RELAYS = [
     '/p2p-circuit/ipfs/QmTfTyKZXjzRo2C8NV6p21HCsxZF54Mm5cZ9GsfY3zpG3T',
     '/p2p-circuit/ipfs/QmTMSgsyw3zzVbcQnkoN5SRZk7WYUMorJ7EqkqVBLgn13i',
     '/p2p-circuit/ipfs/QmYfXRuVWMWFRJxUSFPHtScTNR9CU2samRsTK15VFJPpvh'
@@ -54,7 +55,7 @@ export const DEFAULT_IPFS_CONFIG = {
         API: '',
         Gateway: ''
     },
-    Bootstrap: IPFS_BOOTSTRAP_PEERS.concat(AKASHA_BOOTSTRAP_PEERS),
+    Bootstrap: IPFS_BOOTSTRAP_PEERS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS),
     Discovery: {
         MDNS: {
             Enabled: false,
@@ -65,7 +66,13 @@ export const DEFAULT_IPFS_CONFIG = {
         }
     },
     EXPERIMENTAL: {
-        pubsub: true
+        pubsub: true,
+        relay: {
+            enabled: true,
+            hop: {
+                enabled: true
+            }
+        }
     }
 };
 // default settings
