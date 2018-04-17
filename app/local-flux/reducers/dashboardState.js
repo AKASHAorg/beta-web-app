@@ -341,8 +341,14 @@ const dashboardState = createReducer(initialState, {
             state.getIn(['columnById', context, 'newEntries']) &&
             state.getIn(['columnById', context, 'newEntries']).includes(entryId)
         ) {
-            return state.deleteIn(['columnById', context, 'newEntries'], entryId)
-                .setIn(['columnById', context, 'entriesList', 0], entryId);
+            let mState = state.deleteIn(
+                ['columnById', context, 'newEntries'],
+                state.getIn(['columnById', context, 'newEntries']).indexOf(entryId)
+            )
+            mState = mState.mergeIn(['columnById', context], {
+                entriesList: state.getIn(['columnById', context, 'entriesList']).unshift(entryId)
+            });
+            return mState;
         }
         return state;
     },
@@ -352,8 +358,11 @@ const dashboardState = createReducer(initialState, {
             state.getIn(['columnById', context, 'newEntries']) &&
             state.getIn(['columnById', context, 'newEntries']).includes(entryId)
         ) {
-            return state.deleteIn(['columnById', context, 'newEntries'], entryId)
-                .setIn(['columnById', context, 'entriesList', 0], entryId);
+            let mState = state.deleteIn(['columnById', context, 'newEntries'], entryId)
+            mState = mState.mergeIn(['columnById', context], {
+                entriesList: state.getIn(['columnById', context, 'entriesList']).unshift(entryId)
+            });
+            return mState;
         }
         return state;
     },

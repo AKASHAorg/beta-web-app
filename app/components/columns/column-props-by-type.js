@@ -56,7 +56,8 @@ const getTagColumnProps = props => ({
     onItemPooling: col => props.entryTagIterator({ ...col, reversed: true }),
     fetching: props.column.getIn(['flags', 'fetchingEntries']),
     dataSource: props.tagSearchResults,
-    onSearch: props.searchTags
+    onSearch: props.searchTags,
+    onNewEntriesResolveRequest: data => props.entryGetShort(data),
 });
 
 const getStreamColumnProps = props => ({
@@ -70,7 +71,8 @@ const getStreamColumnProps = props => ({
     },
     onItemPooling: col => props.entryStreamIterator({ ...col, reversed: true }),
     fetching: props.column.getIn(['flags', 'fetchingEntries']),
-    readOnly: true
+    readOnly: true,
+    onNewEntriesResolveRequest: data => props.entryGetShort(data),
 });
 
 const getProfileColumnProps = props => ({

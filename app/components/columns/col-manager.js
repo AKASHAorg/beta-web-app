@@ -131,6 +131,7 @@ class ColManager extends Component {
         this.setState({
             [id]: 0
         });
+        this.colFirstEntry = this.colFirstEntry.set(id, null);
         this._clearIntervals();
         const isPooling = this.poolingInterval[id] > 0;
         if (typeof onItemPooling === 'function' && !isPooling && isVisible) {
@@ -165,8 +166,10 @@ class ColManager extends Component {
 
     _applyLoadedEntries = (newEntries, oldEntries) => {
         const diffFn = (x, y) => x === y;
-        const diffedEntries = differenceWith(diffFn, oldEntries.toJS(), newEntries.toJS());
-        this.colFirstEntry = this.colFirstEntry.set(this.props.column.id, diffedEntries[0]);
+        const diffedEntries = differenceWith(diffFn, newEntries.toJS(), oldEntries.toJS());
+        if (diffedEntries.length > 0) {
+            this.colFirstEntry = this.colFirstEntry.set(this.props.column.id, diffedEntries[0]);
+        }
     }
     /* eslint-disable complexity */
     _prepareUpdates = (passedProps, options) => {
@@ -189,15 +192,14 @@ class ColManager extends Component {
         const newEntriesSize = column.newEntries && column.newEntries.size;
         const oldEntriesSize = olderProps.column.newEntries && olderProps.column.newEntries.size;
         const newEntriesLoaded = column.newEntries && (newEntriesSize < oldEntriesSize);
-        if (newEntriesLoaded && options.canUpdateState) {
-            this._applyLoadedEntries(column.newEntries, olderProps.column.newEntries);
-        }
         this._doUpdates({
             isNewColumn,
             shouldRequestItems,
             hasNewItems: !column.entriesList.equals(oldItems),
-            hasUnseenNewItems: column.newEntries && (newEntriesSize !== oldEntriesSize),
+            hasUnseenNewItems: column.newEntries && (newEntriesSize > oldEntriesSize),
+            newEntriesLoaded,
             column,
+            oldColumn: olderProps.column,
             options
         });
     }
@@ -207,7 +209,7 @@ class ColManager extends Component {
     /* eslint-disable complexity */
     _doUpdates = (updateParams) => {
         const { isNewColumn, shouldRequestItems, hasNewItems, hasUnseenNewItems,
-            column, options } = updateParams;
+            column, options, newEntriesLoaded, oldColumn } = updateParams;
         const { canUpdateState } = options;
         const { id } = column;
         if (hasUnseenNewItems && this.lastScrollTop[id] === 0 && canUpdateState) {
@@ -218,6 +220,11 @@ class ColManager extends Component {
         if (isNewColumn && canUpdateState) {
             this._resetColState(id);
         }
+
+        if (newEntriesLoaded && options.canUpdateState) {
+            this._applyLoadedEntries(column.newEntries, oldColumn.newEntries);
+        }
+
         if ((isNewColumn || shouldRequestItems) && canUpdateState) {
             this.props.onItemRequest(column.toJS());
             this.initialRequests.push(id);
@@ -264,13 +271,17 @@ class ColManager extends Component {
         if(items.size > mappedItems.length) {
             const jsItems = items.toJS().map(v => ({ id: v }));
             const eqKey = (x, y) => x.id === y.id;
-            diff = differenceWith(eqKey, jsItems, mappedItems).map(v => ({
-                id: v.id,
-                height: this.avgItemHeight
-            }));
             if (options.prepend) {
+                diff = differenceWith(eqKey, mappedItems, jsItems).map(v => ({
+                    id: v.id,
+                    height: this.avgItemHeight
+                }));
                 this.items[id].unshift(...diff);
             } else {
+                diff = differenceWith(eqKey, jsItems, mappedItems).map(v => ({
+                    id: v.id,
+                    height: this.avgItemHeight
+                }));
                 this.items[id] = mappedItems.concat(diff);
             }
         } else if (items.size === 0) {
@@ -447,7 +458,7 @@ class ColManager extends Component {
                 }
                 const lastSeenID = this.colFirstEntry.get(id);
                 const currentItemIndex = items[id].findIndex(i => i.id === item.id);
-                const lastSeenItemIndex = items[id].findIndex(i => i.id === lastSeenID)
+                const lastSeenItemIndex = items[id].findIndex(i => i.id === lastSeenID);
                 const isNewItem = lastSeenID && lastSeenItemIndex > currentItemIndex;
                 if (isNewItem) {
                     markAsNew = true;
@@ -462,6 +473,7 @@ class ColManager extends Component {
                     isPending={isPending}
                     large={column.get('large')}
                     entry={entry}
+                    markAsNew={markAsNew}
                   >
                     {cellProps => React.cloneElement(this.props.itemCard, {
                         ...cellProps,
