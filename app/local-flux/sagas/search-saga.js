@@ -22,14 +22,18 @@ function* searchMoreQuery () {
 
 function* searchQuery ({ text }) {
     const channel = getChannels().server.search.query;
-    yield call(enableChannel, channel, getChannels().client.search.manager);
-    yield apply(channel, channel.send, [{ text, pageSize: entrySearchLimit }]);
+    if (text.length) {    
+        yield call(enableChannel, channel, getChannels().client.search.manager);
+        yield apply(channel, channel.send, [{ text, pageSize: entrySearchLimit }]);
+    }
 }
 
 function* searchProfiles ({ query, autocomplete }) {
     const channel = getChannels().server.search.findProfiles;
     const limit = autocomplete ? autocompleteLimit : profileSearchLimit;
-    yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit, autocomplete }]);
+    if (query.length) {    
+        yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit, autocomplete }]);
+    }
 }
 
 function* searchSyncEntries ({ following }) {
@@ -62,7 +66,9 @@ function* searchSyncTags () {
 function* searchTags ({ query, autocomplete }) {
     const channel = getChannels().server.search.findTags;
     const limit = autocomplete ? autocompleteLimit : tagSearchLimit;
-    yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit }]);
+    if (query.length) {
+        yield apply(channel, channel.send, [{ text: query.toLowerCase(), limit }]);
+    }
 }
 
 function* searchUpdateLastEntriesBlock ({ ethAddress, blockNr }) {
@@ -97,7 +103,9 @@ function* watchSearchProfilesChannel () {
         } else if (collection && isValidResp) {
             if (!resp.request.autocomplete) {
                 const ethAddresses = collection.map(res => res.ethAddress);
-                yield put(profileActions.profileIsFollower(ethAddresses));
+                if (ethAddresses.length) {
+                    yield put(profileActions.profileIsFollower(ethAddresses));
+                }
                 for (let i = 0; i < collection.length; i++) {
                     const { ethAddress } = collection[i];
                     yield put(profileActions.profileGetData({ ethAddress, context: SEARCH }));
