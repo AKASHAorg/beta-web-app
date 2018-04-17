@@ -3,7 +3,7 @@ import webpack from 'webpack';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import merge from 'webpack-merge';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-//import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import baseConfig from './webpack.config.base';
 
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -11,12 +11,29 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 // @TODO extract akasha themes in separated files
 export default merge(baseConfig, {
     devtool: 'source-map',
-    entry: [process.env.DARK_THEME ? './main/index-dark.js': './main/index.js'],
+    entry: [process.env.DARK_THEME ? './main/index-dark.js' : './main/index.js'],
 
     output: {
         path: path.join(__dirname, 'dist')
     },
     mode: 'production',
+    optimization: {
+        minimizer: [
+            new UglifyJsPlugin({
+                uglifyOptions: {
+                    ecma: 6,
+                    mangle: false
+                },
+                cache: true,
+                parallel: true,
+                sourceMap: false
+            }),
+            new OptimizeCssAssetsPlugin({
+                cssProcessorOptions: {discardComments: {removeAll: true}},
+                canPrint: true
+            }),
+        ]
+    },
     module: {
         rules: [
             // Pipe other styles through css modules and append to style.css
@@ -133,10 +150,6 @@ export default merge(baseConfig, {
             filename: (process.env.DARK_THEME) ? 'dark-style.css' : 'style.css',
             allChunks: true,
             ignoreOrder: true
-        }),
-        new OptimizeCssAssetsPlugin({
-            cssProcessorOptions: { discardComments: { removeAll: true } },
-            canPrint: true
         }),
         /**
          * Dynamically generate index.html page

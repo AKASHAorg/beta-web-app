@@ -5,7 +5,7 @@ import contracts from '../../contracts';
 
 const execute = Promise.coroutine(function*() {
     let connected = web3Api.instance.isConnected();
-    console.log('web3 connected', connected);
+
     if (!connected) {
         web3Api.instance = regenWeb3();
         connected = web3Api.instance.isConnected();

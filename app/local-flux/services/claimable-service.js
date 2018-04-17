@@ -82,7 +82,7 @@ export const saveEntries = (data, request) => {
                 record.opType = ENTRY;
                 getClaimableCollection().insert(record);
             } else {
-                console.log('entry already inserted');
+                // console.log('entry already inserted');
             }
         });
         return Promise.fromCallback(cb => akashaDB.save(cb)).then(() => newStatus);

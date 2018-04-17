@@ -25,7 +25,6 @@ export function createActionChannel (channel) {
 
 export function createActionChannels () {
     const modules = Object.keys(getChannels().client);
-    console.log('modules', modules);
     modules.forEach((module) => {
         const channels = Object.keys(getChannels().client[module]);
         actionChannels[module] = {};

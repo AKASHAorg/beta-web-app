@@ -81,7 +81,7 @@ function* searchUpdateLastEntriesBlock ({ ethAddress, blockNr }) {
 
 function* searchUpdateLastTagsBlock ({ type, blockNr }) {
     try {
-        yield apply(searchService, searchService.updateLastTagsBlock, [{ type, blockNr }]);
+        const x = yield apply(searchService, searchService.updateLastTagsBlock, [{ type, blockNr }]);
     } catch (error) {
         console.error('update last tags block error -', error);
     }

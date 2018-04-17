@@ -47,9 +47,9 @@ const startApp = (web3, vault) => {
     IpfsConnector.getInstance().setOption('repo', 'ipfs#akasha-beta');
     initModules();
     // for dev only
-    Object.defineProperty(window, 'Channel', {value: getChannels()});
+    // Object.defineProperty(window, 'Channel', {value: getChannels()});
     // Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
-    Object.defineProperty(window, 'contracts', {value: contracts});
+    // Object.defineProperty(window, 'contracts', {value: contracts});
     // end
 
     web3Helper.setChannel(getChannels().client.tx.emitMined);
