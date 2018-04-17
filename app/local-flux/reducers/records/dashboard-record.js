@@ -15,11 +15,12 @@ export const ColumnRecord = Record({
     id: null,
     entriesList: new List(),
     firstBlock: null,
+    firstIndex: 0,
     flags: new ColumnFlags(),
     newEntries: new List(), // a list of newly published entryIds
     large: false,
     lastBlock: null,
-    lastIndex: null,
+    lastIndex: 0,
     type: null,
     value: '',
 });

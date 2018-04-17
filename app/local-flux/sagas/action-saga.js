@@ -221,7 +221,6 @@ function* actionGetPending () {
     try {
         const loggedEthAddress = yield select(selectLoggedEthAddress);
         const data = yield apply(actionService, actionService.getPendingActions, [loggedEthAddress]);
-        console.log('action get pending', data);
         yield put(actions.actionGetPendingSuccess(data));
         if (data.length) {
             const txs = [];

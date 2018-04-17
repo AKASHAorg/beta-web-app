@@ -59,7 +59,6 @@ function* draftAddTag ({ data }) {
  */
 function* draftsGet ({ data }) {
     try {
-        console.log('drafts get', data);
         const response = yield call([draftService, draftService.draftsGet], data.ethAddress);
         let drafts = new Map();
         if (response.length > 0) {
