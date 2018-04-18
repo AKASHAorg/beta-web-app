@@ -1,5 +1,5 @@
 // @flow
-const prefix = 'akasha.network';
+const prefix = 'beta.akasha.world';
 
 export const addPrefix = (str: string = ''): string => `${prefix}/#${str}`;
 
