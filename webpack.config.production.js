@@ -22,7 +22,11 @@ export default merge(baseConfig, {
             new UglifyJsPlugin({
                 uglifyOptions: {
                     ecma: 6,
-                    mangle: false
+                    mangle: false,
+                    compress: false,
+                    output: {
+                        comments: false
+                    }
                 },
                 cache: true,
                 parallel: true,

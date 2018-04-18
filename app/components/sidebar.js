@@ -155,15 +155,16 @@ class Sidebar extends Component {
                 </div>
               </li>
               <li
-                className="sidebar__entry-menu-buttons_wrapper"
+                className="sidebar__entry-menu-buttons_wrapper sidebar__entry-menu-buttons_wrapper-disabled"
               >
                 <Button
-                  type="entry-menu-button"
+                  type="entry-menu-button-disabled"
                   size="large"
                   className="borderless"
                   icon="link"
                   ghost
-                  onClick={this._navigateTo('/draft/link/new')}
+                  disabled
+                  onClick={() => {}}
                 />
                 <div
                   className="sidebar__entry-menu-buttons_text"
@@ -233,8 +234,7 @@ class Sidebar extends Component {
 
         const newEntryIcon = unlocked ?
             (<Popover
-              arrowPointAtCenter
-              placement="rightTop"
+              placement="right"
               content={this._getEntryMenu()}
               overlayClassName="entry-menu-popover"
             >

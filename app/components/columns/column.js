@@ -60,8 +60,9 @@ const Column = ({ onBeginDrag, onEndDrag, isColumnDragging, baseWidth, type, ...
       >
         {passedProps.fetching && passedProps.column.entriesList.size === 0 &&
           <DataLoader
-            flag
+            flag={true}
             timeout={500}
+            className="column__data-loader"
           />
         }
         {(!passedProps.column || passedProps.column.entriesList.size === 0) && !passedProps.fetching &&
