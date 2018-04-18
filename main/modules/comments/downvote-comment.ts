@@ -31,7 +31,7 @@ const execute = Promise.coroutine(function* (data: { entryId: string, weight: nu
         throw new Error('Vote weight value must be between 1-10');
     }
 
-    const txData = contracts.instance.Votes.voteComment.request(data.weight, data.entryId, data.commentId, true, { gas: 200000 });
+    const txData = contracts.instance.Votes.voteComment.request(data.weight, data.entryId, data.commentId, true, { gas: 250000 });
     const transaction = yield contracts.send(txData, data.token, cb);
     return { tx: transaction.tx, receipt: transaction.receipt };
 });
