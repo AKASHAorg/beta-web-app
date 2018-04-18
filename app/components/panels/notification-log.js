@@ -133,6 +133,7 @@ class NotificationLog extends Component {
                         pathname: `/${loggedEthAddress}/${entry.get('entryId')}`,
                         state: { overlay: true }
                     }}
+                    target="_blank"
                   >
                     {entryTitle}
                   </Link>
