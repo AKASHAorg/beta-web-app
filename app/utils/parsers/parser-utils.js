@@ -6,7 +6,7 @@ class ParserUtils {
     constructor () {
         this.fetchRequestParams = {
             method: 'GET',
-            mode: 'cors'
+            mode: 'no-cors'
         };
     }
 

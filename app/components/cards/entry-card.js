@@ -91,7 +91,7 @@ class EntryCard extends Component {
     };
 
     getVersion = (version) => {
-        const { entry, loggedAkashaId, entryPageShow } = this.props;
+        // const { entry, loggedAkashaId, entryPageShow } = this.props;
         // const query = version !== undefined ? `?version=${version}` : '';
         // this.context.router.push(`/${loggedAkashaId}/entry/${entry.get('entryId')}${query}`);
         // entryPageShow(entry.get('entryId'));
@@ -326,6 +326,7 @@ EntryCard.propTypes = {
     style: PropTypes.shape(),
     toggleOutsideNavigation: PropTypes.func,
     votePending: PropTypes.bool,
+    markAsNew: PropTypes.bool,
 };
 
 export default withRouter(injectIntl(EntryCard));

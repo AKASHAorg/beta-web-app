@@ -18,7 +18,8 @@ class CellManager extends Component {
         return nextProps.isPending !== this.props.isPending ||
             (nextProps.author && !nextProps.author.equals(this.props.author)) ||
             nextProps.large !== this.props.large ||
-            !!(nextProps.entry && !nextProps.entry.equals(this.props.entry));
+            !!(nextProps.entry && !nextProps.entry.equals(this.props.entry)) ||
+            nextProps.markAsNew !== this.props.markAsNew;
     }
 
     componentDidUpdate (prevProps) {
@@ -64,6 +65,7 @@ CellManager.propTypes = {
     id: PropTypes.string,
     large: PropTypes.bool,
     entry: PropTypes.shape(),
+    markAsNew: PropTypes.bool,
 };
 
 export default CellManager;
