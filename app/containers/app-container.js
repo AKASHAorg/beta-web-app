@@ -176,8 +176,8 @@ class AppContainer extends Component {
         const ethBalance = balance.get('eth');
         const noFunds = ethBalance && !Number(ethBalance) && !Number(balance.getIn(['aeth', 'total']));
         const initialFaucet = loggedEthAddress && loggedEthAddress !== guestAddress && noFunds;
-        const showFaucetNotification = needFunds || initialFaucet;
         const termsAccepted = userSettings.get('termsAccepted');
+        const showFaucetNotification = termsAccepted && (needFunds || initialFaucet);
         const isGuest = loggedEthAddress === guestAddress;
 
         return (
