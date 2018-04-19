@@ -30,7 +30,7 @@ export default merge(baseConfig, {
                 },
                 cache: true,
                 parallel: true,
-                sourceMap: false
+                sourceMap: true
             }),
             new OptimizeCssAssetsPlugin({
                 cssProcessorOptions: {discardComments: {removeAll: true}},

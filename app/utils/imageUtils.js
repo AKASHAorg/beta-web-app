@@ -66,6 +66,11 @@ function imageCreator (arrayBuffer, baseUrl) {
         if (arrayBuffer === `${baseUrl}/` || arrayBuffer.length === 0) {
             return null;
         }
+
+        if (baseUrl.endsWith('/')) {
+            return `${baseUrl}${arrayBuffer}`
+        }
+
         return `${baseUrl}/${arrayBuffer}`;
     }
     if (is(Uint8Array, arrayBuffer)) {

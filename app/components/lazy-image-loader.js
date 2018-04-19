@@ -30,8 +30,9 @@ class LazyImageLoader extends Component {
 
     _loadImage = (image, baseWidth) => {
         const img = new Image();
-        const imageSrc = this._getImageSrc(image, baseWidth)
+        const imageSrc = this._getImageSrc(image, baseWidth);
         img.src = imageSrc;
+        img.decoding = "async";
         img.onload = this._handleImageLoad(imageSrc);
     }
 
