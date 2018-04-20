@@ -61,19 +61,14 @@ const execute = Promise.coroutine(function* (data: EntryCreateRequest, cb) {
     delete data.content;
     delete data.tags;
     const transaction = yield contracts.send(txData, data.token, cb);
-    // in the future extract this from receipt
-    const fetched = yield contracts
-        .fromEvent(
-            contracts.instance.Entries.Publish,
-            { author: web3Api.instance.eth.defaultAccount },
-            transaction.receipt.blockNumber,
-            1,
-            {}
-        );
+    let entryId = null;
+    // in the future extract this should be dynamic @TODO
+    if (transaction.logs && transaction.logs.length > 2) {
+        entryId = transaction.logs[transaction.logs.length - 1];
+    }
 
-    const entryId = (fetched.results.length) ? fetched.results[0].args.entryId : null;
     yield entriesCache.push(entryId);
-    return { tx: transaction.tx, receipt: transaction.receipt, entryId };
+    return { tx: transaction.tx, receipt: transaction.receipt, entryId: entryId };
 });
 
 export default { execute, name: 'publish', hasStream: true };
