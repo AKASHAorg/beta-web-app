@@ -430,6 +430,9 @@ export const selectProfileEntries = (state, ethAddress) =>
     (state.entryState.getIn(['profileEntries', ethAddress, 'entryIds']) || new List())
         .map(entryId => selectEntry(state, entryId));
 
+export const selectProfileEntriesCount = (state, ethAddress) =>
+    state.profileState.getIn(['byEthAddress', ethAddress, 'entriesCount']);
+
 export const selectProfileEntriesFlags = (state, ethAddress) => {
     const profileEntries = state.entryState.getIn(['profileEntries', ethAddress]);
     if (!profileEntries) {
