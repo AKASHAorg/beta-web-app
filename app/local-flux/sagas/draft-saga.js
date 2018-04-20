@@ -5,7 +5,9 @@ import { Map, OrderedMap } from 'immutable';
 import { isEmpty } from 'ramda';
 import { DraftModel } from '../reducers/models';
 import { actionChannels, enableChannel, isLoggedProfileRequest } from './helpers';
-import { selectToken, selectDraftById, selectLoggedEthAddress } from '../selectors';
+import { selectToken, selectDraftById, selectLoggedEthAddress,
+    selectProfileEntriesCount, 
+    selectAction} from '../selectors';
 import { entryTypes } from '../../constants/entry-types';
 import { getWordCount, extractExcerpt } from '../../utils/dataModule';
 import { extractImageFromContent } from '../../utils/imageUtils';
@@ -18,6 +20,7 @@ import * as claimableActions from '../actions/claimable-actions';
 import * as actionStatus from '../../constants/action-status';
 import * as eProcActions from '../actions/external-process-actions';
 import * as tagActions from '../actions/tag-actions';
+import * as transactionActions from '../actions/transaction-actions';
 
 const { EditorState, SelectionState } = DraftJS;
 /**
@@ -175,9 +178,12 @@ function* draftPublish ({ actionId, draft }) {
         ) {
             draftToPublish.content.excerpt = extractExcerpt(draftToPublish.content.draft);
         }
+        const ethAddress = yield select(selectLoggedEthAddress);
+        const entriesCount = yield select(state => selectProfileEntriesCount(state, ethAddress));        
         yield call([channel, channel.send], {
             actionId,
             id,
+            isFirstEntry: Number(entriesCount) === 0,
             token,
             tags: draftFromState.tags.keySeq().toJS(),
             content: draftToPublish.content,
@@ -235,17 +241,22 @@ function* draftRevert ({ data }) {
     }
 }
 
-function* watchDraftPublishChannel () {
+function* watchDraftPublishChannel () { // eslint-disable-line max-statements
     while (true) {
         const response = yield take(actionChannels.entry.publish);
-        const { actionId } = response.request;
+        const { actionId, isFirstEntry } = response.request;
         const shouldApplyChanges = yield call(isLoggedProfileRequest, actionId);
         if (shouldApplyChanges) {
             if (response.error) {
-                yield put(draftActions.draftPublishError(
-                    response.error,
-                    response.request.id
-                ));
+                const action = yield select(state => selectAction(state, actionId));
+                if (action.tx && isFirstEntry) {
+                    yield put(transactionActions.transactionGetStatus([action.tx], [actionId], true));
+                } else {
+                    yield put(draftActions.draftPublishError(
+                        response.error,
+                        response.request.id
+                    ));
+                }
             } else if (response.data.receipt) {
                 const { blockNumber, cumulativeGasUsed, success } = response.data.receipt;
                 if (!response.data.receipt.success) {

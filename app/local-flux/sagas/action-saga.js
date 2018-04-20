@@ -301,8 +301,11 @@ function* actionPublished ({ receipt }) {
     if (action && action.get('ethAddress') === loggedEthAddress) {
         const status = actionStatus.published;
         const changes = { id: actionId, blockNumber, cumulativeGasUsed, status, success };
+        if (action.type === actionTypes.faucet) {
+            yield apply(reduxSaga, reduxSaga.delay, [3000]);
+        }
         yield put(actions.actionUpdate(changes));
-        yield put(profileActions.profileGetBalance());
+        yield put(profileActions.profileGetBalance());        
         yield put(profileActions.profileManaBurned());
     }
 }

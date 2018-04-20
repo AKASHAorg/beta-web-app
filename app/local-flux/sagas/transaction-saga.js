@@ -2,14 +2,15 @@ import { apply, fork, put, take, takeEvery } from 'redux-saga/effects';
 import getChannels from 'akasha-channels';
 import { actionChannels } from './helpers';
 import * as actionActions from '../actions/action-actions';
+import * as draftActions from '../actions/draft-actions';
 import * as actions from '../actions/transaction-actions';
 import * as types from '../constants';
 import * as actionStatus from '../../constants/action-status';
 
 
-export function* transactionGetStatus ({ txs, ids }) {
+export function* transactionGetStatus ({ txs, ids, checkFalseNegative }) {
     const channel = getChannels().server.tx.getTransaction;
-    yield apply(channel, channel.send, [{ transactionHash: txs, actionIds: ids }]);
+    yield apply(channel, channel.send, [{ transactionHash: txs, actionIds: ids, checkFalseNegative }]);
 }
 
 function* watchTransactionGetStatus () {
@@ -38,6 +39,9 @@ function* watchTransactionGetStatusChannel () {
                 }
             });
             for (let i = 0; i < updates.length; i++) {
+                if (resp.request.checkFalseNegative && !updates[i].success) {
+                    yield put(draftActions.draftPublishError({}, updates[i].id));
+                }
                 yield put(actionActions.actionUpdate(updates[i]));
             }
         }
