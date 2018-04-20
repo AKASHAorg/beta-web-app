@@ -62,9 +62,11 @@ const execute = Promise.coroutine(function* (data: EntryCreateRequest, cb) {
     delete data.tags;
     const transaction = yield contracts.send(txData, data.token, cb);
     let entryId = null;
+    const receipt = transaction.receipt;
     // in the future extract this should be dynamic @TODO
-    if (transaction.logs && transaction.logs.length > 2) {
-        entryId = transaction.logs[transaction.logs.length - 1];
+    if (receipt.logs && receipt.logs.length > 2) {
+        const log = receipt.logs[receipt.logs.length - 1];
+        entryId = log.topics.length > 2 ? log.topics[2] : null;
     }
 
     yield entriesCache.push(entryId);
