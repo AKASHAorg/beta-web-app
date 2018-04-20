@@ -34,6 +34,12 @@ function* commentsDownvoteSuccess ({ data }) {
     yield put(appActions.showNotification({ id: 'downvoteCommentSuccess', duration: 4 }));
 }
 
+function* getComment (entryId, commentId) {
+    const channel = getChannels().server.comments.getComment;
+    yield call(enableChannel, channel, getChannels().client.comments.manager);
+    yield apply(channel, channel.send, [{ entryId, commentId }]);
+}
+
 function* commentsGetCount ({ entryId }) {
     const channel = getChannels().server.comments.commentsCount;
     yield call(enableChannel, channel, getChannels().client.comments.manager);
@@ -118,15 +124,8 @@ function* commentsPublish ({ actionId, ...payload }) {
     yield apply(channel, channel.send, [{ actionId, token, ...payload }]);
 }
 
-function* commentsPublishSuccess ({ data }) {
-    const { entryId, parent } = data;
-    const entry = yield select(state => state.entryState.get('fullEntry'));
+function* commentsPublishSuccess () {
     yield put(appActions.showNotification({ id: 'publishCommentSuccess', duration: 4 }));
-    if (!entry || entry.get('entryId') !== entryId) {
-        return;
-    }
-    const toBlock = yield select(state => selectNewestCommentBlock(state, parent));
-    yield fork(commentsIterator, { entryId, toBlock, parent, reversed: true });
 }
 
 function* commentsResolveIpfsHash ({ ipfsHashes, commentIds }) {
@@ -177,6 +176,17 @@ function* watchCommentsDownvoteChannel () {
                 const changes = { id: actionId, status: actionStatus.publishing, tx: resp.data.tx };
                 yield put(actionActions.actionUpdate(changes));
             }
+        }
+    }
+}
+
+function* watchCommentsGetCommentChannel () {
+    while (true) {
+        const resp = yield take(actionChannels.comments.getComment);
+        if (resp.error) {
+            yield put(actions.commentsGetCommentError(resp.error));
+        } else {
+            yield put(actions.commentsGetCommentSuccess(resp.data, resp.request));
         }
     }
 }
@@ -277,6 +287,9 @@ function* watchCommentsPublishChannel () {
                 yield put(actions.commentsPublishError(resp.error));
             } else if (resp.data.receipt) {
                 yield put(actionActions.actionPublished(resp.data.receipt));
+                if (resp.data.entryId && resp.data.commentId) {
+                    yield fork(getComment, resp.data.entryId, resp.data.commentId);
+                }
                 if (!resp.data.receipt.success) {
                     yield put(actions.commentsPublishError({}));
                 }
@@ -323,6 +336,7 @@ function* watchCommentsUpvoteChannel () {
 
 export function* registerCommentsListeners () {
     yield fork(watchCommentsDownvoteChannel);
+    yield fork(watchCommentsGetCommentChannel);
     yield fork(watchCommentsGetCountChannel);
     yield fork(watchCommentsGetScoreChannel);
     yield fork(watchCommentsGetVoteOfChannel);
