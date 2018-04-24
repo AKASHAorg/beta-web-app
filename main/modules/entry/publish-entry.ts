@@ -4,7 +4,6 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import entriesCache from '../notifications/entries';
-import { web3Api } from '../../services';
 
 const publish = {
     'id': '/publish',

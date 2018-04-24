@@ -65,7 +65,7 @@ class IpfsEntry {
                 })
             );
         }
-        if (content.cardInfo) {
+        if (content.cardInfo && is(Object, content.cardInfo)) {
             ipfsApiRequests.push(
                 IpfsConnector.getInstance().api
                     .add(content.cardInfo)
@@ -217,7 +217,7 @@ export const getShortContent = Promise.coroutine(function* (hash) {
     if (entries.hasShort(hash)) {
         return Promise.resolve(entries.getShort(hash));
     }
-    const response = {
+    const response: any = {
         [EXCERPT]: '',
         [FEATURED_IMAGE]: '',
         [CARD_INFO]: ''
@@ -227,6 +227,22 @@ export const getShortContent = Promise.coroutine(function* (hash) {
     for (let i = 0; i < extraData.length; i++) {
         response[extraData[i].name] = yield IpfsConnector.getInstance().api.get(extraData[i].multihash);
     }
+
+    if ((response[CARD_INFO] && !is(Object, response[CARD_INFO])) ||
+        Buffer.isBuffer(response[CARD_INFO])) {
+        response[CARD_INFO] = '';
+    }
+
+    if ((response[EXCERPT] && !is(String, response[EXCERPT])) ||
+        Buffer.isBuffer(response[EXCERPT])) {
+        response[EXCERPT] = '';
+    }
+
+    if ((response[FEATURED_IMAGE] && !is(Object, response[FEATURED_IMAGE])) ||
+        Buffer.isBuffer(response[FEATURED_IMAGE])) {
+        response[FEATURED_IMAGE] = '';
+    }
+
     const data = Object.assign({}, root, response);
     entries.setShort(hash, data);
     return data;
