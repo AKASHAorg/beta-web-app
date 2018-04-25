@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { Button, Carousel, Modal } from 'antd';
 import { Dashboard, DataLoader } from '../components';
-import { dashboardCreateNew, dashboardHideTutorial, dashboardSetActive,
+import { toggleNewDashboardModal } from '../local-flux/actions/app-actions';
+import { dashboardHideTutorial, dashboardSetActive,
     dashboardUpdateNewColumn, dashboardReorderColumn  } from '../local-flux/actions/dashboard-actions';
 import { selectEntryFlag, selectFullEntry, selectColumnPendingEntries } from '../local-flux/selectors';
 import { setupMessages, generalMessages } from '../locale-data/messages';
@@ -108,7 +109,7 @@ class DashboardPage extends Component {
                 <Dashboard
                   columns={columns}
                   darkTheme={darkTheme}
-                  dashboardCreateNew={this.props.dashboardCreateNew}
+                  dashboardCreateNew={this.props.toggleNewDashboardModal}
                   dashboards={dashboards}
                   getDashboardRef={this.getDashboardRef}
                   navigateRight={this.navigateRight}
@@ -130,7 +131,6 @@ DashboardPage.propTypes = {
     columns: PropTypes.shape(),
     darkTheme: PropTypes.bool,
     dashboards: PropTypes.shape(),
-    dashboardCreateNew: PropTypes.func.isRequired,
     dashboardHideTutorial: PropTypes.func,
     dashboardSetActive: PropTypes.func.isRequired,
     dashboardUpdateNewColumn: PropTypes.func.isRequired,
@@ -143,6 +143,7 @@ DashboardPage.propTypes = {
     match: PropTypes.shape(),
     newColumn: PropTypes.shape(),
     pendingEntries: PropTypes.shape(),
+    toggleNewDashboardModal: PropTypes.func
 };
 
 function mapStateToProps (state) {
@@ -164,10 +165,10 @@ function mapStateToProps (state) {
 export default connect(
     mapStateToProps,
     {
-        dashboardCreateNew,
         dashboardHideTutorial,
         dashboardSetActive,
         dashboardUpdateNewColumn,
-        dashboardReorderColumn
+        dashboardReorderColumn,
+        toggleNewDashboardModal
     }
 )(injectIntl(DashboardPage));

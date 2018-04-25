@@ -17,10 +17,10 @@ import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
 import { AppErrorBoundary, AppPreferences, ManafyModal, NavigateAwayModal,
-    DashboardSecondarySidebar, DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
+    DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
-    Notification, NotificationsPanel, PageContent, PreviewPanel, ProfileOverviewSecondarySidebar,
-    ProfilePage, ProfileEdit, SecondarySidebar, Sidebar, Terms, TopBar,
+    Notification, NewDashboardModal, NotificationsPanel, PageContent, PreviewPanel,
+    ProfileOverviewSecondarySidebar, ProfilePage, ProfileEdit, SecondarySidebar, Sidebar, Terms, TopBar,
     TransactionsLogPanel, ProfileSettings, WalletPanel, FullSizeImageViewer, WebPlaceholder,
     FaucetNotification, CustomDragLayer } from '../components';
 import { isInternalLink, removePrefix } from '../utils/url-utils';
@@ -200,7 +200,6 @@ class AppContainer extends Component {
                           <Redirect to={`/dashboard/${activeDashboard}`} />
                         }
                         <SecondarySidebar shown={appState.get('showSecondarySidebar')}>
-                          <Route path="/dashboard/:dashboardId?" component={DashboardSecondarySidebar} />
                           <Route path="/draft/:draftType/:draftId" component={NewEntrySecondarySidebar} />
                           <Route path="/profileoverview/:title" component={ProfileOverviewSecondarySidebar} />
                         </SecondarySidebar>
@@ -292,6 +291,9 @@ class AppContainer extends Component {
                 {showIpfsDetailsModal && <IpfsDetailsModal />}
                 {appState.get('showNavigationModal') &&
                   <NavigationModal toggleNavigationModal={this.props.toggleNavigationModal} />
+                }
+                {appState.get('showNewDashboardModal') &&
+                  <NewDashboardModal />
                 }
                 {appState.get('showTerms') && 
                   <Terms

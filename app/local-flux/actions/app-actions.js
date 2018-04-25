@@ -47,6 +47,7 @@ export const toggleGethDetailsModal = () => action(types.TOGGLE_GETH_DETAILS_MOD
 export const toggleGuestModal = () => action(types.TOGGLE_GUEST_MODAL);
 export const toggleIpfsDetailsModal = () => action(types.TOGGLE_IPFS_DETAILS_MODAL);
 export const toggleNavigationModal = () => action(types.TOGGLE_NAVIGATION_MODAL);
+export const toggleNewDashboardModal = () => action(types.TOGGLE_NEW_DASHBOARD_MODAL);
 export const toggleOutsideNavigation = url => action(types.TOGGLE_OUTSIDE_NAVIGATION_MODAL, { url });
 export const toggleOutsideNavigationSucccess = url =>
     action(types.TOGGLE_OUTSIDE_NAVIGATION_MODAL_SUCCESS, { url });
