@@ -37,7 +37,7 @@ const execute = Promise.coroutine(function* (data: IpfsStartRequest) {
         });
     }
 
-    generalSettings.set(BASE_URL, 'https://ipfs.io/ipfs/');
+    generalSettings.set(BASE_URL, 'https://gateway.ipfs.io/ipfs/');
     return {started: true};
 });
 

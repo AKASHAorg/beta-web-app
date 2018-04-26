@@ -76,4 +76,4 @@ export const DEFAULT_IPFS_CONFIG = {
     }
 };
 // default settings
-generalSettings.set(BASE_URL, 'https://ipfs.io/ipfs');
+generalSettings.set(BASE_URL, 'https://gateway.ipfs.io/ipfs');
