@@ -8,7 +8,7 @@ import { toggleNewDashboardModal } from '../../local-flux/actions/app-actions';
 import { entryNewestIteratorSuccess } from '../../local-flux/actions/entry-actions';
 import { dashboardAdd, dashboardDelete,
     dashboardRename, dashboardReorder } from '../../local-flux/actions/dashboard-actions';
-import { selectActiveDashboardId, selectAllDashboards } from '../../local-flux/selectors';
+import { selectActiveDashboardId, selectAllDashboards, selectActiveDashboard } from '../../local-flux/selectors';
 import { DashboardPopoverRow, Icon } from '../';
 
 
@@ -107,7 +107,7 @@ class DashboardPopover extends Component {
     };
 
     renderContent = () => {
-        const {intl, activeDashboard, dashboards} = this.props;
+        const {intl, activeDashboardId, dashboards} = this.props;
         const bodyHeight = document.body.scrollHeight;
         const computedMaxHeight = `${bodyHeight - 100}px`;
 
@@ -122,7 +122,7 @@ class DashboardPopover extends Component {
 
                   return (
                     <DashboardPopoverRow
-                      activeDashboard={activeDashboard}
+                      activeDashboard={activeDashboardId}
                       closePopover={() => {this.setState({popoverVisible: false})}}
                       dashboard={dashboard}
                       dashboardDelete={this._deleteDashboard}
@@ -153,7 +153,10 @@ class DashboardPopover extends Component {
     };
 
     render () {
-        const { intl } = this.props;
+        const { activeDashboard, intl } = this.props;
+        const title = activeDashboard ?
+            activeDashboard.get('name') :
+            intl.formatMessage(dashboardMessages.akashaBoard);
 
         return (
           <div className="dashboard-popover__title">
@@ -172,10 +175,10 @@ class DashboardPopover extends Component {
               />
             </Popover>
             <div
-              className="dashboard-popover__title-text"
+              className="overflow-ellipsis dashboard-popover__title-text"
               onMouseDown={() => { this.onVisibleChange(!this.state.popoverVisible)}}
             >
-              {intl.formatMessage(dashboardMessages.akashaBoard)}
+              {title}
             </div>
           </div>
         );
@@ -183,7 +186,7 @@ class DashboardPopover extends Component {
 }
 
 DashboardPopover.propTypes = {
-    activeDashboard: PropTypes.string,
+    activeDashboard: PropTypes.shape(),
     containerRef: PropTypes.shape(),
     dashboardAdd: PropTypes.func.isRequired,
     dashboardDelete: PropTypes.func.isRequired,
@@ -199,7 +202,7 @@ DashboardPopover.propTypes = {
 
 function mapStateToProps (state) {
     return {
-        activeDashboard: state.dashboardState.get('activeDashboard'),
+        activeDashboard: selectActiveDashboard(state),
         entries: state.entryState.get('byId'),
         dashboards: selectAllDashboards(state),
         activeDashboardId: selectActiveDashboardId(state),
