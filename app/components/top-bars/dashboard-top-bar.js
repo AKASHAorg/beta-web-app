@@ -30,14 +30,6 @@ const removeClass = (id) => {
 };
 
 class DashboardTopBar extends Component {
-    componentWillReceiveProps (nextProps) {
-        const { history } = this.props;
-        if (nextProps.activeDashboardId !== this.props.activeDashboardId &&
-            nextProps.match.params.dashboardId !== nextProps.activeDashboardId
-        ) {
-            history.push(`/dashboard/${nextProps.activeDashboardId}`);
-        }
-    }
 
     shouldComponentUpdate (nextProps) {
         return !!(symmetricDifference([this.props], [pick(Object.keys(this.props), nextProps)])).length;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import createHashHistory from 'history/createHashHistory';
+import getHistory from './history';
 import Route from 'react-router-dom/Route';
 import { ConnectedRouter } from 'react-router-redux';
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
@@ -15,7 +15,7 @@ import './styles/core.scss';
 import './styles/ant-vars/extract-default-theme.less'
 
 export const bootstrap = (web3Enabled = false, vault = false) => {
-    const history = createHashHistory();
+    const history = getHistory();
     const store = configureStore();
     sagaMiddleware.run(rootSaga);
     render(
