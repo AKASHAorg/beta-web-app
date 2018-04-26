@@ -11,14 +11,19 @@ class LazyImageLoader extends Component {
         loaded: false,
         errored: false,
     }
-
+    idleCallbackHandler = null;
     shouldComponentUpdate (nextProps, nextState) {
         return nextProps.baseWidth !== this.props.baseWidth ||
             nextState.loaded !== this.state.loaded ||
             nextState.errored !== this.state.errored ||
             !equals(nextProps.image, this.props.image);
     }
-
+    componentWillUnmount = () => {
+        if(this.idleCallbackHandler) {
+            window.cancelIdleCallback(this.idleCallbackHandler)
+            this.idleCallbackHandler = null;
+        }
+    }
     _createImageRef = (node) => this.imageNodeRef = node;
 
     _getImageSrc = (imageObj, baseWidth) => {
@@ -32,7 +37,7 @@ class LazyImageLoader extends Component {
     };
 
     _handleImageLoad = (imgSrc) => () => {
-        window.requestIdleCallback(() => {
+        this.idleCallbackHandler = window.requestIdleCallback(() => {
             this.setState({
                 loaded: imgSrc,
                 errored: false

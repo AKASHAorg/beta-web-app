@@ -209,7 +209,14 @@ const entryState = createReducer(initialState, {
         data.entryId = entryId;
         let pendingEntries = state.getIn(['flags', 'pendingEntries', context]) || new Map();
         pendingEntries = pendingEntries.set(entryId, false);
-
+        
+        let newEntryRecord;
+        try {
+            newEntryRecord = createEntryRecord(data);
+        } catch (ex) {
+            console.warn('entry:', data, 'error:', ex);
+            newEntryRecord = new EntryRecord();
+        }
         const newEntry = state.getIn(['byId', entryId]).mergeWith((old, newVal, key) => {
             if (key === 'author') {
                 return old;
@@ -223,7 +230,7 @@ const entryState = createReducer(initialState, {
                 return old;
             }
             return newVal;
-        }, createEntryRecord(data));
+        }, newEntryRecord);
         return state.merge({
             byId: state.get('byId').set(entryId, newEntry),
             flags: state.get('flags').setIn(['pendingEntries', context], pendingEntries)

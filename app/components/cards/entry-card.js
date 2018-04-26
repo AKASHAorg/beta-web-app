@@ -35,6 +35,7 @@ class EntryCard extends Component {
     shouldComponentUpdate (nextProps, nextState) { // eslint-disable-line complexity
         const { author, blockNr, canClaimPending, claimPending, entry,
             fetchingEntryBalance, isPending, large, style, votePending } = nextProps;
+        
         if (blockNr !== this.props.blockNr ||
             canClaimPending !== this.props.canClaimPending ||
             claimPending !== this.props.claimPending ||
