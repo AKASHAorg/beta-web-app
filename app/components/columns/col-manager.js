@@ -135,7 +135,7 @@ class ColManager extends Component {
         this._clearIntervals();
         const isPooling = this.poolingInterval[id] > 0;
         if (typeof onItemPooling === 'function' && !isPooling && isVisible) {
-            this.requestPoolingTimeout = setTimeout(() => this._createRequestPooling(id), this.poolingDelay);
+            this._createRequestPooling(id);
         }
     }
 
@@ -150,7 +150,7 @@ class ColManager extends Component {
         if (typeof onItemPooling === 'function') {
             const isPooling = this.poolingInterval[column.id] > 0;
             if (isPooling) {
-                clearInterval(this.poolingInterval[column.id]);
+                this.poolingInterval[column.id] = clearInterval(this.poolingInterval[column.id]);
             }
         }
     }
@@ -535,6 +535,7 @@ ColManager.propTypes = {
     onRefLink: PropTypes.func,
     onNewEntriesResolveRequest: PropTypes.func,
     profiles: PropTypes.shape(),
+    entries: PropTypes.shape(),
 };
 
 export default ColManager;
