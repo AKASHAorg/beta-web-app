@@ -33,7 +33,7 @@ class OptimisticComment extends Component {
         const wrappedComponent = decorateComponentWithProps(CommentImage, {
             readOnly: true
         });
-        this.emojiPlugin = createEmojiPlugin({ imagePath: 'https://ipfs.io/ipfs/QmdEkyy4pmcmDhAe5XjsAokhXMFMvNTVzoELnxfpUGhmQv/emoji-svg/', allowImageCache: true });
+        this.emojiPlugin = createEmojiPlugin({ imagePath: 'https://gateway.ipfs.io/ipfs/QmdEkyy4pmcmDhAe5XjsAokhXMFMvNTVzoELnxfpUGhmQv/emoji-svg/', allowImageCache: true });
         this.highlightPlugin = createHighlightPlugin();
         this.imagePlugin = createImagePlugin({ imageComponent: wrappedComponent });
         this.linkPlugin = createLinkPlugin();

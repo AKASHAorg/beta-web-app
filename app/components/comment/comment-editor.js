@@ -21,7 +21,7 @@ const { AtomicBlockUtils, convertToRaw, EditorState, RichUtils, SelectionState }
 const { handleKeyCommand, toggleInlineStyle, toggleBlockType } = RichUtils;
 
 const config = {
-    imagePath: 'https://ipfs.io/ipfs/QmdEkyy4pmcmDhAe5XjsAokhXMFMvNTVzoELnxfpUGhmQv/emoji-svg/',
+    imagePath: 'https://gateway.ipfs.io/ipfs/QmdEkyy4pmcmDhAe5XjsAokhXMFMvNTVzoELnxfpUGhmQv/emoji-svg/',
     allowImageCache: true
 };
 
