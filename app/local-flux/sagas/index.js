@@ -31,6 +31,8 @@ import * as utilsSaga from './utils-saga';
 import * as types from '../constants';
 import { loadAkashaDB } from '../services/db/dbs';
 import { guestAddress } from '../../constants/guest-address';
+import getChannels from 'akasha-channels';
+import { isEmpty } from 'ramda';
 
 function* registerListeners () {
     yield fork(claimableSaga.registerClaimableListeners);
@@ -51,14 +53,15 @@ function* launchActions () {
     yield put(eProcActions.servicesSetTimestamp(timestamp));
     // from local db
     yield fork(settingsSaga.getSettings);
+    if (!isEmpty(getChannels().client)) {
+        // from geth.options channel
+        yield fork(externalProcSaga.gethGetOptions);
+        // from ipfs.getConfig channel
+        yield fork(externalProcSaga.ipfsGetConfig);
 
-    // from geth.options channel
-    yield fork(externalProcSaga.gethGetOptions);
-    // from ipfs.getConfig channel
-    yield fork(externalProcSaga.ipfsGetConfig);
-
-    yield fork(externalProcSaga.gethGetStatus);
-    yield fork(externalProcSaga.ipfsGetStatus);
+        yield fork(externalProcSaga.gethGetStatus);
+        yield fork(externalProcSaga.ipfsGetStatus);
+    }
 }
 
 function* getUserSettings () {
@@ -120,26 +123,28 @@ function* watchBootstrapHome () {
 export default function* rootSaga () { // eslint-disable-line max-statements
     createActionChannels();
     yield call(loadAkashaDB);
-    yield fork(registerListeners);
-    yield fork(actionSaga.watchActionActions);
-    yield fork(appSaga.watchAppActions);
-    yield fork(claimableSaga.watchClaimableActions);
-    yield fork(commentsSaga.watchCommentsActions);
-    yield fork(dashboardSaga.watchDashboardActions);
-    yield fork(draftSaga.watchDraftActions);
-    yield fork(entrySaga.watchEntryActions);
-    yield fork(externalProcSaga.watchEProcActions);
-    yield fork(highlightSaga.watchHighlightActions);
-    yield fork(licenseSaga.watchLicenseActions);
-    yield fork(listSaga.watchListActions);
-    yield fork(notificationsSaga.watchNotificationsActions);
-    yield fork(profileSaga.watchProfileActions);
-    yield fork(searchSaga.watchSearchActions);
-    yield fork(settingsSaga.watchSettingsActions);
-    yield fork(tagSaga.watchTagActions);
-    yield fork(tempProfileSaga.watchTempProfileActions);
-    yield fork(transactionSaga.watchTransactionActions);
-    yield fork(utilsSaga.watchUtilsActions);
+    if (!isEmpty(getChannels().client)) {
+        yield fork(registerListeners);
+        yield fork(actionSaga.watchActionActions);
+        yield fork(appSaga.watchAppActions);
+        yield fork(claimableSaga.watchClaimableActions);
+        yield fork(commentsSaga.watchCommentsActions);
+        yield fork(dashboardSaga.watchDashboardActions);
+        yield fork(draftSaga.watchDraftActions);
+        yield fork(entrySaga.watchEntryActions);
+        yield fork(externalProcSaga.watchEProcActions);
+        yield fork(highlightSaga.watchHighlightActions);
+        yield fork(licenseSaga.watchLicenseActions);
+        yield fork(listSaga.watchListActions);
+        yield fork(notificationsSaga.watchNotificationsActions);
+        yield fork(profileSaga.watchProfileActions);
+        yield fork(searchSaga.watchSearchActions);
+        yield fork(settingsSaga.watchSettingsActions);
+        yield fork(tagSaga.watchTagActions);
+        yield fork(tempProfileSaga.watchTempProfileActions);
+        yield fork(transactionSaga.watchTransactionActions);
+        yield fork(utilsSaga.watchUtilsActions);
+    }
     yield fork(bootstrapApp);
     yield fork(watchBootstrapHome);
     yield fork(watchGethStartSuccess);
