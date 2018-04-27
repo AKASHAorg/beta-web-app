@@ -211,7 +211,7 @@ class NewColumn extends Component {
             columns = [columnTypes.latest, columnTypes.profile, columnTypes.tag,
                 columnTypes.list];
         }
-        if (dashboardId !== activeDashboard.get('id')) {
+        if (!activeDashboard || (dashboardId !== activeDashboard.get('id'))) {
             return null;
         }
         if (!newColumn) {

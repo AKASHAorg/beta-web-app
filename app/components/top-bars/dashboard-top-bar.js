@@ -10,7 +10,7 @@ import { selectActiveDashboard, selectActiveDashboardId,
     selectActiveDashboardColumns } from '../../local-flux/selectors';
 import { dashboardMessages } from '../../locale-data/messages';
 import { getDisplayAddress, isEthAddress } from '../../utils/dataModule';
-import { DashboardPopover, Navigation, PlusSquareIcon, TopBarIcon } from '../';
+import { DashboardPopover, PlusSquareIcon, TopBarIcon } from '../';
 
 const iconsTypes = {
     [columnTypes.latest]: 'entries',
