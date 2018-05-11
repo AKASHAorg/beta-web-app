@@ -4,6 +4,7 @@
     flex-direction: column;
     width: 100%;
     position: relative;
+    overflow-y: auto;
 
     &__search-wrapper {
         flex: 0 0 auto;
@@ -41,12 +42,14 @@
 
     &__list-wrapper {
         flex: 1 1 auto;
-        height: 100%;
+        height: calc(100% - 64px);
         border-top: 1px solid @light-border;
         border-bottom: 1px solid @light-border;
         display: flex;
         flex-direction: column;
         padding-right: 3px;
         background-color: @background;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 }
