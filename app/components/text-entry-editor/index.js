@@ -25,8 +25,10 @@ class EntryEditor extends Component {
         const dataKey = `${anchorKey}-0-0`;
         const targetNode = document.querySelector(`div[data-offset-key='${dataKey}']`);
 
-        if (targetNode) {
+        if (targetNode && typeof targetNode.scrollIntoViewIfNeeded === 'function') {
             targetNode.scrollIntoViewIfNeeded();
+        } else if (targetNode) {
+            targetNode.scrollIntoView();
         }
     };
     focus = () => {
