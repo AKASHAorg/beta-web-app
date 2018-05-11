@@ -109,7 +109,13 @@ class CommentEditor extends Component {
 
     getEditorRef = (el) => { this.editor = el; };
 
-    scrollIntoView = () => this.baseNodeRef && this.baseNodeRef.scrollIntoViewIfNeeded();
+    scrollIntoView = () => {
+        if (this.baseNodeRef && typeof this.baseNodeRef.scrollIntoViewIfNeeded === 'function') {
+            this.baseNodeRef.scrollIntoViewIfNeeded()
+        } else if (this.baseNodeRef) {
+            this.baseNodeRef.scrollIntoView()
+        }
+    };
 
     hasText = () => this.state.editorState.getCurrentContent().hasText();
 

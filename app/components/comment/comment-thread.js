@@ -14,7 +14,11 @@ class CommentThread extends Component {
     componentDidUpdate (prevProps) {
         if (this.props.replyTo && prevProps.replyTo !== this.props.replyTo &&
                 this.commentEditorRef) {
-            this.commentEditorRef.baseNodeRef.scrollIntoViewIfNeeded(false);
+            if(typeof this.commentEditorRef.baseNodeRef.scrollIntoViewIfNeeded === 'function') {
+                this.commentEditorRef.baseNodeRef.scrollIntoViewIfNeeded(false);
+            } else {
+                this.commentEditorRef.baseNodeRef.scrollIntoView();
+            }
         }
     }
 

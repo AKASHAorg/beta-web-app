@@ -50,7 +50,9 @@ class EntryPage extends Component {
         if ((prevProps.newComments.size > 0) && (newComments.size === 0)) {
             const targetId = prevProps.newComments.first().commentId;
             const node = document.getElementById(`comment-${targetId}`);
-            if (node) {
+            if (node && typeof node.scrollIntoViewIfNeeded === 'function') {
+                node.scrollIntoViewIfNeeded(true);
+            } else if (node) {
                 node.scrollIntoViewIfNeeded(true);
             }
         }
