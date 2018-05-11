@@ -4,6 +4,7 @@ import * as Promise from 'bluebird';
 import contracts from '../../contracts/index';
 import schema from '../utils/jsonschema';
 import entriesCache from '../notifications/entries';
+import {web3Api} from '../../services';
 
 const publish = {
     'id': '/publish',
@@ -41,6 +42,7 @@ const execute = Promise.coroutine(function* (data: EntryCreateRequest, cb) {
     let ipfsEntry = new IpfsEntry();
     const ipfsHash = yield ipfsEntry.create(data.content, data.tags, data.entryType);
     const decodedHash = decodeHash(ipfsHash);
+    const tags = data.tags.map(tag => web3Api.instance.fromUtf8(tag));
     let publishMethod;
     switch (data.entryType) {
         case 0:
