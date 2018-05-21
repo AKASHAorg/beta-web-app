@@ -17,6 +17,7 @@ export Column from './columns/column';
 export ColumnHeader from './columns/column-header';
 export ConfirmationDialog from './dialogs/confirmation-dialog';
 export Comment from './comment/comment';
+export CommentCard from './cards/comment-card';
 export CommentEditor from './comment/comment-editor';
 export CommentHighlight from './comment/comment-highlight';
 export CommentsList from './comment/comments-list';

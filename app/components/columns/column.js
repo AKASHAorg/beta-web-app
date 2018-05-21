@@ -11,14 +11,15 @@ import {
 } from '../../local-flux/actions/entry-actions';
 import { dashboardResetColumnEntries } from '../../local-flux/actions/dashboard-actions';
 import {
-    profileFollowersIterator, profileFollowingsIterator, profileMoreFollowingsIterator,
-    profileMoreFollowersIterator
+    profileCommentsIterator, profileFollowersIterator, profileFollowingsIterator,
+    profileMoreCommentsIterator, profileMoreFollowingsIterator, profileMoreFollowersIterator
 } from '../../local-flux/actions/profile-actions';
 import { searchProfiles, searchTags, searchResetResults } from '../../local-flux/actions/search-actions';
+import { ColumnRecord } from '../../local-flux/reducers/records';
 import {
-    selectAllPendingClaims, selectAllPendingVotes, selectBaseUrl, selectHideEntrySettings,
-    selectLoggedEthAddress, selectProfileEntriesFlags, selectFetchingFollowers, selectFetchingMoreFollowers,
-    selectFollowers, selectProfileEntries, selectMoreFollowers, selectFetchingFollowings,
+    selectAllPendingClaims, selectAllPendingVotes, selectBaseUrl, selectHideCommentSettings,
+    selectHideEntrySettings, selectLoggedEthAddress, selectProfileEntriesFlags, selectFetchingFollowers,
+    selectFetchingMoreFollowers, selectFollowers, selectMoreFollowers, selectFetchingFollowings,
     selectFetchingMoreFollowings, selectFollowings, selectMoreFollowings, selectListsAll,
     selectTagSearchResults, selectProfileSearchResults, selectProfileExists, selectTagExists,
 } from '../../local-flux/selectors';
@@ -30,17 +31,17 @@ import dropBox from './column-dropBox';
 import columnProps from './column-props-by-type';
 import ColumnEmptyPlaceholder from './column-empty-placeholder';
 
-const Column = ({ onBeginDrag, onEndDrag, isColumnDragging, baseWidth, type, ...other }) => {
+const Column = ({ onBeginDrag, onEndDrag, isColumnDragging, pendingEntries, type, ...other }) => {
     const passedProps = columnProps[type]({
-        baseWidth,
         type,
         onRetry: other.entryGetShort,
-        // onUnmount: (col) => other.dashboardResetColumnEntries(col.get('id')),
         iconType: 'entries',
-        ...other,
-        pendingEntries: other.column ? other.pendingEntries.get(other.column.id) :
-            other.pendingEntries.get(type),
+        pendingEntries: other.column ?
+            pendingEntries.get(other.column.id) :
+            pendingEntries.get(type),
+        ...other
     });
+    const fetchingItems = passedProps.column.flags.fetchingItems;
     return (
       <ColumnHeader
         readOnly={passedProps.readOnly}
@@ -58,14 +59,14 @@ const Column = ({ onBeginDrag, onEndDrag, isColumnDragging, baseWidth, type, ...
         dataSource={passedProps.dataSource}
         onSearch={passedProps.onSearch}
       >
-        {passedProps.fetching && passedProps.column.entriesList.size === 0 &&
+        {fetchingItems && passedProps.column.itemsList.size === 0 &&
           <DataLoader
             flag={true}
             timeout={500}
             className="column__data-loader"
           />
         }
-        {(!passedProps.column || passedProps.column.entriesList.size === 0) && !passedProps.fetching &&
+        {(!passedProps.column || passedProps.column.itemsList.size === 0) && !fetchingItems &&
           <ColumnEmptyPlaceholder
             type={type}
             intl={passedProps.intl}
@@ -85,45 +86,19 @@ Column.propTypes = {
     onBeginDrag: PropTypes.func,
     onEndDrag: PropTypes.func,
     isColumnDragging: PropTypes.func,
+    pendingEntries: PropTypes.shape(),
     readOnly: PropTypes.bool,
 };
 
 const mapStateToProps = (state, ownProps) => {
-    const { ethAddress } = ownProps;
-    const { fetchingEntries, fetchingMoreEntries, moreEntries } =
-        selectProfileEntriesFlags(state, ethAddress);
+    const { columnId } = ownProps;
+
     return {
-        baseUrl: selectBaseUrl(state),
-        blockNr: state.externalProcState.getIn(['geth', 'status', 'blockNr']),
-        canClaimPending: state.entryState.getIn(['flags', 'canClaimPending']),
-        column: state.dashboardState.getIn(['columnById', ownProps.columnId]),
-        drafts: state.draftState.get('drafts'),
-        fetchingEntryBalance: state.entryState.getIn(['flags', 'fetchingEntryBalance']),
-        hideEntrySettings: selectHideEntrySettings(state),
-        loggedEthAddress: selectLoggedEthAddress(state),
-        pendingClaims: selectAllPendingClaims(state),
+        column: state.dashboardState.getIn(['columnById', columnId]) || new ColumnRecord({ id: columnId}),
         pendingEntries: state.entryState.getIn(['flags', 'pendingEntries']),
-        pendingVotes: selectAllPendingVotes(state),
-        profiles: state.profileState.get('byEthAddress'),
-        searchQuery: state.searchState.get('query'),
-        entries: state.entryState.get('byId'),
-        profileEntriesList: state.entryState.getIn(['profileEntries', ethAddress, 'entryIds']),
-        fetchingEntries,
-        fetchingMoreEntries,
-        moreProfileEntries: moreEntries,
-        fetchingFollowers: selectFetchingFollowers(state, ethAddress),
-        fetchingMoreFollowers: selectFetchingMoreFollowers(state, ethAddress),
-        followers: selectFollowers(state, ethAddress),
-        moreFollowers: selectMoreFollowers(state, ethAddress),
-        fetchingFollowings: selectFetchingFollowings(state, ethAddress),
-        fetchingMoreFollowings: selectFetchingMoreFollowings(state, ethAddress),
-        followings: selectFollowings(state, ethAddress),
-        moreFollowings: selectMoreFollowings(state, ethAddress),
         lists: selectListsAll(state),
         tagSearchResults: selectTagSearchResults(state),
         profileSearchResults: selectProfileSearchResults(state),
-        profileExists: selectProfileExists(state),
-        tagExists: selectTagExists(state)
     };
 };
 
@@ -140,15 +115,14 @@ const mapDispatchToProps = {
     entryMoreStreamIterator,
     entryStreamIterator,
     entryGetShort,
+    profileCommentsIterator,
     profileFollowersIterator,
+    profileMoreCommentsIterator,
     profileMoreFollowersIterator,
     profileFollowingsIterator,
     profileMoreFollowingsIterator,
-    entryPageShow,
     searchProfiles,
     searchTags,
-    searchResetResults,
-    toggleOutsideNavigation
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DropTarget(
