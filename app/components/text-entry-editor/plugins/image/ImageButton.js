@@ -71,22 +71,27 @@ export default class BlockButton extends Component {
                 this.setState({
                     isAddingImage: false,
                     dialogOpen: false
+                }, () => {
+                    const blockWithImage = insertDataBlock(this.props.editorState, {
+                        files: imgHashes,
+                        ...data
+                    });
+                    return this.props.onChange(blockWithImage);
                 });
-                // verify if editor is in focus, and blur it;
-                if (document.activeElement.contentEditable === 'true') {
-                    document.activeElement.blur();
-                }
-                this.props.onChange(insertDataBlock(this.props.editorState, {
-                    files: imgHashes,
-                    ...data
-                }));
             });
         }).catch((reason) => {
-            this.props.onImageError(reason);
+            this.setState({
+                isAddingImage: false,
+                dialogOpen: false,
+                error: reason
+            }, () => {
+                this.props.onImageError(reason);
+            });
         });
     }
 
     render () {
+        
         return (
           <div>
             <Icon

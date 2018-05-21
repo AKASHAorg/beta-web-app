@@ -20,6 +20,7 @@ class EntryEditor extends Component {
             imageErr: null
         };
     }
+
     updateCaretPosition = (newSelectionState) => {
         const anchorKey = newSelectionState.getAnchorKey();
         const dataKey = `${anchorKey}-0-0`;
@@ -31,9 +32,11 @@ class EntryEditor extends Component {
             targetNode.scrollIntoView();
         }
     };
+
     focus = () => {
         this.editor.focus();
     }
+
     _handleImageError = (err) => {
         this.setState({
             imageErr: err
@@ -47,9 +50,11 @@ class EntryEditor extends Component {
             this.updateCaretPosition(currSelection);
         }
     }
+
     _handleEditorChange = (editorState) => {
         this.props.onChange(editorState);
     };
+
     _handleSidebarToggle = (isOpen) => {
         this.setState({
             sidebarOpen: isOpen,
@@ -68,6 +73,7 @@ class EntryEditor extends Component {
         }
         return '';
     }
+
     _renderSidebar = ({ plugins, editorState, onChange }) => {
         const { showSidebar, readOnly, showTerms, onError, sidebarReposition } = this.props;
         if (showSidebar && !readOnly) {
