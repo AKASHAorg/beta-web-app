@@ -167,7 +167,6 @@ class EntryCard extends Component {
                 entry={entry}
                 isOwnEntry={this.isOwnEntry()}
                 large={large}
-                openVersionsPanel={this.openVersionsPanel}
                 onEntryVersionNavigation={this._handleNavigation}
                 onDraftNavigation={this._handleNavigation}
                 loading={isPending}
@@ -194,19 +193,19 @@ class EntryCard extends Component {
                   />
                 </div>
               </Link>,
-                !hideContent && entryType === 1 &&
-                  <WebsiteInfoCard
-                    key={`${entryId}-entryCard`}
-                    baseUrl={baseUrl}
-                    baseWidth={large ? largeCard : smallCard}
-                    cardInfo={content.get('cardInfo')}
-                    hasCard={!!hasContent}
-                    onClick={toggleOutsideNavigation}
-                    maxImageHeight={150}
-                    infoExtracted
-                    intl={intl}
-                  />,
-                !hideContent && entryType === 0 &&
+              !hideContent && entryType === 1 &&
+                <WebsiteInfoCard
+                  key={`${entryId}-entryCard`}
+                  baseUrl={baseUrl}
+                  baseWidth={large ? largeCard : smallCard}
+                  cardInfo={content.get('cardInfo')}
+                  hasCard={!!hasContent}
+                  onClick={toggleOutsideNavigation}
+                  maxImageHeight={150}
+                  infoExtracted
+                  intl={intl}
+                />,
+              !hideContent && entryType === 0 &&
                 <div className="entry-card__title" key={`${entryId}-title`}>
                   <Link
                     className="unstyled-link"
