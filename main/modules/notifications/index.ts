@@ -1,3 +1,5 @@
 import subscribe from './subscribe';
 
-export default [subscribe];
+const exported: any = [subscribe];
+
+export default exported;

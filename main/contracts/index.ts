@@ -1,5 +1,5 @@
-const initContracts = require('@akashaproject/contracts.js');
-const hash = require('object-hash');
+import hash from 'object-hash';
+import initContracts from '@akashaproject/contracts.js';
 import { web3Api } from '../services';
 import { descend, filter, last, prop, sortWith, take, uniq, head, isNil } from 'ramda';
 import * as BlPromise from 'bluebird';

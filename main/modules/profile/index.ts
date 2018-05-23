@@ -28,7 +28,7 @@ import essenceIterator from './essence-iterator';
 import votesIterator from './votes-iterator';
 import karmaRanking from './ranking';
 
-export default [
+const exported: any =  [
     essenceIterator,
     transfer,
     cyclingStates,
@@ -59,3 +59,5 @@ export default [
     votesIterator,
     karmaRanking
 ];
+
+export default exported;

@@ -3,6 +3,7 @@
     "target": "es6",
     "removeComments": true,
     "moduleResolution": "node",
+    "declaration": true,
     "noLib": false,
     "sourceMap": true,
     "preserveConstEnums": true,

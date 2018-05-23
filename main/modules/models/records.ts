@@ -64,10 +64,10 @@ class Entries {
     }
 
 }
-export const entries = new Entries();
-export const profiles = new Entries();
-export const comments = new Entries();
-export const mixed = new Entries();
-export const eventCache = new Entries();
+export const entries: any = new Entries();
+export const profiles: any = new Entries();
+export const comments: any = new Entries();
+export const mixed: any = new Entries();
+export const eventCache: any = new Entries();
 mixed.setOptions({ max: 1024, maxAge: 1000 * 60 * 15 });
 eventCache.setOptions({ max: 2048, maxAge: 1000 * 60 * 120 });

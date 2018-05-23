@@ -29,6 +29,6 @@ export const regenWeb3 = () => {
     return web3Regen;
 };
 
-export const web3Api = new Service();
-export const ipfsApi = new Service();
-export const ipfsProvider = new Service();
+export const web3Api: any = new Service();
+export const ipfsApi: any = new Service();
+export const ipfsProvider: any = new Service();

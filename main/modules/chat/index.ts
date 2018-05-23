@@ -4,4 +4,5 @@ import leave from './leave';
 import peerCount from './peers';
 import getRooms from './current-rooms';
 
-export default [join, post, leave, peerCount, getRooms];
+const e: any = [join, post, leave, peerCount, getRooms];
+export default e;

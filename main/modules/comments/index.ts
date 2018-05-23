@@ -11,7 +11,7 @@ import upvoteComment from './upvote-comment';
 import voteOf from './vote-of';
 import getScore from './get-score';
 
-export default [
+const exported: any = [
     addComment,
     commentsCount,
     getComment,
@@ -25,3 +25,5 @@ export default [
     voteOf,
     getScore
 ];
+
+export default exported;

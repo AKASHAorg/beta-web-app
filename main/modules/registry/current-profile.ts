@@ -4,4 +4,5 @@ import resolveEthAddress from './resolve-ethaddress';
 const execute = () => resolveEthAddress.execute(
     { ethAddress: web3Api.instance.eth.defaultAccount }
 );
-export default { execute, name: 'getCurrentProfile' };
+const exported: any = { execute, name: 'getCurrentProfile' };
+export default exported;

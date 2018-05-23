@@ -30,7 +30,7 @@ import voteRatio from './vote-ratio';
 import getVoteEndPeriod from './vote-endperiod';
 import myVotesIterator from './my-votes-iterator';
 
-export default [
+const exported: any = [
     canClaimVote,
     claimVote,
     entryCountProfile,
@@ -63,3 +63,4 @@ export default [
     getVoteEndPeriod,
     myVotesIterator
 ];
+export default exported;

@@ -41,5 +41,6 @@ class EntriesCache {
         return this.canVote.indexOf(entryId) !== -1;
     }
 }
+const eC: any =  new EntriesCache();
 
-export default new EntriesCache();
+export default eC;

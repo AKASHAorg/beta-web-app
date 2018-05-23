@@ -8,4 +8,6 @@ import start from './start';
 import status from './status';
 import stop from './stop';
 
-export default [createImage, getConfig, getPorts, logs, resolve, setPorts, start, status, stop];
+const exported: any = [createImage, getConfig, getPorts, logs, resolve, setPorts, start, status, stop];
+
+export default exported;

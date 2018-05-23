@@ -34,5 +34,5 @@ class Notifications {
         }
     }
 }
-
-export default new Notifications();
+const n: any = new Notifications();
+export default n;
