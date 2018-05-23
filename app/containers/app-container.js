@@ -16,7 +16,7 @@ import { userSettingsAddTrustedDomain, userSettingsSave } from '../local-flux/ac
 import { errorDeleteFatal } from '../local-flux/actions/error-actions';
 import { errorMessages, generalMessages } from '../locale-data/messages';
 import { DashboardPage, EntryPageContainer, SearchPage, NewTextEntryPage, NewLinkEntryPage } from './';
-import { AppErrorBoundary, AppPreferences, ManafyModal, NavigateAwayModal,
+import { AppErrorBoundary, AppPreferences, CommentPage, ManafyModal, NavigateAwayModal,
     DataLoader, ErrorNotification, GethDetailsModal, GuestModal, Highlights,
     IpfsDetailsModal, Lists, ListEntries, MyEntries, NavigationModal, NewEntrySecondarySidebar,
     Notification, NewDashboardModal, NotificationsPanel, PageContent, PreviewPanel,
@@ -205,7 +205,6 @@ class AppContainer extends Component {
                         </SecondarySidebar>
                         <PageContent showSecondarySidebar={appState.get('showSecondarySidebar')}>
                           <Route exact path="/@:akashaId" component={ProfilePage} />
-                          <Route exact path="/0x:ethAddress" component={ProfilePage} />
                           {unlocked &&
                             <Route path="/profileoverview/myentries" component={MyEntries} />
                           }
@@ -225,6 +224,7 @@ class AppContainer extends Component {
                             <Route path="/profileoverview/preferences" component={AppPreferences} />
                           }
                           <Switch location={isOverlay ? this.previousLocation : location}>
+                            <Route exact path="/0x:ethAddress" component={ProfilePage} />
                             <Route path="/dashboard/:dashboardId?" component={DashboardPage} />
                             {unlocked &&
                               <Route path="/draft/article/:draftId" component={NewTextEntryPage} />
@@ -232,15 +232,19 @@ class AppContainer extends Component {
                             {unlocked &&
                               <Route path="/draft/link/:draftId" component={NewLinkEntryPage} />
                             }                       
+                            <Route path="/@:akashaId/:entryId/comment/:commentId" component={CommentPage} />
+                            <Route path="/0x:ethAddress/:entryId/comment/:commentId" component={CommentPage} />
                             <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
                             <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
                             <Route path="/search" component={SearchPage} />
                           </Switch>
                           {isOverlay &&
-                            <div>
+                            <Switch>
+                              <Route path="/@:akashaId/:entryId/comment/:commentId" component={CommentPage} />
+                              <Route path="/0x:ethAddress/:entryId/comment/:commentId" component={CommentPage} />
                               <Route path="/@:akashaId/:entryId/:version?" component={EntryPageContainer} />
                               <Route path="/0x:ethAddress/:entryId/:version?" component={EntryPageContainer} />
-                            </div>
+                            </Switch>
                           }
                         </PageContent>
                         <TopBar
