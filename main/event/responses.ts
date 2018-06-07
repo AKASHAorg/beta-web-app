@@ -80,7 +80,7 @@ class GethStatus {
 
 }
 
-export const gethStatus = new GethStatus();
+export const gethStatus: any = new GethStatus();
 
 /**
  *

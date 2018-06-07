@@ -21,16 +21,17 @@ export default merge(baseConfig, {
         minimizer: [
             new UglifyJsPlugin({
                 uglifyOptions: {
-                    ecma: 6,
-                    mangle: false,
-                    compress: false,
+                    compress: {
+                        unused: false
+                    },
                     output: {
-                        comments: false
+                        comments: false,
+                        ascii_only: true,
                     }
                 },
                 cache: true,
                 parallel: true,
-                sourceMap: false
+                sourceMap: true
             }),
             new OptimizeCssAssetsPlugin({
                 cssProcessorOptions: {discardComments: {removeAll: true}},

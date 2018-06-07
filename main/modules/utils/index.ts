@@ -4,4 +4,5 @@ import checkUpdates from './check-updates';
 import uploadImage from './upload-image';
 import manaCosts from './mana-costs';
 
-export default [backupStore, checkUpdates, osInfo, uploadImage, manaCosts];
+const exported: any = [backupStore, checkUpdates, osInfo, uploadImage, manaCosts];
+export default exported;

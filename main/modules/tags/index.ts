@@ -14,7 +14,7 @@ import subsIterator from './subs-iterator';
 import isSubscribed from './is-subscribed';
 import searchTag from './search-tag';
 
-export default [
+const exported: any = [
     canCreate,
     checkFormat,
     createTag,
@@ -31,3 +31,5 @@ export default [
     isSubscribed,
     searchTag
 ];
+
+export default exported;

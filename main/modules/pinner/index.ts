@@ -1,3 +1,5 @@
 import runner from './runner';
 
-export default [runner];
+const exported: any = [runner];
+
+export default exported;

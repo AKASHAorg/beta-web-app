@@ -5,4 +5,5 @@ import logout from './logout';
 import requestAeth from './request-aeth';
 import regenSession from './regen-session';
 
-export default [generateKey, getLocalIdentities, login, logout, requestAeth, regenSession];
+const e: any = [generateKey, getLocalIdentities, login, logout, requestAeth, regenSession];
+export default e;

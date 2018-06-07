@@ -5,4 +5,5 @@ import status from './status';
 import stop from './stop';
 import syncStatus from './sync-status';
 
-export default [options, restart, start, status, stop, syncStatus];
+const exported: any = [options, restart, start, status, stop, syncStatus];
+export default exported;

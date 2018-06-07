@@ -60,7 +60,7 @@ class RoomFactory {
     }
 }
 
-export const roomFactory = new RoomFactory();
+export const roomFactory: any = new RoomFactory();
 
 const execute = Promise.coroutine(function* (data: { channels: string[] }, cb) {
     if (!data.channels || !data.channels.length) {

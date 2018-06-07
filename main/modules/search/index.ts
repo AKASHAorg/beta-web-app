@@ -5,4 +5,6 @@ import findTags from './find-tags';
 import syncEntries from './sync-entries';
 import findProfiles from './find-profiles';
 
-export default [query, flush, syncTags, findTags, syncEntries, findProfiles];
+const exported: any = [query, flush, syncTags, findTags, syncEntries, findProfiles];
+
+export default exported;
