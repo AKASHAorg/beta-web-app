@@ -1,55 +1,59 @@
+// @flow
 import { supportedProtocols } from './parser-config';
 import { getResizedImages } from '../imageUtils';
 import { uploadImage } from '../../local-flux/services/utils-service';
 
+const PARSER_URL = 'https://beta.akasha.world/fetch-link';
+
 class ParserUtils {
-    constructor () {
-        this.fetchRequestParams = {
-            method: 'GET',
-            mode: 'no-cors'
-        };
+    fetchRequestParams = {
+        method: 'GET',
+        mode: 'no-cors'
     }
-
-    makeRequest = (url, contentType = 'application/json') => {
-        const reqHeaders = new Headers();
-        reqHeaders.append('Content-Type', contentType);
-        const reqParams = {
-            ...this.fetchRequestParams,
-            headers: reqHeaders
-        };
+    makeParserRequest = (url: string) => {
+        const parserUrl = `${PARSER_URL}?url=${url.toString()}`;
         try {
-            const req = new Request(url, reqParams);
-            return new Promise((resolve, reject) => {
-                fetch(req).then(resolve).catch(reject);
-                setTimeout(() => {
-                    const error = new Error('Request timeout!');
-                    error.code = 408;
-                    reject(error);
-                }, 5000);
-            });
+            return fetch(parserUrl).then(resp => resp.json());
         } catch (ex) {
-            return Promise.reject('error!');
+            return Promise.reject('Unexpected error!');
         }
+        // const reqParams = {
+        //     ...this.fetchRequestParams,
+        //     headers: reqHeaders
+        // };
+        // try {
+        //     const req = new Request(url, reqParams);
+        //     return new Promise((resolve, reject) => {
+        //         fetch(req).then(resolve).catch(reject);
+        //         setTimeout(() => {
+        //             const error = new Error('Request timeout!');
+        //             error.code = 408;
+        //             reject(error);
+        //         }, 5000);
+        //     });
+        // } catch (ex) {
+        //     return Promise.reject('error!');
+        // }
+
     }
 
-    getUrlQueryParams = search => new URLSearchParams(search)
+    getUrlQueryParams = (search: string) => new URLSearchParams(search)
 
-    getAbsoluteUrl = (url, parsedUrl) => {
+    getAbsoluteUrl = (url: string, parsedUrl: Object) => {
         if (url) {
             return new URL(url, parsedUrl.href).href;
         }
         return null;
     }
 
-    formatUrl = (url) => {
-        const urlPrefix = ParserUtils.parseUrl(url).protocol;
-        if (urlPrefix && supportedProtocols.includes(urlPrefix)) {
-            return url;
+    formatUrl = (url: string) => {
+        if (!url.startsWith('http')) {
+            return `http://${url}`;
         }
         return `${supportedProtocols[0]}//${url}`;
     }
 
-    static parseUrl = (url) => {
+    static parseUrl = (url: string) => {
         const link = document.createElement('a');
         link.href = url;
         return {
@@ -63,12 +67,12 @@ class ParserUtils {
         };
     }
 
-    parseHtmlFromString = (htmlString) => {
+    parseHtmlFromString = (htmlString: string) => {
         const superParser = new DOMParser();
         return superParser.parseFromString(htmlString, 'text/html');
     }
 
-    resizeImage = (image, { ipfsFile }) => {
+    resizeImage = (image:string, { ipfsFile }: Object) => {
         let filePromises = [];
 
         if (image) {

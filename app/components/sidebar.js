@@ -155,16 +155,15 @@ class Sidebar extends Component {
                 </div>
               </li>
               <li
-                className="sidebar__entry-menu-buttons_wrapper sidebar__entry-menu-buttons_wrapper-disabled"
+                className="sidebar__entry-menu-buttons_wrapper"
               >
                 <Button
-                  type="entry-menu-button-disabled"
+                  type="entry-menu-button"
                   size="large"
                   className="borderless"
                   icon="link"
                   ghost
-                  disabled
-                  onClick={() => {}}
+                  onClick={this._navigateTo('/draft/link/new')}
                 />
                 <div
                   className="sidebar__entry-menu-buttons_text"
