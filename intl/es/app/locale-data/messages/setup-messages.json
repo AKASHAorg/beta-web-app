@@ -102,7 +102,7 @@
     {
         "id": "app.setup.normalSyncDescription",
         "description": "info when user selects normal sync mode",
-        "defaultMessage": "¡Enhorabuena, es usted un pionero sincronizándose con la red de prueba de Etherem! Recomendamos la Sincronización Normal con el setup Express, pero los más valientes también pueden escoger la (muy) experimental Sincronización Ligera."
+        "defaultMessage": "¡Enhorabuena, es usted un pionero sincronizándose con la red de prueba de Ethereum! Recomendamos la Sincronización Normal con el setup Express, pero los más valientes también pueden escoger la (muy) experimental Sincronización Ligera! :)"
     },
     {
         "id": "app.setup.normalSyncDescriptionAlt",
@@ -318,5 +318,20 @@
         "id": "app.setup.tutorialManaAlt",
         "description": "text for tutorial Modal",
         "defaultMessage": "Alternativamente, puede dar click en el indicador de Mana de la barra de a lado, junto a su foto de perfi, y seleccionar Convertir."
+    },
+    {
+        "id": "app.setup.gethDescription",
+        "description": "geth service description",
+        "defaultMessage": "You are using a third party web3 provider."
+    },
+    {
+        "id": "app.setup.ipfsDescription",
+        "description": "ipfs service description",
+        "defaultMessage": "You are using the JavaScript implementation of IPFS."
+    },
+    {
+        "id": "app.setup.ipfsStorageName",
+        "description": "IPFS storage name input field label",
+        "defaultMessage": "IPFS storage name"
     }
 ]
