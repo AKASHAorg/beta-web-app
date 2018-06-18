@@ -10,15 +10,16 @@ import { showNotificationsPanel, showTransactionsLog, toggleAethWallet,
     toggleEthWallet, toggleGuestModal } from '../../local-flux/actions/app-actions';
 import { selectBalance, selectEntryFlag, selectFullEntry, selectLoggedProfile,
     selectLoggedProfileData, selectNotificationsPanel, selectPublishingActions, selectShowWallet,
-    selectTransactionsLog, selectUnreadNotifications } from '../../local-flux/selectors';
+    selectTransactionsLog, selectUnreadNotifications, selectCyclingStates } from '../../local-flux/selectors';
 
 class TopBar extends PureComponent {
     _renderComponent = (Component, injectedProps) =>
         props => <Component {...injectedProps} {...props} />;
 
     render () {
-        const { balance, fullEntry, hasPendingActions, notificationsLoaded, notificationsPanelOpen,
-            showSecondarySidebar, showWallet, transactionsLogOpen, unreadNotifications, unlocked } = this.props;
+        const { balance, cyclingStates, fullEntry, hasPendingActions, notificationsLoaded,
+            notificationsPanelOpen, showSecondarySidebar, showWallet, transactionsLogOpen,
+            unreadNotifications, unlocked } = this.props;
         const className = classNames('flex-center-y top-bar', {
             'top-bar_full': !showSecondarySidebar || fullEntry,
             'top-bar_default': !fullEntry
@@ -36,6 +37,7 @@ class TopBar extends PureComponent {
             </div>
             <TopBarRight
               balance={balance}
+              cyclingStates={cyclingStates}
               hasPendingActions={hasPendingActions}
               notificationsLoaded={notificationsLoaded}
               notificationsPanelOpen={notificationsPanelOpen}
@@ -56,6 +58,7 @@ class TopBar extends PureComponent {
 
 TopBar.propTypes = {
     balance: PropTypes.shape().isRequired,
+    cyclingStates: PropTypes.shape().isRequired,
     fullEntry: PropTypes.bool,
     hasPendingActions: PropTypes.bool,
     history: PropTypes.shape(),
@@ -77,6 +80,7 @@ TopBar.propTypes = {
 
 const mapStateToProps = state => ({
     balance: selectBalance(state),
+    cyclingStates: selectCyclingStates(state),
     fullEntry: !!selectFullEntry(state) || !!selectEntryFlag(state, 'fetchingFullEntry'),
     hasPendingActions: !!selectPublishingActions(state).size,
     loggedProfile: selectLoggedProfile(state),

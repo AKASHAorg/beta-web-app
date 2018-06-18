@@ -90,6 +90,7 @@ function* launchHomeActions () {
                 limit: 1000
             }));
             yield put(profileActions.profileManaBurned());
+            yield put(profileActions.profileCyclingStates());
         }
     }
 }
