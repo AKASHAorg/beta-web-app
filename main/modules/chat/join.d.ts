@@ -1,3 +1,4 @@
+/// <reference types="bluebird" />
 import * as Promise from 'bluebird';
 export declare const roomFactory: any;
 declare const _default: {

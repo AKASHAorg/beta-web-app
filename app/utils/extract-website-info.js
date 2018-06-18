@@ -104,7 +104,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
             extension = pathname.split('.')[pathname.split('.').length - 1];
             documentName = pathname.split('/')[pathname.split('/').length - 1];
         }
-
+        
         if (extension && supportedDocs.includes(extension)) {
             return Promise.resolve({
                 url: this.parsedUrl.href,

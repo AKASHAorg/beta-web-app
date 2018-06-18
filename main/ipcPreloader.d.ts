@@ -24,5 +24,5 @@ export declare class ApiRequest extends ApiListener {
     disable(): {
         listening: boolean;
     };
-    registerListener(listener: (data: any) => {}): void;
+    registerListener(listener: (data) => {}): void;
 }

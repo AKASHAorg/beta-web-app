@@ -917,6 +917,6 @@ const generalMessages = defineMessages({
         id: 'app.general.loadingImageFailed',
         description: 'message to show when an image failed to load',
         defaultMessage: 'Cannot load image :('
-    }
+    },
 });
 export { generalMessages };
