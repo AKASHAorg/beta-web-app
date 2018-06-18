@@ -345,6 +345,6 @@ const formMessages = defineMessages({
         id: 'app.form.storageNameInvalid',
         description: 'error message for ipfs storage name field',
         defaultMessage: 'Storage name cannot contain slash (/) character'
-    }
+    },
 });
 export { formMessages };

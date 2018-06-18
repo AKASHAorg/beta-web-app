@@ -528,6 +528,6 @@ const entryMessages = defineMessages({
             many {comments}
             other {comments}
         }`
-    },
+    }
 });
 export { entryMessages };

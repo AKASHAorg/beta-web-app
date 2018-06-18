@@ -838,6 +838,26 @@ const generalMessages = defineMessages({
         description: 'report issue',
         defaultMessage: 'Report issue'
     },
+    loadMore: {
+        id: 'app.general.loadMore',
+        description: 'load more',
+        defaultMessage: 'Load more'
+    },
+    externalNavigationAreYouSure: {
+        id: 'app.general.externalNavigationAreYouSure',
+        description: 'warning displayed when clicking an external link',
+        defaultMessage: 'Are you sure you want to go there?'
+    },
+    loadingImage: {
+        id: 'app.general.loadingImage',
+        description: 'message to display when an image is in loading state',
+        defaultMessage: 'Loading image'
+    },
+    loadingImageFailed: {
+        id: 'app.general.loadingImageFailed',
+        description: 'message to show when an image failed to load',
+        defaultMessage: 'Cannot load image :('
+    },
     or: {
         id: 'app.general.or',
         description: 'or',
@@ -859,24 +879,14 @@ const generalMessages = defineMessages({
         defaultMessage: 'While in guest mode you have access to a limited part of the Akasha app, and cannot do any action that requires a transaction.'
     },
     unlockVault: {
-        id: 'app.general.unlockVault',
-        description: 'info for guest mode modal',
-        defaultMessage: 'Please refresh the page to login after unlocking Metamask.'
+        id: "app.general.unlockVault",
+        description: "info for guest mode modal",
+        defaultMessage: "Please refresh the page to login after unlocking Metamask."
     },
     thanks: {
         id: 'app.general.thanks',
         description: 'thanks',
         defaultMessage: 'Thanks!'
-    },
-    externalNavigationAreYouSure: {
-        id: 'app.general.externalNavigationAreYouSure',
-        description: 'warning displayed when clicking an external link',
-        defaultMessage: 'Are you sure you want to go there?'
-    },
-    loadingImage: {
-        id: 'app.general.loadingImage',
-        description: 'message to display when an image is in loading state',
-        defaultMessage: 'Loading image'
     },
     loginUnlock: {
         id: 'app.general.loginUnlock',
@@ -893,11 +903,6 @@ const generalMessages = defineMessages({
         description: 'version',
         defaultMessage: 'Version'
     },
-    loadMore: {
-        id: 'app.general.loadMore',
-        description: 'load more',
-        defaultMessage: 'Load more'
-    },
     and: {
         id: 'app.general.and',
         description: 'and',
@@ -912,11 +917,6 @@ const generalMessages = defineMessages({
         id: 'app.general.decline',
         description: 'decline',
         defaultMessage: 'Decline'
-    },
-    loadingImageFailed: {
-        id: 'app.general.loadingImageFailed',
-        description: 'message to show when an image failed to load',
-        defaultMessage: 'Cannot load image :('
     },
 });
 export { generalMessages };
