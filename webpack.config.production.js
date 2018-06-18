@@ -10,7 +10,7 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 // const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 // @TODO extract akasha themes in separated files
 export default merge(baseConfig, {
-    devtool: 'source-map',
+    devtool: 'none',
     entry: [process.env.DARK_THEME ? './main/index-dark.js' : './main/index.js'],
 
     output: {

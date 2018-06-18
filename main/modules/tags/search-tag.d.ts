@@ -1,4 +1,3 @@
-/// <reference types="bluebird" />
 import * as Promise from 'bluebird';
 export declare const cacheKey = "search:tags:all";
 declare const _default: {
