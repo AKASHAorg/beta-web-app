@@ -1,4 +1,3 @@
-/// <reference types="bluebird" />
 import * as Promise from 'bluebird';
 export declare const DRAFT_BLOCKS = "blocks";
 export declare const ATOMIC_TYPE = "atomic";
@@ -22,9 +21,9 @@ declare class IpfsEntry {
         version: number;
     }): Promise<any>;
     edit(content: any, tags: any[], entryType: number, previousHash: any): any;
-    private _filterForImages();
-    private _normalizeImage(data);
-    private _uploadMediaDraft();
+    private _filterForImages;
+    private _normalizeImage;
+    private _uploadMediaDraft;
 }
 export declare const getShortContent: (a1: any) => Promise<{}>;
 export declare const getFullContent: (a1: string, a2: any) => Promise<{}>;
