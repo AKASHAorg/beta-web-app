@@ -1,3 +1,4 @@
+/// <reference types="bluebird" />
 import * as Promise from 'bluebird';
 declare const _default: {
     execute: (a1: any, a2: any) => Promise<{}>;

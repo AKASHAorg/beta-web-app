@@ -1,3 +1,4 @@
+/// <reference types="bluebird" />
 import * as BlPromise from 'bluebird';
 export declare class Contracts {
     instance: any;
@@ -16,7 +17,7 @@ export declare class Contracts {
     fromEventFilter(ethEvent: any, args: any, toBlock: number | string, limit: number, options: {
         lastIndex?: number;
         reversed?: boolean;
-    }, aditionalFilter: (data: any) => boolean): Promise<any>;
+    }, aditionalFilter: (data) => boolean): Promise<any>;
 }
 declare const _default: Contracts;
 export default _default;
