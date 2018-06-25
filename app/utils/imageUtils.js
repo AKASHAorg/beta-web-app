@@ -283,6 +283,12 @@ const getRawDataUrl = file =>
 
 const getImageSize = (imagePath, options) => {
     const image = document.createElement('img');
+    
+    // Prevent tainting canvas with cors resource
+    // Header `Access-Control-Allow-Origin: *` still needs to be present on the origin!
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
+
+    image.crossOrigin = 'Anonymous';
     return new Promise((resolve, reject) => {
         image.onload = () => {
             const imageWidth = image.width;

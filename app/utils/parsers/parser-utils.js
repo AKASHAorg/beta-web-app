@@ -69,6 +69,9 @@ class ParserUtils {
                 promise = uploadImage(results[0]);
             }
             return promise;
+        }).catch(ex => {
+            console.log('error in image resizer', ex);
+            return Promise.resolve();
         });
     }
 }

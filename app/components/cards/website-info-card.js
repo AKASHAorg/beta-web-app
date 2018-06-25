@@ -76,6 +76,7 @@ class WebsiteInfoCard extends Component {
                   style={{ height: maxImageHeight }}
                 >
                   <img
+                    crossOrigin="Anonymous"
                     alt="card-cover"
                     src={getImageSrc(image.toJS(), baseUrl, baseWidth)}
                   />

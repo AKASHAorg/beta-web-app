@@ -89,6 +89,7 @@ class LazyImageLoader extends Component {
             style={{ width: '100%' }}
             onError={this._handleImageError(source)}
             onLoad={this._handleImageLoad(source)}
+            crossOrigin="Anonymous"
           />
         ];
     }
