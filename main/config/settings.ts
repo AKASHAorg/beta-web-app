@@ -50,7 +50,9 @@ export const IPFS_BOOTSTRAP_PEERS = [
 export const DEFAULT_IPFS_CONFIG = {
     Addresses: {
         Swarm: [
-            '/dns4/akasha.cloud/tcp/443/wss/p2p-webrtc-star'
+            '/dns4/akasha.cloud/tcp/443/wss/p2p-webrtc-star',
+            '/dns4/wrtc-star.discovery.libp2p.io/tcp/443/wss/p2p-webrtc-star',
+            '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
         ],
         API: '',
         Gateway: ''

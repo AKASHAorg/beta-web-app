@@ -1,4 +1,3 @@
-/// <reference types="loglevel" />
 import * as logger from 'loglevel';
 declare class AppLogger {
     loggers: Object;
