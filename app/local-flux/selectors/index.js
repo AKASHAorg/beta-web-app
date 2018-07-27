@@ -125,8 +125,8 @@ export const selectCommentLastIndex = (state, parent) => state.commentsState.get
 export const selectCommentVote = (state, commentId) => state.commentsState.getIn(['votes', commentId]);
 
 export const selectEntryCommentsForParent = (state, entryId, parent) => {
-    const list = state.commentsState.getIn(['byParent', parent]) || new List();
-    return list.map(id => selectComment(state, id)).filter(comm => comm.entryId === entryId);
+    const list = state.commentsState.getIn(['byParent', parent]);
+    return List(list).map(id => selectComment(state, id)).filter(comm => comm.entryId === entryId);
 };
 
 export const selectCommentsFlag = (state, flag, id) => {

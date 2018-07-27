@@ -1,7 +1,7 @@
 // @flow
 import ParserUtils from './parsers/parser-utils';
 import { metaTagsPriority, supportedDocs } from './parsers/parser-config';
-
+import { isInternalLink } from './url-utils';
 // <meta
 //    property="meta.attributes.property.textContent"
 //    content="meta.attributes.content.textContent"
@@ -9,7 +9,8 @@ import { metaTagsPriority, supportedDocs } from './parsers/parser-config';
 
 type ParserParams = {
     url: String,
-    uploadImageToIpfs: ?Boolean
+    uploadImageToIpfs: ?Boolean,
+    parseUrl: (url: String) => Object,
 };
 
 type AkashaParserResponse = {
@@ -33,6 +34,9 @@ type AkashaParserResponse = {
  *   websiteParser.getInfo().then(info: Object);
  */
 class WebsiteParser extends ParserUtils<ParserParams> {
+    url: string;
+    parsedUrl: Object;
+    uploadImageToIpfs: Object;
     constructor (params: Object): void {
         super();
         this.url = this.formatUrl(params.url);
@@ -40,7 +44,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
         this.uploadImageToIpfs = params.uploadImageToIpfs;
     }
 
-    requestWebsiteInfo = (url: String): Promise<AkashaParserResponse> =>
+    requestWebsiteInfo = (url: string): Promise<AkashaParserResponse> =>
         this.makeParserRequest(url, 'text/html').then((response) => {
             const { status_code } = response;
             if (status_code !== 200) {
@@ -95,10 +99,72 @@ class WebsiteParser extends ParserUtils<ParserParams> {
         return Promise.resolve(outputDescr);
     }
 
+    requestAkashaEntry = (entryId: string): Promise<Object> =>
+        new Promise((resolve: void, reject: void) => {
+            const ch: Object = window.Channel;
+            ch.client.entry.getEntry.once((ev, resp) => {
+                if(resp.error) {
+                    reject('some error occured when fetching entry');
+                }
+                return resolve(resp.data);
+            });
+            ch.server.entry.getEntry.send({ entryId });
+        });
+
+    getEntryIdFromUrl = () => {
+        const url = this.url;
+        const urlParts = url.split('/');
+        const entryId = urlParts[urlParts.length - 1];
+        if (entryId.length && entryId.length === 66 && entryId.startsWith('0x')) {
+            return entryId;
+        }
+        return null;
+    }
+
+    getEntryType = (entry : Object) : Number => {
+        let { type } = entry;
+        if(!type && entry.cardInfo.title.length) {
+            type = 1;
+        }
+        return type;
+    }
+
     getInfo = () => {
         const { pathname } = this.parsedUrl;
         let extension = null;
         let documentName = '';
+        const isAkashaInternalLink = isInternalLink(this.parsedUrl.host);
+
+        if(isAkashaInternalLink) {
+            const entryId = this.getEntryIdFromUrl();
+            if (entryId) {
+                return this.requestAkashaEntry(entryId).then(resp => {
+                    const entryType = this.getEntryType(resp.content);
+                    switch (entryType) {
+                        case 1:
+                            return {
+                                url: resp.content.cardInfo.url,
+                                info: {
+                                    title: resp.content.cardInfo.title,
+                                    description: resp.content.cardInfo.description,
+                                    image: resp.content.cardInfo.image
+                                }
+                            }
+                        // default is case 0/'text entry type'
+                        default:
+                            return {
+                                url: this.parsedUrl.href,
+                                info: {
+                                    title: resp.content.title,
+                                    description: resp.content.excerpt,
+                                    image: resp.content.featuredImage
+                                }
+                            }
+                    }
+
+                });
+            }
+        }
 
         if (pathname.split('.').length > 1) {
             extension = pathname.split('.')[pathname.split('.').length - 1];
