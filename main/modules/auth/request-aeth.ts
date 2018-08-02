@@ -9,7 +9,7 @@ const execute = Promise.coroutine(function*(data: RequestEtherRequest, cb) {
             .set('Content-Type', 'application/json')
             .send({ address: data.address, token: FAUCET_TOKEN })
             .end(cb1);
-    }).then((body) => {
+    }).then((body: any) => {
         if (body.ok && body.text) {
             return JSON.parse(body.text);
         }

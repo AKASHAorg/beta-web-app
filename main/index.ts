@@ -14,12 +14,12 @@ declare const ipfs;
 window.addEventListener('load', function () {
     let web3Local;
 
-    if (typeof ipfs !== 'undefined') {
-        ipfsProvider.instance = ipfs;
-    } else {
-        ipfsProvider.instance = {};
-    }
-
+    // if (typeof ipfs !== 'undefined') {
+    //     ipfsProvider.instance = ipfs;
+    // } else {
+    //     ipfsProvider.instance = {};
+    // }
+    ipfsProvider.instance = {};
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
         return web3Local.eth.getAccounts((err, accList) => {
@@ -47,7 +47,7 @@ const startApp = (web3, vault) => {
     IpfsConnector.getInstance().setOption('repo', 'ipfs#akasha-beta');
     initModules();
     // for dev only
-    // Object.defineProperty(window, 'Channel', {value: getChannels()});
+    Object.defineProperty(window, 'Channel', {value: getChannels()});
     // Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
     Object.defineProperty(window, 'contracts', {value: contracts});
     // end

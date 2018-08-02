@@ -36,11 +36,11 @@ export declare const DEFAULT_IPFS_CONFIG: {
     };
     EXPERIMENTAL: {
         pubsub: boolean;
-        relay: {
+    };
+    relay: {
+        enabled: boolean;
+        hop: {
             enabled: boolean;
-            hop: {
-                enabled: boolean;
-            };
         };
     };
 };
