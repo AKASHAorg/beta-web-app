@@ -26,4 +26,4 @@ export declare const dbs: {
         additional: {};
     };
 };
-export default function init(): Promise<{}[]>;
+export default function init(): Promise<any[]>;
