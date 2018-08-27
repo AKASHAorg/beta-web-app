@@ -20,6 +20,7 @@ window.addEventListener('load', function () {
     //     ipfsProvider.instance = {};
     // }
 
+    ipfsProvider.instance = {};
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();
         return web3Local.eth.getAccounts((err, accList) => {

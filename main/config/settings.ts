@@ -67,14 +67,14 @@ export const DEFAULT_IPFS_CONFIG = {
             Enabled: true
         }
     },
+    EXPERIMENTAL: {
+        pubsub: true,
+    },
     relay: {
         enabled: true,
         hop: {
             enabled: true
         }
-    },
-    EXPERIMENTAL: {
-        pubsub: true,
     }
 };
 // default settings

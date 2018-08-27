@@ -10,6 +10,7 @@ export { highlightMessages } from './highlight-messages';
 export { listMessages } from './list-messages';
 export { notificationMessages } from './notification-messages';
 export { profileMessages } from './profile-messages';
+export { placeholderMessages } from './placeholder-messages';
 export { searchMessages } from './search-messages';
 export { settingsMessages } from './settings-messages';
 export { setupMessages } from './setup-messages';

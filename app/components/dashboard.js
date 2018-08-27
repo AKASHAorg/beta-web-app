@@ -255,7 +255,7 @@ class Dashboard extends Component {
         const { match, dashboards, columns } = this.props;
         const { dashboardId } = match.params;
         const activeDashboard = dashboards.get(dashboardId);
-        if(this._dashboardNode) {
+        if (this._dashboardNode) {
             this._calculateColumnData(activeDashboard.get('columns'), dashboardId, columns);
         }
         this.forceUpdate();
@@ -367,6 +367,7 @@ Dashboard.propTypes = {
     match: PropTypes.shape(),
     connectDropTarget: PropTypes.func,
     dashboardReorderColumn: PropTypes.func,
+    pendingEntries: PropTypes.shape(),
 };
 
 export default withRouter(DropTarget(dragItemTypes.COLUMN, {}, connect => ({

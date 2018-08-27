@@ -13,7 +13,6 @@ declare const ipfs;
 
 window.addEventListener('load', function () {
     let web3Local;
-    // ignore ipfs companion atm
     // if (typeof ipfs !== 'undefined') {
     //     ipfsProvider.instance = ipfs;
     // } else {
@@ -47,8 +46,8 @@ const startApp = (web3, vault) => {
     IpfsConnector.getInstance().setOption('repo', 'ipfs#akasha-beta');
     initModules();
     // for dev only
-    // Object.defineProperty(window, 'Channel', {value: getChannels()});
     Object.defineProperty(window, 'ipfs', { value: IpfsConnector });
+    Object.defineProperty(window, 'Channel', {value: getChannels()});
     Object.defineProperty(window, 'contracts', {value: contracts});
     // end
 

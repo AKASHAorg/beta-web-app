@@ -92,7 +92,7 @@ class CommentList extends Component {
                 loggedProfileData={loggedProfileData}
               />
             ))}
-            {!fetchingComments && comments.map(comm => (
+            {!fetchingComments && comments.filter(c => c.entryId === entryId).map(comm => (
               <CommentThread
                 comment={comm}
                 containerRef={containerRef}
@@ -109,7 +109,7 @@ class CommentList extends Component {
                 <Spin />
               </div>
             }
-            {!fetchingComments && !commentsCount && !optimisticComments.length &&
+            {!fetchingComments && !commentsCount && !optimisticComments.length && !comments.size &&
               <div className="comment-list__placeholder">
                 <div>{intl.formatMessage(entryMessages.noCommentsFound)}</div>
                 <div>
@@ -151,6 +151,7 @@ CommentList.propTypes = {
     moreComments: PropTypes.bool,
     pendingComments: PropTypes.shape(),
     onNewCommentButtonClick: PropTypes.func,
+    noCommentsPlaceholderVisible: PropTypes.bool,
 };
 
 function mapStateToProps (state) {
