@@ -57,7 +57,7 @@ export const DEFAULT_IPFS_CONFIG = {
         API: '',
         Gateway: ''
     },
-    Bootstrap: IPFS_BOOTSTRAP_PEERS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS),
+    Bootstrap: IPFS_BOOTSTRAP_PEERS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS).concat(IPFS_CIRCUIT_RELAYS),
     Discovery: {
         MDNS: {
             Enabled: false,
@@ -67,14 +67,14 @@ export const DEFAULT_IPFS_CONFIG = {
             Enabled: true
         }
     },
+    relay: {
+        enabled: true,
+        hop: {
+            enabled: true
+        }
+    },
     EXPERIMENTAL: {
         pubsub: true,
-        relay: {
-            enabled: true,
-            hop: {
-                enabled: true
-            }
-        }
     }
 };
 // default settings
