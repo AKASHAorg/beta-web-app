@@ -19,6 +19,7 @@ window.addEventListener('load', function () {
     // } else {
     //     ipfsProvider.instance = {};
     // }
+
     ipfsProvider.instance = {};
     if (typeof web3 !== 'undefined') {
         web3Local = regenWeb3();

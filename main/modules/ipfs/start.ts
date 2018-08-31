@@ -18,24 +18,25 @@ const execute = Promise.coroutine(function* (data: IpfsStartRequest) {
     let peers;
     IpfsConnector.getInstance().setIpfsFolder(data.hasOwnProperty('storagePath') ? data.storagePath : defaultPath);
     yield initSearchDbs();
-    yield IpfsConnector.getInstance().start(isEmpty(ipfsProvider.instance) ? null : ipfsProvider.instance);
+    yield IpfsConnector.getInstance().start(null);
+    // yield IpfsConnector.getInstance().start(isEmpty(ipfsProvider.instance) ? null : ipfsProvider.instance);
 
-    if (!isEmpty(ipfsProvider.instance)) {
-        const nodeId = yield IpfsConnector.getInstance().api.apiClient.idAsync();
-        if (nodeId && (nodeId.agentVersion).includes('go-ipfs')) {
-            peers = IPFS_CIRCUIT_RELAYS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS);
-        } else {
-            peers = AKASHA_BOOTSTRAP_PEERS.concat(DEFAULT_CIRCUIT_RELAYS);
-        }
-
-        peers.forEach(peer => {
-            IpfsConnector.getInstance().api.apiClient.swarm.connect(peer, (err) => {
-                if (err) {
-                    console.error('js-ipfs swarm connect error ', err);
-                }
-            });
-        });
-    }
+    // if (!isEmpty(ipfsProvider.instance)) {
+    //     const nodeId = yield IpfsConnector.getInstance().api.apiClient.idAsync();
+    //     if (nodeId && (nodeId.agentVersion).includes('go-ipfs')) {
+    //         peers = IPFS_CIRCUIT_RELAYS.concat(AKASHA_BOOTSTRAP_PEERS).concat(DEFAULT_CIRCUIT_RELAYS);
+    //     } else {
+    //         peers = AKASHA_BOOTSTRAP_PEERS.concat(DEFAULT_CIRCUIT_RELAYS);
+    //     }
+    //
+    //     peers.forEach(peer => {
+    //         IpfsConnector.getInstance().api.apiClient.swarm.connect(peer, (err) => {
+    //             if (err) {
+    //                 console.error('js-ipfs swarm connect error ', err);
+    //             }
+    //         });
+    //     });
+    // }
 
     generalSettings.set(BASE_URL, 'https://gateway.ipfs.io/ipfs/');
     return {started: true};
