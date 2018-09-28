@@ -2,16 +2,8 @@
 import ParserUtils from './parsers/parser-utils';
 import { metaTagsPriority, supportedDocs } from './parsers/parser-config';
 import { isInternalLink } from './url-utils';
-// <meta
-//    property="meta.attributes.property.textContent"
-//    content="meta.attributes.content.textContent"
-// />
 
-type ParserParams = {
-    url: String,
-    uploadImageToIpfs: ?Boolean,
-    parseUrl: (url: String) => Object,
-};
+const AKASHA_WEB_HOSTNAME = 'beta.akasha.world';
 
 type AkashaParserResponse = {
     tags?: Array<Object>,
@@ -31,9 +23,9 @@ type AkashaParserResponse = {
  *
  * @tutorial
  *   const websiteParser = new WebsiteParser('www.akasha.world')
- *   websiteParser.getInfo().then(info: Object);
+ *   websiteParser.getInfo().then(info<Object>);
  */
-class WebsiteParser extends ParserUtils<ParserParams> {
+class WebsiteParser extends ParserUtils {
     url: string;
     parsedUrl: Object;
     uploadImageToIpfs: Object;
@@ -45,7 +37,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
     }
 
     requestWebsiteInfo = (url: string): Promise<AkashaParserResponse> =>
-        this.makeParserRequest(url, 'text/html').then((response) => {
+        this.makeParserRequest(url).then((response) => {
             const { status_code } = response;
             if (status_code !== 200) {
                 const error = new Error('Request failed! Cannot generate card!');
@@ -99,8 +91,11 @@ class WebsiteParser extends ParserUtils<ParserParams> {
         return Promise.resolve(outputDescr);
     }
 
+    assertInternalLink = () =>
+        this.parsedUrl.host.includes(AKASHA_WEB_HOSTNAME);
+
     requestAkashaEntry = (entryId: string): Promise<Object> =>
-        new Promise((resolve: void, reject: void) => {
+        new Promise((resolve: function, reject: function) => {
             const ch: Object = window.Channel;
             ch.client.entry.getEntry.once((ev, resp) => {
                 if(resp.error) {
@@ -121,7 +116,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
         return null;
     }
 
-    getEntryType = (entry : Object) : Number => {
+    getEntryType = (entry : Object) : number => {
         let { type } = entry;
         if(!type && entry.cardInfo.title.length) {
             type = 1;
@@ -133,7 +128,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
         const { pathname } = this.parsedUrl;
         let extension = null;
         let documentName = '';
-        const isAkashaInternalLink = isInternalLink(this.parsedUrl.host);
+        const isAkashaInternalLink = this.assertInternalLink();
 
         if(isAkashaInternalLink) {
             const entryId = this.getEntryIdFromUrl();
@@ -164,6 +159,7 @@ class WebsiteParser extends ParserUtils<ParserParams> {
 
                 });
             }
+            // @todo add support for links to user profiles and other 'linkable' resources
         }
 
         if (pathname.split('.').length > 1) {

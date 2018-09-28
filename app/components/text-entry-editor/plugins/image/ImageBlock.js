@@ -7,7 +7,6 @@ import {
     ImageSizeMedium,
     ImageSizeLarge } from '../../../../components/svg';
 import { SvgIcon, Icon, LazyImageLoader } from '../../../../components';
-import { findClosestMatch } from '../../../../utils/imageUtils';
 import clickAway from '../../../../utils/clickAway';
 import { entryMessages } from '../../../../locale-data/messages/entry-messages';
 
@@ -138,20 +137,6 @@ class ImageBlock extends Component {
           </Menu>
         );
     }
-
-    // _getImageSource = () => {
-    //     const { media, files } = this.props.data;
-    //     switch (media) {
-    //         case 'xs':
-    //             return files[findClosestMatch(320, files, 'xs')].src;
-    //         case 'md':
-    //             return files[findClosestMatch(700, files, 'md')].src;
-    //         case 'lg':
-    //             return files[findClosestMatch(1280, files, 'lg')].src;
-    //         default:
-    //             break;
-    //     }
-    // }
 
     _handlePopoverVisibility = (visible) => {
         this.setState({

@@ -98,6 +98,7 @@
     "draft-js-image-plugin": "2.0.5",
     "draft-js-plugins-editor": "2.1.1",
     "enzyme": "3.5.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "5.4.0",
     "eslint-config-airbnb": "17.1.0",
     "eslint-plugin-babel": "5.1.0",
