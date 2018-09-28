@@ -10,6 +10,9 @@ class ParserUtils {
         method: 'GET',
         mode: 'no-cors'
     }
+
+    static parseUrl: function;
+
     makeParserRequest = (url: string) => {
         const parserUrl = `${PARSER_URL}?url=${url.toString()}`;
         try {
@@ -21,7 +24,7 @@ class ParserUtils {
 
     getUrlQueryParams = (search: string) => new URLSearchParams(search)
 
-    getAbsoluteUrl = (url: string, parsedUrl: Object): ?string => {
+    getAbsoluteUrl = (url: string, parsedUrl: Object): string => {
         if (url) {
             return new URL(url, parsedUrl.href).href;
         }
@@ -33,20 +36,6 @@ class ParserUtils {
             return `http://${url}`;
         }
         return url;
-    }
-
-    static parseUrl = (url: string): Object => {
-        const link = document.createElement('a');
-        link.href = url;
-        return {
-            host: link.host,
-            hostname: link.hostname,
-            pathname: link.pathname,
-            origin: link.origin,
-            protocol: link.protocol,
-            search: link.search,
-            href: link.href,
-        };
     }
 
     resizeImage = (image: string, { ipfsFile }: Object) => {
@@ -70,5 +59,17 @@ class ParserUtils {
         });
     }
 }
-
+ParserUtils.parseUrl = (url: string): Object => {
+        const link = document.createElement('a');
+        link.href = url;
+        return {
+            host: link.host,
+            hostname: link.hostname,
+            pathname: link.pathname,
+            origin: link.origin,
+            protocol: link.protocol,
+            search: link.search,
+            href: link.href,
+        };
+    }
 export default ParserUtils;

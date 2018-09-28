@@ -86,30 +86,45 @@ function imageCreator (arrayBuffer, baseUrl) {
  * Utility to extract first image from draftjs generated content;
  * @param {object} content Draft-js generated content;
  * @returns {array} image Array of versions of an image;
+ * @todo optimize iterations!
  */
 function extractImageFromContent (content) {
     const { blocks } = content;
     if (!blocks) {
-        console.error('no blocks not found inside content param');
         return null;
     }
     if (blocks.length === 0) {
         return null;
     }
-    let firstImage;
-    for (let i = 0; i < blocks.length; i++) {
-        if (
-            blocks[i].type === 'atomic' &&
-            blocks[i].data.type &&
-            blocks[i].data.type === 'image' &&
-            blocks[i].data.files &&
-            !isEmpty(blocks[i].data.files)
-        ) {
-            firstImage = blocks[i].data.files;
-            break;
+    const targetBlock = blocks.filter(block =>
+        block.type === 'atomic' &&
+        block.data.type &&
+        block.data.type === 'image' &&
+        block.data.files &&
+        !isEmpty(block.data.files)
+    ).find(block => {
+        const files = block.data.files;
+        return Object.keys(files).some(fileKey => {
+            if (files[fileKey].width >= 640) {
+                return true;
+            }
+            return false;
+        });
+    });
+    if(targetBlock && targetBlock.data.files) {
+        return targetBlock.data.files;
+    } else {
+        for (let i = 0; i < blocks.length; i++) {
+            if (
+                blocks[i].type === 'atomic' &&
+                blocks[i].data.type &&
+                blocks[i].data.type === 'image' &&
+                blocks[i].data.files &&
+                !isEmpty(blocks[i].data.files)
+            ) {
+                return blocks[i].data.files;
+            }
         }
-    }
-    return firstImage;
 }
 /**
  * @TODO Move this to a config file
@@ -118,8 +133,9 @@ function extractImageFromContent (content) {
 const settings = {
     extensions: ['jpg', 'jpeg', 'png', 'svg'],
     resizerSettings: {
-        alphaChannel: true,
-        unsharpAmount: 50,
+        alpha: true,
+        quality: 2, // 2 lobbed, 16px in the neighborhood
+        unsharpAmount: 80,
         unsharpRadius: 0.6,
         unsharpThreshold: 2,
     },
@@ -214,14 +230,11 @@ const resizeImage = (image, options) => {
             const targetHeight = (actualHeight * targetWidth) / actualWidth;
             ctx.canvas.width = targetWidth;
             ctx.canvas.height = targetHeight;
-            ctx.fillStyle = 'white';
+            cctx.fillStyle = 'rgba(255, 255, 255, 0)';
             /**
              * pica.resizeCanvas(from, to, options, cb)
              */
-            return pica.resize(image, canvas, {
-                quality: 3,
-                alpha: true
-            }).then(destCanvas =>
+            return pica.resize(image, canvas, settings.resizerSettings).then(destCanvas =>
                 canvasToArray(destCanvas).then((result) => {
                     if (options.progressHandler && typeof options.progressHandler === 'function') {
                         const { maxProgress } = options;
@@ -236,7 +249,7 @@ const resizeImage = (image, options) => {
                     }
                     imageObject[widthObj.key] = result;
                     return imageObject;
-                })
+                });
             );
         });
     });
