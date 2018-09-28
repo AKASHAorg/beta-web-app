@@ -1,4 +1,4 @@
-import SearchIndex from 'search-index';
+const searchIndex = require('search-index');
 import * as Promise from 'bluebird';
 
 export default class StorageIndex {
@@ -16,6 +16,6 @@ export default class StorageIndex {
      * @returns {Bluebird<any>}
      */
     init() {
-        return Promise.fromCallback((cb) => SearchIndex(this._options, cb));
+        return Promise.fromCallback((cb) => searchIndex(this._options, cb));
     }
 }

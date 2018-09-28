@@ -95,7 +95,7 @@ class WebsiteParser extends ParserUtils {
         this.parsedUrl.host.includes(AKASHA_WEB_HOSTNAME);
 
     requestAkashaEntry = (entryId: string): Promise<Object> =>
-        new Promise((resolve: function, reject: function) => {
+        new Promise((resolve, reject) => {
             const ch: Object = window.Channel;
             ch.client.entry.getEntry.once((ev, resp) => {
                 if(resp.error) {

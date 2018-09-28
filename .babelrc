@@ -1,13 +1,13 @@
 {
   "presets": [
+    "flow",
       ["env", {
           "targets": {
               "browsers": ["last 2 versions", "safari >= 7"]
           }
       }],
       "react",
-      "stage-0",
-      "flow"
+      "stage-0"
   ],
   "plugins": [
       "add-module-exports",

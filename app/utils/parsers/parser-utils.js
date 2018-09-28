@@ -11,7 +11,7 @@ class ParserUtils {
         mode: 'no-cors'
     }
 
-    static parseUrl: function;
+    static parseUrl;
 
     makeParserRequest = (url: string) => {
         const parserUrl = `${PARSER_URL}?url=${url.toString()}`;

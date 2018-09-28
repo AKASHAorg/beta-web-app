@@ -89,7 +89,7 @@ function imageCreator (arrayBuffer, baseUrl) {
  * @todo optimize iterations!
  */
 function extractImageFromContent (content) {
-    const { blocks } = content;
+    const {blocks} = content;
     if (!blocks) {
         return null;
     }
@@ -111,7 +111,7 @@ function extractImageFromContent (content) {
             return false;
         });
     });
-    if(targetBlock && targetBlock.data.files) {
+    if (targetBlock && targetBlock.data.files) {
         return targetBlock.data.files;
     } else {
         for (let i = 0; i < blocks.length; i++) {
@@ -125,6 +125,7 @@ function extractImageFromContent (content) {
                 return blocks[i].data.files;
             }
         }
+    }
 }
 /**
  * @TODO Move this to a config file
@@ -249,7 +250,7 @@ const resizeImage = (image, options) => {
                     }
                     imageObject[widthObj.key] = result;
                     return imageObject;
-                });
+                })
             );
         });
     });
