@@ -231,7 +231,7 @@ const resizeImage = (image, options) => {
             const targetHeight = (actualHeight * targetWidth) / actualWidth;
             ctx.canvas.width = targetWidth;
             ctx.canvas.height = targetHeight;
-            cctx.fillStyle = 'rgba(255, 255, 255, 0)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0)';
             /**
              * pica.resizeCanvas(from, to, options, cb)
              */

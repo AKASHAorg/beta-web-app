@@ -17,13 +17,14 @@ export default class BlockButton extends Component {
             dialogOpen: false,
             creatingIPFSHash: false,
         };
+        this.fileInput = React.createRef();
     }
 
     _triggerFileBrowser = (ev) => {
         if (this.props.onClick) {
             this.props.onClick();
         }
-        this.fileInput.value = '';
+        this.fileInput.current.value = '';
         // this.fileInput.click();
         this.setState({
             error: ''
@@ -37,7 +38,7 @@ export default class BlockButton extends Component {
     }
 
     _handleImageAdd = (ev) => {
-        const files = this.fileInput.files;
+        const files = this.fileInput.current.files;
         const filePromises = getResizedImages(files, {
             minWidth: 320,
             progressHandler: this._handleImageProgress,
@@ -67,7 +68,7 @@ export default class BlockButton extends Component {
             };
         }).then((data) => {
             uploadImage(data.files, data.imgId).then((imgHashes) => {
-                this.fileInput.value = '';
+                this.fileInput.current.value = '';
                 this.setState({
                     isAddingImage: false,
                     dialogOpen: false
@@ -102,7 +103,7 @@ export default class BlockButton extends Component {
               onClick={this._triggerFileBrowser}
             >
               <input
-                ref={((input) => { this.fileInput = input; })}
+                ref={this.fileInput}
                 type="file"
                 accept="image/*"
                 onChange={this._handleImageAdd}

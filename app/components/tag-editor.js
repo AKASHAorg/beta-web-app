@@ -340,8 +340,8 @@ class TagEditor extends Component {
         }
 
     _getTooltipContainer = () => {
-        if (this.rootNodeRef.current) {
-            return this.rootNodeRef.current;
+        if (this._rootNodeRef.current) {
+            return this._rootNodeRef.current;
         } else if (document.getElementById('tag-editor')) {
             return document.getElementById('tag-editor');
         }
