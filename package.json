@@ -58,7 +58,7 @@
     "@types/node": "10.11.2",
     "@types/rimraf": "2.0.2",
     "@types/sharedworker": "0.0.28",
-    "antd": "3.9.3",
+    "antd": "3.10.0",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.3",
     "babel-eslint": "9.0.0",
