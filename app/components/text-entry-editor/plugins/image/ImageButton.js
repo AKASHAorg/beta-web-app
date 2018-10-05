@@ -25,7 +25,7 @@ export default class BlockButton extends Component {
             this.props.onClick();
         }
         this.fileInput.current.value = '';
-        // this.fileInput.click();
+        this.fileInput.current.click();
         this.setState({
             error: ''
         });
@@ -94,21 +94,22 @@ export default class BlockButton extends Component {
     render () {
         
         return (
-          <div>
+          <div
+            className="sidemenu__image-button"
+          >
             <Icon
               title="Add an image"
               shape="circle"
               type="camera-o"
-              className="sidemenu__image-button"
+              className="sidemenu__image-button-icon"
               onClick={this._triggerFileBrowser}
-            >
-              <input
-                ref={this.fileInput}
-                type="file"
-                accept="image/*"
-                onChange={this._handleImageAdd}
-              />
-            </Icon>
+            />
+            <input
+              ref={this.fileInput}
+              type="file"
+              accept="image/*"
+              onChange={this._handleImageAdd}
+            />
           </div>
         );
     }
