@@ -6,8 +6,8 @@ import contracts from '../../contracts';
 const execute = Promise.coroutine(function*() {
     let connected = web3Api.instance.isConnected();
 
-    if (!connected) {
-        web3Api.instance = regenWeb3();
+    if (!connected && window.hasOwnProperty('ethereum')) {
+        web3Api.instance = regenWeb3(window['ethereum']);
         connected = web3Api.instance.isConnected();
     }
     if (connected) {

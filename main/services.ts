@@ -1,6 +1,5 @@
 import Web3 from 'web3';
 import * as Promise from 'bluebird';
-declare const web3;
 
 class Service {
     protected _instance: any;
@@ -17,9 +16,9 @@ class Service {
     }
 }
 
-export const regenWeb3 = () => {
+export const regenWeb3 = (web3) => {
     let web3Regen;
-    web3Regen = new Web3(web3.currentProvider);
+    web3Regen = new Web3(web3);
     web3Regen.eth = Promise.promisifyAll(web3Regen.eth);
     web3Regen.shh = Promise.promisifyAll(web3Regen.shh);
     web3Regen.personal = Promise.promisifyAll(web3Regen.personal);
