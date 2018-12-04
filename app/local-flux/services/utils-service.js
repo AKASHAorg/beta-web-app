@@ -17,6 +17,11 @@ import getChannels from 'akasha-channels';
 //     });
 // };
 
+function createJPGImage (data) {
+    const blob = new Blob([data], { type: "image/jpg" });
+    return URL.createObjectURL(blob);
+}
+
 export const uploadImage = (files, imgId) => {
     const serverChannel = getChannels().server.utils.uploadImage;
     const clientChannel = getChannels().client.utils.uploadImage;
@@ -30,9 +35,10 @@ export const uploadImage = (files, imgId) => {
             }
             const filesArr = data.collection;
             filesArr.forEach((file) => {
+                // files[file.size].preview = createJPGImage(files[file.size].src);
                 files[file.size].src = file.hash;
             });
-            // console.log(files, 'the new files with ipfs hash');
+
             return resolve(files);
         });
         if (files instanceof Uint8Array) {

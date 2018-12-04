@@ -20,7 +20,7 @@ class Entries {
         if (this._entries) {
             this._entries.reset();
         }
-        this._entries = LRU(this.options);
+        this._entries = new LRU(this.options);
     }
 
     setFull(hash, data) {

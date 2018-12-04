@@ -76,6 +76,8 @@ function imageCreator (arrayBuffer, baseUrl) {
     if (is(Uint8Array, arrayBuffer)) {
         const blobFile = new Blob([arrayBuffer]);
         return window.URL.createObjectURL(blobFile);
+    } else if (is(String, arrayBuffer)){
+        return arrayBuffer;
     }
     const arr = Object.keys(arrayBuffer).map(key => arrayBuffer[key]);
     const blobFile = new Blob([new Uint8Array(arr)]);
