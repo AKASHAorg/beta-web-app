@@ -6,7 +6,7 @@ import { getResizedImages, findClosestMatch } from '../../../../utils/imageUtils
 import { genId } from '../../../../utils/dataModule';
 import { uploadImage } from '../../../../local-flux/services/utils-service';
 
-const { RichUtils } = DraftJS;
+// const { RichUtils } = DraftJS;
 
 export default class BlockButton extends Component {
     constructor (props) {
@@ -37,7 +37,7 @@ export default class BlockButton extends Component {
         if (onImageProgress) onImageProgress(currentProgress);
     }
 
-    _handleImageAdd = (ev) => {
+    _handleImageAdd = () => {
         const files = this.fileInput.current.files;
         const filePromises = getResizedImages(files, {
             minWidth: 320,
@@ -47,9 +47,8 @@ export default class BlockButton extends Component {
         Promise.all(filePromises).then((results) => {
             let bestKey = findClosestMatch(768, results[0]);
             if (bestKey === 'gif' && results[0].gif) {
-                const res = Object.assign({}, results[0]);
-                delete res.gif;
-                bestKey = findClosestMatch(results[0].gif.width, res);
+                delete results[0].gif;
+                bestKey = findClosestMatch(results[0].gif.width, results[0]);
             }
             if (bestKey === 'xl' || bestKey === 'xxl') {
                 bestKey = 'md';
@@ -67,15 +66,18 @@ export default class BlockButton extends Component {
                 caption: ''
             };
         }).then((data) => {
-            uploadImage(data.files, data.imgId).then((imgHashes) => {
+            uploadImage(JSON.parse(JSON.stringify(data.files)), data.imgId).then((imgHashes) => {
                 this.fileInput.current.value = '';
                 this.setState({
                     isAddingImage: false,
                     dialogOpen: false
                 }, () => {
+                    const { files, ...other } = data;
                     const blockWithImage = insertDataBlock(this.props.editorState, {
-                        files: imgHashes,
-                        ...data
+                        files: Object.assign(imgHashes, {
+                            preview: files[data.media]
+                        }),
+                        ...other
                     });
                     return this.props.onChange(blockWithImage);
                 });

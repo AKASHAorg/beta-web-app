@@ -76,13 +76,23 @@ function imageCreator (arrayBuffer, baseUrl) {
     if (is(Uint8Array, arrayBuffer)) {
         const blobFile = new Blob([arrayBuffer]);
         return window.URL.createObjectURL(blobFile);
-    } else if (is(String, arrayBuffer)){
+    } else if (is(String, arrayBuffer)) {
+        // @todo check this condition!
         return arrayBuffer;
     }
     const arr = Object.keys(arrayBuffer).map(key => arrayBuffer[key]);
     const blobFile = new Blob([new Uint8Array(arr)]);
     return window.URL.createObjectURL(blobFile);
     // return null;
+}
+function getImageBlocks (blocks) {
+    return blocks.filter(block =>
+        block.type === 'atomic' &&
+        block.data.type &&
+        block.data.type === 'image' &&
+        block.data.files &&
+        !isEmpty(block.data.files)
+    )
 }
 /**
  * Utility to extract first image from draftjs generated content;
@@ -98,13 +108,7 @@ function extractImageFromContent (content) {
     if (blocks.length === 0) {
         return null;
     }
-    const targetBlock = blocks.filter(block =>
-        block.type === 'atomic' &&
-        block.data.type &&
-        block.data.type === 'image' &&
-        block.data.files &&
-        !isEmpty(block.data.files)
-    ).find(block => {
+    const targetBlock = getImageBlocks(blocks).find(block => {
         const files = block.data.files;
         return Object.keys(files).some(fileKey => {
             if (files[fileKey].width >= 640) {
@@ -398,6 +402,7 @@ export default imageCreator;
 export {
     getResizedImages,
     getImageSize,
+    getImageBlocks,
     extractImageFromContent,
     findBestMatch,
     findClosestMatch,

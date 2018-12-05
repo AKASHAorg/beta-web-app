@@ -18,6 +18,7 @@ class LazyImageLoader extends Component {
             nextState.errored !== this.state.errored ||
             !equals(nextProps.image, this.props.image);
     }
+
     componentWillUnmount = () => {
         if(this.idleCallbackHandler) {
             window.cancelIdleCallback(this.idleCallbackHandler)
@@ -57,7 +58,12 @@ class LazyImageLoader extends Component {
     render () { // eslint-disable-line complexity
         const { loaded, errored } = this.state;
         const { className, image, baseUrl, intl } = this.props;
-        const source = this._getImageSrc(image, baseUrl);
+        let source = loaded;
+        if(image.preview && (!source || !!errored)) {
+            source = imageCreator(image.preview.src);
+        } else if(!image.preview){
+            source = this._getImageSrc(image, baseUrl);
+        }
         const imageLoaded = (source === loaded);
         const imageErrored = (source === errored);
         const rootClass = classNames(className, {

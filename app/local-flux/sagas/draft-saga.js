@@ -10,7 +10,7 @@ import { selectToken, selectDraftById, selectLoggedEthAddress,
     selectAction} from '../selectors';
 import { entryTypes } from '../../constants/entry-types';
 import { getWordCount, extractExcerpt } from '../../utils/dataModule';
-import { extractImageFromContent } from '../../utils/imageUtils';
+import { extractImageFromContent, getImageBlocks } from '../../utils/imageUtils';
 import * as types from '../constants';
 import * as draftService from '../services/draft-service';
 import * as draftActions from '../actions/draft-actions';
@@ -167,6 +167,17 @@ function* draftPublish ({ actionId, draft }) {
          * See issue: #238 on /Community
          */
         yield call(enableChannel, channel, getChannels().client.entry.manager);
+        getImageBlocks(draftToPublish.content.draft.blocks).forEach(block => {
+            if(block.data.files.preview) {
+                const blockIndex = draftToPublish.content.draft.blocks.findIndex(bl => bl.key === block.key);
+                delete draftToPublish.content.draft.blocks[blockIndex].data.files.preview;
+            }
+        });
+        if (draftToPublish.content.entryType === 'article' &&
+            !isEmpty(draftToPublish.content.featuredImage) && draftToPublish.content.featuredImage.preview
+        ) {
+            delete draftToPublish.content.featuredImage.preview;
+        }
         if (
             draftToPublish.content.entryType === 'article' &&
             isEmpty(draftToPublish.content.featuredImage)
@@ -180,7 +191,8 @@ function* draftPublish ({ actionId, draft }) {
             draftToPublish.content.excerpt = extractExcerpt(draftToPublish.content.draft);
         }
         const ethAddress = yield select(selectLoggedEthAddress);
-        const entriesCount = yield select(state => selectProfileEntriesCount(state, ethAddress));        
+        const entriesCount = yield select(state => selectProfileEntriesCount(state, ethAddress)); 
+        debugger;
         yield call([channel, channel.send], {
             actionId,
             id,

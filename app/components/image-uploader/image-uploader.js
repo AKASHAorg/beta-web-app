@@ -18,7 +18,8 @@ class ImageUploader extends Component {
             error: null,
             processingFinished: true,
             imageLoaded: false,
-            imageUploaderClose: false
+            imageUploaderClose: false,
+            loadedImgSrc: null
         };
     }
 
@@ -70,15 +71,19 @@ class ImageUploader extends Component {
             this.setState({
                 processingFinished: true,
                 error: null,
-                imageLoaded: false
+                imageLoaded: false,
+                loadedImgSrc: null
             }, () => {
                 if (typeof this.props.onChange === 'function') {
                     if (!this.props.useIpfs) {
                         return this.props.onChange(results);
                     }
                     if (results) {
-                        return uploadImage(results)
-                            .then(converted => this.props.onChange(converted));
+                        return uploadImage(JSON.parse(JSON.stringify(results)))
+                            .then(converted => {
+                                const bestKey = findClosestMatch(640, results, 'xs');
+                                this.props.onChange({ ...converted, preview: results[bestKey] });
+                            });
                     }
                 }
                 return true;
@@ -88,6 +93,7 @@ class ImageUploader extends Component {
                 error: err,
                 progress: INITIAL_PROGRESS_VALUE,
                 processingFinished: false,
+                loadedImgSrc: null
             });
         });
     }
@@ -99,7 +105,8 @@ class ImageUploader extends Component {
             processingFinished: false,
             progress: INITIAL_PROGRESS_VALUE,
             imageLoaded: false,
-            error: null
+            error: null,
+            loadedImgSrc: null
         }, () => {
             this.forceUpdate();
             this._resizeImages(this.fileInput.files);
@@ -133,19 +140,44 @@ class ImageUploader extends Component {
             error: null,
             imageLoaded: false,
             highlightDropZone: false,
+            loadedImgSrc: null
         });
     }
-    _handleImageLoad = () => {
+    _handleImageLoad = (ev) => {
         this.setState({
+            loadedImgSrc: ev.target.src,
             imageLoaded: true,
             highlightDropZone: false,
         });
     }
+    componentWillUnmount () {
+        this.setState({
+            loadedImgSrc: null,
+            imageLoaded: false,
+            error: null
+        })
+    }
+    /* eslint-disable complexity */
     render () {
         const { multiFiles, intl, initialImage } = this.props;
         const { imageLoaded, imageUploaderClose, processingFinished,
-            progress, error, highlightDropZone } = this.state;
-
+            progress, error, highlightDropZone, loadedImgSrc } = this.state;
+        // let image = initialImage;
+        // let imageSrc = this.getIma
+        // if(image && image.size > 0 && !imageLoaded && image.preview) {
+        //     console.log('has preview', image.preview);
+        // } else if(image && image.size > 0 && !image.preview) {
+        //     image = 
+        // }
+        let imgSrc = loadedImgSrc;
+        if(!imgSrc && !imageLoaded && !error) {
+            if(initialImage.get('preview')) {
+                imgSrc = imageCreator(initialImage.getIn(['preview', 'src']));
+            } else {
+                imgSrc = this._getImageSrc(initialImage);
+            }
+        }
+        
         return (
           <div
             ref={(container) => { this.container = container; }}
@@ -167,7 +199,7 @@ class ImageUploader extends Component {
             <div>
               {processingFinished && initialImage && initialImage.size !== 0 &&
                 <img
-                  src={this._getImageSrc(initialImage)}
+                  src={imgSrc}
                   className={`image-uploader__img image-uploader__img${imageLoaded && '_loaded'}`}
                   onLoad={this._handleImageLoad}
                   alt=""
