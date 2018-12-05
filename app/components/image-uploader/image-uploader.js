@@ -4,7 +4,7 @@ import { Button, Progress } from 'antd';
 import { fromJS } from 'immutable';
 import { equals } from 'ramda';
 import { generalMessages } from '../../locale-data/messages';
-import imageCreator, { getResizedImages, findClosestMatch } from '../../utils/imageUtils';
+import imageCreator, { getResizedImages, findClosestMatch, findBestMatch } from '../../utils/imageUtils';
 import { uploadImage } from '../../local-flux/services/utils-service';
 import { Icon } from '../';
 
@@ -81,7 +81,7 @@ class ImageUploader extends Component {
                     if (results) {
                         return uploadImage(JSON.parse(JSON.stringify(results)))
                             .then(converted => {
-                                const bestKey = findClosestMatch(640, results, 'xs');
+                                const bestKey = findBestMatch(640, converted, 'md');
                                 this.props.onChange({ ...converted, preview: results[bestKey] });
                             });
                     }

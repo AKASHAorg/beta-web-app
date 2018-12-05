@@ -192,7 +192,6 @@ function* draftPublish ({ actionId, draft }) {
         }
         const ethAddress = yield select(selectLoggedEthAddress);
         const entriesCount = yield select(state => selectProfileEntriesCount(state, ethAddress)); 
-        debugger;
         yield call([channel, channel.send], {
             actionId,
             id,
