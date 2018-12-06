@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Map, fromJS } from 'immutable';
+import { Map, Record, fromJS } from 'immutable';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import validation from 'react-validation-mixin';
 import strategy from 'joi-validation-strategy';
@@ -215,6 +215,9 @@ class ProfileEditForm extends Component {
     _handleAvatarAdd = () => {
         const { tempProfile, onProfileUpdate } = this.props;
         this.avatar.wrappedInstance.refs.wrappedInstance.getImage().then((avatar) => {
+            const avatarRecord = Record({ src: '', preview: avatar });
+            const avatarObj = new avatarRecord();
+
             if (!avatar) {
                 return null;
             }
@@ -223,12 +226,10 @@ class ProfileEditForm extends Component {
                     tempProfile.set('avatar', avatar)
                 );
             }
-            return uploadImage(avatar).then((avatarIpfs) => {
-                return onProfileUpdate(
-                    tempProfile.set('avatar', avatarIpfs)
-                );
-            }
-            );
+            return uploadImage(avatar).then((avatarIpfs) =>
+                onProfileUpdate(
+                    tempProfile.set('avatar', avatarObj.set('src', avatarIpfs))
+                ));
         });
     }
 
@@ -241,10 +242,9 @@ class ProfileEditForm extends Component {
 
     _handleBackgroundChange = (bgImageObj) => {
         const { tempProfile, onProfileUpdate } = this.props;
-        uploadImage(bgImageObj).then((bgImageObjIpfs) => {
-            onProfileUpdate(
-                tempProfile.set('backgroundImage', bgImageObjIpfs));
-        });
+        onProfileUpdate(
+            tempProfile.set('backgroundImage', fromJS(bgImageObj))
+        );
     }
 
     _handleSave = () => {
@@ -342,6 +342,7 @@ class ProfileEditForm extends Component {
                           </div>
                           <div className="col-xs-12 profile-edit-form__bg-image-wrap">
                             <ImageUploader
+                              useIpfs
                               ref={(imageUploader) => { this.imageUploader = imageUploader; }}
                               minWidth={320}
                               intl={intl}

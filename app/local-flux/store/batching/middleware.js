@@ -5,6 +5,7 @@ const shouldBatch = (action) => action && action.batching;
 
 export default () => next => (action) => {
     const resolved = next(action);
+    // console.log(action.type, action);
     if (State.notify && !shouldBatch(action)) {
         State.notify();
     } else {

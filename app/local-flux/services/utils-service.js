@@ -26,7 +26,6 @@ export const uploadImage = (files, imgId) => {
     const serverChannel = getChannels().server.utils.uploadImage;
     const clientChannel = getChannels().client.utils.uploadImage;
     getChannels().server.utils.uploadImage.enable();
-
     return new Promise((resolve, reject) => {
         clientChannel.once(({ data }) => {
             if (data.error) return reject(data.error);
@@ -38,7 +37,6 @@ export const uploadImage = (files, imgId) => {
                 // files[file.size].preview = createJPGImage(files[file.size].src);
                 files[file.size].src = file.hash;
             });
-
             return resolve(files);
         });
         if (files instanceof Uint8Array) {
@@ -49,7 +47,9 @@ export const uploadImage = (files, imgId) => {
                     .map(fileKey => ({
                         size: fileKey,
                         id: imgId,
-                        source: files[fileKey].src
+                        source: Uint8Array.from(
+                            Object.keys(files[fileKey].src).map(key => files[fileKey].src[key])
+                        )
                     })));
         }
     });

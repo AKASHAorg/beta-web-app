@@ -17,6 +17,7 @@ const entryContent = {
     draft: draftJSContent,
     tags: Array,
     excerpt: String,
+    featuredImage: Object,
     cardInfo: CardInfo,
     wordCount: Number,
     entryType: Number,

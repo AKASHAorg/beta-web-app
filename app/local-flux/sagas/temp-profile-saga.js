@@ -23,6 +23,13 @@ function* tempProfileGet ({ ethAddress }) {
  */
 function* createTempProfile () {
     const tempProfile = yield select(state => state.tempProfileState.get('tempProfile'));
+    const profile = tempProfile.toJS();
+    delete profile.backgroundImage.preview;
+    
+    if (typeof profile.avatar === "object") {
+        profile.avatar = profile.avatar.src;
+    }
+    
     try {
         const savedProfile = yield call(
             [registryService, registryService.createTempProfile],
