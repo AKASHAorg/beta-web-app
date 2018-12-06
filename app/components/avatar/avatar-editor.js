@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Record } from 'immutable';
 import { connect } from 'react-redux';
 import AvatarEditor from 'react-avatar-editor/dist';
 import { injectIntl } from 'react-intl';
 import { Button } from 'antd';
 import { Icon } from '../';
-import { generalMessages } from '../../locale-data/messages/general-messages';
 import { selectBaseUrl } from '../../local-flux/selectors/index';
+import imageCreator from '../../utils/imageUtils';
 
 class AvatarEditr extends Component {
     constructor (props) {
@@ -124,15 +125,21 @@ class AvatarEditr extends Component {
             this.props.onClick(ev);
         }
     }
+    /* eslint-disable complexity */
     render () {
         const { baseUrl, backgroundColor, image, offsetBorder,
             onMouseEnter, onMouseLeave, size, style } = this.props;
         let avatarImage;
         if (this.state.avatarImage) {
             avatarImage = this.state.avatarImage;
-        } else if (image) {
-            avatarImage = `${baseUrl}/${image}`;
+        } else if (image && typeof image === 'object' && image.preview) {
+            avatarImage = imageCreator(image.preview);            
+        } else if (image && typeof image === 'object' && !image.preview) {
+            avatarImage = `${baseUrl}/${image.src}`
+        } else if (typeof image === 'string') {
+            avatarImage = `${baseUrl}/${image}`
         }
+
         if (!avatarImage) {
             this.editor = null;
         }
@@ -199,7 +206,7 @@ class AvatarEditr extends Component {
                     className="avatar__avatar-editor"
                     border={0}
                     image={avatarImage}
-                    disableDrop
+                    disabledrop="true"
                     ref={(editor) => { this.editor = editor; }}
                     scale={this.state.avatarScale}
                     rotate={this.state.rotation}

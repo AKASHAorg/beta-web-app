@@ -499,6 +499,12 @@ function* profileUpdate ({ actionId, about, avatar, backgroundImage, firstName, 
     const channel = getChannels().server.profile.updateProfileData;
     yield call(enableChannel, channel, getChannels().client.profile.manager);
     const token = yield select(selectToken);
+    if (backgroundImage && backgroundImage.preview) {
+        delete backgroundImage.preview;
+    }
+    if (avatar && typeof avatar === 'object' && avatar.src) {
+        avatar = avatar.src
+    }
     const ipfs = { about, avatar, backgroundImage, firstName, lastName, links };
     yield apply(channel, channel.send, [{ token, actionId, ipfs }]);
 }
