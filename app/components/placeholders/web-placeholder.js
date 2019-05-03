@@ -42,7 +42,7 @@ const WebPlaceholder = (props) => {
 
     const noMetamaskCards = (
       <div className="web-placeholder__card-wrap">
-        <div className="web-placeholder__card-wrapper">
+        {/*<div className="web-placeholder__card-wrapper">
           <Card className="web-placeholder__card">
             <div className="web-placeholder__card-title">
               {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
@@ -77,7 +77,7 @@ const WebPlaceholder = (props) => {
               />
             </div>
           </Card>
-        </div>
+        </div>*/}
         <div className="web-placeholder__card-wrapper">
           <Card className="web-placeholder__card">
             <div className="web-placeholder__card-title">
