@@ -45,42 +45,6 @@ const WebPlaceholder = (props) => {
         <div className="web-placeholder__card-wrapper">
           <Card className="web-placeholder__card">
             <div className="web-placeholder__card-title">
-              {intl.formatMessage(placeholderMessages.downloadDesktopApp)}
-            </div>
-            <div className="web-placeholder__card-subtitle">
-              {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle)}
-            </div>
-            <div className="web-placeholder__card-sec-subtitle">
-              {intl.formatMessage(placeholderMessages.downloadDesktopAppSubtitle1)}
-            </div>
-            <div className="web-placeholder__download-btn">
-              <Button
-                type="primary"
-                target={"_blank"}
-                href={"https://github.com/AkashaProject/dapp/releases"}
-              >
-                {intl.formatMessage(placeholderMessages.download)}
-              </Button>
-            </div>
-            <div className="web-placeholder__terms">
-              <FormattedMessage
-                {...placeholderMessages.terms}
-                  values={{
-                    termsLink: (
-                      <a
-                        onClick={termsShow}
-                      >
-                        {intl.formatMessage(placeholderMessages.termsOfService)}
-                      </a>
-                    )
-                  }}
-              />
-            </div>
-          </Card>
-        </div>
-        <div className="web-placeholder__card-wrapper">
-          <Card className="web-placeholder__card">
-            <div className="web-placeholder__card-title">
               {intl.formatMessage(placeholderMessages.tryBrowser)}
             </div>
             <div className="web-placeholder__card-subtitle">
